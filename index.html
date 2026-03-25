@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Activo - Zaawansowana Wyszukiwarka</title>
+    
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root { --primary: #2ecc71; --dark: #0b3d91; --bg: #f4f6f9; --white: #ffffff; --danger: #e74c3c; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); overflow-x: hidden; }
+
+        .top-nav { background: var(--dark); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .top-nav i { font-size: 1.1em; cursor: pointer; }
+        .nav-user { display: flex; align-items: center; gap: 12px; }
+        .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85em; cursor: pointer; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e0e0e0; display: flex; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); }
+        .bottom-nav-item { flex: 1; padding: 10px 5px; text-align: center; cursor: pointer; font-size: 0.65em; color: #999; transition: color 0.2s; }
+        .bottom-nav-item i { display: block; font-size: 1.4em; margin-bottom: 3px; }
+        .bottom-nav-item.active { color: var(--dark); font-weight: 600; }
+        .bottom-nav-item.active i { color: var(--primary); }
+
+        .side-panel { position: fixed; top: 0; height: 100%; width: 280px; background: var(--dark); color: white; transition: 0.3s; z-index: 2000; padding: 60px 20px 20px; }
+        .panel-left { left: -280px; }
+        .panel-left.open { left: 0; }
+        .panel-right { right: -280px; background: white; color: #333; }
+        .panel-right.open { right: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
+        .overlay.show { display: block; }
+
+        .container { padding: 20px; padding-bottom: 80px; }
+
+        .btn-more { background: white; border: 1px solid var(--dark); padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 20px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card img { width: 100%; height: 150px; object-fit: cover; }
+        .card-body { padding: 15px; }
+        .card-address { font-size: 0.78em; color: #888; margin: 4px 0 8px; display: flex; align-items: center; gap: 5px; }
+        .card-address i { color: var(--dark); }
+        .courts-badge { display: inline-block; background: #e8f4fd; color: var(--dark); font-size: 0.75em; font-weight: 700; padding: 3px 8px; border-radius: 20px; margin-left: 8px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8em; margin: 10px 0; color: #666; }
+        .prop i { color: var(--primary); margin-right: 5px; }
+        .card-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-map { background: var(--dark); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
+        .btn-reserve { background: var(--primary); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
+
+        .filter-item { margin-bottom: 15px; }
+        .filter-item label { display: block; font-size: 0.8em; font-weight: 600; margin-bottom: 5px; }
+        select, input[type="email"], input[type="password"], input[type="text"], input[type="date"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 16px; }
+        .btn-apply { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 20px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
+
+        .map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 3000; display: flex; align-items: flex-end; }
+        .map-modal-content { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; }
+        .map-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .map-modal-header h3 { margin: 0; color: var(--dark); }
+        .btn-close { background: none; border: none; font-size: 1.4em; cursor: pointer; color: #999; }
+        #map-container { width: 100%; height: 280px; border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
+        .map-info-row { display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; margin-bottom: 8px; }
+        .map-info-row i { color: var(--dark); width: 16px; }
+
+        .auth-container { padding: 20px; padding-bottom: 80px; }
+        .auth-tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .auth-tab { flex: 1; padding: 14px; text-align: center; font-weight: 600; font-size: 0.9em; cursor: pointer; color: #999; border: none; background: none; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
+        .auth-tab.active { background: var(--dark); color: white; }
+        .auth-form { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .auth-form h2 { margin: 0 0 5px; color: var(--dark); font-size: 1.3em; }
+        .auth-form p { margin: 0 0 20px; color: #888; font-size: 0.85em; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.8em; font-weight: 600; color: #555; margin-bottom: 6px; }
+        .form-group input { border: 1.5px solid #e0e0e0; transition: border 0.2s; }
+        .form-group input:focus { outline: none; border-color: var(--dark); }
+        .auth-error { background: #fdecea; color: var(--danger); padding: 10px 14px; border-radius: 8px; font-size: 0.82em; margin-top: 10px; }
+        .auth-success { background: #eafaf1; color: #27ae60; padding: 10px 14px; border-radius: 8px; font-size: 0.82em; margin-top: 10px; }
+        .btn-loading { opacity: 0.7; pointer-events: none; }
+
+        .profile-header { background: var(--dark); color: white; padding: 30px 20px 50px; text-align: center; }
+        .profile-avatar-big { width: 70px; height: 70px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: 700; margin: 0 auto 12px; }
+        .profile-name { font-size: 1.2em; font-weight: 700; }
+        .profile-email { font-size: 0.82em; opacity: 0.8; margin-top: 4px; }
+        .profile-body { padding: 20px; padding-bottom: 80px; margin-top: -30px; }
+        .profile-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 16px; }
+        .profile-card h4 { margin: 0 0 15px; color: var(--dark); font-size: 0.95em; }
+        .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85em; }
+        .profile-row:last-child { border-bottom: none; }
+        .profile-row span:first-child { color: #888; }
+        .profile-row span:last-child { font-weight: 600; color: #333; }
+        .btn-logout { background: #fdecea; color: var(--danger); border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
+
+        .hero-card { background: var(--dark); color: white; padding: 25px 20px; border-radius: 12px; margin-bottom: 20px; }
+        .hero-card h2 { margin: 0 0 8px; font-size: 1.3em; }
+        .hero-card p { margin: 0 0 16px; font-size: 0.85em; opacity: 0.85; }
+
+        .fav-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; padding: 12px; }
+        .fav-card img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+        .fav-card-info { flex: 1; }
+        .fav-card-info h5 { margin: 0 0 3px; color: var(--dark); font-size: 0.9em; }
+        .fav-card-info span { font-size: 0.75em; color: #888; }
+        .btn-fav-remove { background: none; border: none; color: #ddd; font-size: 1.2em; cursor: pointer; padding: 5px; }
+        .btn-fav-remove:hover { color: var(--danger); }
+        .btn-heart { background: none; border: none; font-size: 1.3em; cursor: pointer; padding: 4px 8px; line-height: 1; }
+        .played-entry { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85em; }
+        .played-entry:last-child { border-bottom: none; }
+        .played-entry-left { display: flex; flex-direction: column; gap: 2px; }
+        .played-entry-left strong { color: #333; }
+        .played-entry-left span { color: #aaa; font-size: 0.8em; }
+        .played-entry-right { color: #aaa; font-size: 0.75em; cursor: pointer; }
+        .add-played-form { background: #f9f9f9; border-radius: 8px; padding: 12px; margin-top: 10px; }
+        .add-played-form select, .add-played-form input { margin-bottom: 8px; background: white; }
+        .btn-add-small { background: var(--dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 0.82em; font-weight: 600; cursor: pointer; width: 100%; }
+        .section-empty { color: #bbb; font-size: 0.85em; text-align: center; padding: 15px 0; }
+        .lock-banner { background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 20px; text-align: center; margin: 20px; }
+        .lock-banner i { font-size: 2em; color: #f9a825; margin-bottom: 10px; display: block; }
+        .lock-banner p { margin: 0 0 12px; color: #555; font-size: 0.9em; }
+
+        .friends-search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .friends-search-bar input { flex: 1; margin-bottom: 0; }
+        .btn-search { background: var(--dark); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .friend-card { background: white; border-radius: 12px; padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 12px; }
+        .friend-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .friend-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--dark); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1em; flex-shrink: 0; }
+        .friend-info { flex: 1; }
+        .friend-info h5 { margin: 0 0 2px; color: var(--dark); font-size: 0.95em; }
+        .friend-info span { font-size: 0.75em; color: #aaa; }
+        .btn-add-friend { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
+        .btn-remove-friend { background: #f0f0f0; color: #888; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
+        .friend-fav-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .friend-fav-tag { background: #e8f4fd; color: var(--dark); font-size: 0.72em; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+        .friend-played-list { margin-top: 6px; }
+        .friend-played-item { font-size: 0.78em; color: #666; padding: 3px 0; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; }
+        .friend-played-item:last-child { border-bottom: none; }
+        .friend-section-title { font-size: 0.75em; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin: 10px 0 4px; }
+        .search-result-card { background: #f0f7ff; border: 1.5px solid #c5ddf7; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+        .tabs-mini { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tab-mini { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.82em; font-weight: 600; cursor: pointer; border: 1.5px solid #e0e0e0; background: white; color: #888; font-family: 'Poppins', sans-serif; }
+        .tab-mini.active { background: var(--dark); color: white; border-color: var(--dark); }
+
+        .edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 4000; display: flex; align-items: flex-end; }
+        .edit-sheet { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px 40px; max-height: 90vh; overflow-y: auto; }
+        .edit-sheet h3 { margin: 0 0 20px; color: var(--dark); font-size: 1.1em; }
+        .edit-sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .edit-sheet-header h3 { margin: 0; }
+
+        .privacy-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .privacy-row:last-child { border-bottom: none; }
+        .privacy-label { font-size: 0.88em; color: #444; }
+        .privacy-label small { display: block; color: #aaa; font-size: 0.8em; margin-top: 2px; }
+        .toggle-wrap { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+        .toggle-wrap input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; inset: 0; background: #ddd; border-radius: 24px; cursor: pointer; transition: 0.3s; }
+        .toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+        .toggle-wrap input:checked + .toggle-slider { background: var(--primary); }
+        .toggle-wrap input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+        .played-entry-details { font-size: 0.75em; color: #888; margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .played-entry-details span { display: flex; align-items: center; gap: 3px; }
+        .result-badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.8em; font-weight: 700; }
+        .result-W { background: #eafaf1; color: #27ae60; }
+        .result-L { background: #fdecea; color: #e74c3c; }
+        .result-D { background: #fef9e7; color: #f39c12; }
+
+        .profile-tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; margin: 0 20px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .profile-tab { flex: 1; padding: 11px 5px; text-align: center; font-size: 0.72em; font-weight: 600; cursor: pointer; color: #999; border: none; background: none; font-family: 'Poppins', sans-serif; }
+        .profile-tab.active { background: var(--dark); color: white; }
+        .btn-edit-profile { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 600; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+             signOut, onAuthStateChanged, updateProfile }
+        from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, collection, query, where, getDocs, orderBy, limit }
+        from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAz01TWvm83M8OUYDevXmo1vt7q64zcbR8",
+        authDomain: "activo-2ccb5.firebaseapp.com",
+        projectId: "activo-2ccb5",
+        storageBucket: "activo-2ccb5.firebasestorage.app",
+        messagingSenderId: "158201159420",
+        appId: "1:158201159420:web:b2fdf18e9f7741fd0f0179",
+        measurementId: "G-3Y4XQE3E64"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.__firebase = { auth, db, createUserWithEmailAndPassword,
+        signInWithEmailAndPassword, signOut, onAuthStateChanged,
+        updateProfile, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, collection, query, where, getDocs, orderBy, limit };
+</script>
+
+<script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const DATA = [
+        { id: 1, name: "Olimpia", courts: 10, address: "ul. Warmińska 1, 61-001 Poznań", lat: 52.4064, lng: 16.9252, parking: "Tak", rental: "Tak", trainers: "Tak", shop: "Tak", testRackets: "Tak", surface: "ziemna", img: "https://images.unsplash.com/photo-1595435064212-3629224444e1?w=600" },
+        { id: 2, name: "Posir Rataje", courts: 5, address: "ul. Łukaszewicza 34, 61-762 Poznań", lat: 52.3980, lng: 16.9640, parking: "Tak", rental: "Tak", trainers: "Tak", shop: "Tak", testRackets: "Nie", surface: "ziemna", img: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600" },
+        { id: 3, name: "FairPlayce", courts: 4, address: "ul. Ratajczaka 10, 61-815 Poznań", lat: 52.4068, lng: 16.9299, parking: "Nie", rental: "Nie", trainers: "Nie", shop: "Nie", testRackets: "Nie", surface: "twarda", img: "https://images.unsplash.com/photo-1622279457486-62dcc4a4bd13?w=600" },
+        { id: 4, name: "Kortowo", courts: 8, address: "ul. Bułgarska 67, 60-320 Poznań", lat: 52.3901, lng: 16.8902, parking: "Tak", rental: "Nie", trainers: "Nie", shop: "Tak", testRackets: "Nie", surface: "dywan", img: "https://images.unsplash.com/photo-1544333346-64e4fe18274b?w=600" }
+    ];
+
+    function MapModal({ item, onClose }) {
+        const mapRef = useRef(null);
+        const mapInstance = useRef(null);
+        useEffect(() => {
+            if (!mapRef.current || mapInstance.current) return;
+            const map = L.map(mapRef.current).setView([item.lat, item.lng], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+            const icon = L.divIcon({ html: `<div style="background:#0b3d91;color:white;padding:6px 10px;border-radius:20px;font-family:Poppins;font-weight:700;font-size:12px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3)">🎾 ${item.name}</div>`, className: '', iconAnchor: [0, 0] });
+            L.marker([item.lat, item.lng], { icon }).addTo(map);
+            mapInstance.current = map;
+            return () => { map.remove(); mapInstance.current = null; };
+        }, [item]);
+        return (
+            <div className="map-modal" onClick={e => e.target === e.currentTarget && onClose()}>
+                <div className="map-modal-content">
+                    <div className="map-modal-header">
+                        <h3>{item.name}</h3>
+                        <button className="btn-close" onClick={onClose}>✕</button>
+                    </div>
+                    <div id="map-container" ref={mapRef}></div>
+                    <div className="map-info-row"><i className="fas fa-map-marker-alt"></i> {item.address}</div>
+                    <div className="map-info-row"><i className="fas fa-layer-group"></i> Nawierzchnia: {item.surface}</div>
+                    <div className="map-info-row"><i className="fas fa-th-large"></i> Korty: {item.courts}</div>
+                    <button className="btn-apply" style={{marginTop:10}} onClick={() => window.open(`http://maps.google.com/?q=${item.lat},${item.lng}`, '_blank')}>
+                        <i className="fas fa-external-link-alt"></i> Otwórz w Google Maps
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    function translateError(code) {
+        const map = {
+            'auth/email-already-in-use': 'Ten adres e-mail jest już zarejestrowany.',
+            'auth/invalid-email': 'Nieprawidłowy adres e-mail.',
+            'auth/weak-password': 'Hasło jest za słabe (min. 6 znaków).',
+            'auth/user-not-found': 'Nie znaleziono konta z tym adresem e-mail.',
+            'auth/wrong-password': 'Nieprawidłowe hasło.',
+            'auth/invalid-credential': 'Nieprawidłowy e-mail lub hasło.',
+            'auth/too-many-requests': 'Zbyt wiele prób. Spróbuj ponownie za chwilę.',
+        };
+        return map[code] || 'Wystąpił błąd. Spróbuj ponownie.';
+    }
+
+    function AuthScreen() {
+        const [tab, setTab] = useState('login');
+        const [name, setName] = useState('');
+        const [email, setEmail] = useState('');
+        const [password, setPassword] = useState('');
+        const [error, setError] = useState('');
+        const [success, setSuccess] = useState('');
+        const [loading, setLoading] = useState(false);
+        const fb = window.__firebase;
+
+        const handleRegister = async () => {
+            setError(''); setSuccess('');
+            if (!name.trim()) return setError('Podaj swoje imię.');
+            if (!email.trim()) return setError('Podaj adres e-mail.');
+            if (password.length < 6) return setError('Hasło musi mieć min. 6 znaków.');
+            setLoading(true);
+            try {
+                const cred = await fb.createUserWithEmailAndPassword(fb.auth, email.trim(), password);
+                const uid = cred.user.uid;
+                await fb.updateProfile(cred.user, { displayName: name.trim() });
+                await fb.setDoc(fb.doc(fb.db, 'users', uid), {
+                    uid: uid,
+                    name: name.trim(),
+                    email: email.trim().toLowerCase(),
+                    createdAt: fb.serverTimestamp(),
+                    role: 'user'
+                });
+                await fb.signOut(fb.auth);
+                setSuccess('Konto utworzone! Teraz się zaloguj.');
+                setTab('login');
+                setName('');
+                setPassword('');
+            } catch (e) {
+                setError(translateError(e.code));
+            }
+            setLoading(false);
+        };
+
+        const handleLogin = async () => {
+            setError(''); setSuccess('');
+            if (!email.trim()) return setError('Podaj adres e-mail.');
+            if (!password.trim()) return setError('Podaj haslo.');
+            setLoading(true);
+            try {
+                await fb.signInWithEmailAndPassword(fb.auth, email.trim().toLowerCase(), password);
+            } catch (e) {
+                setError(translateError(e.code));
+            }
+            setLoading(false);
+        };
+
+        return (
+            <div className="auth-container">
+                <div className="auth-tabs">
+                    <button className={`auth-tab ${tab==='login'?'active':''}`} onClick={() => { setTab('login'); setError(''); setSuccess(''); }}>Logowanie</button>
+                    <button className={`auth-tab ${tab==='register'?'active':''}`} onClick={() => { setTab('register'); setError(''); setSuccess(''); }}>Rejestracja</button>
+                </div>
+                <div className="auth-form">
+                    {tab === 'login'
+                        ? <><h2>Witaj z powrotem 👋</h2><p>Zaloguj się, aby rezerwować korty.</p></>
+                        : <><h2>Utwórz konto 🎾</h2><p>Dołącz do Activo i rezerwuj korty w kilka sekund.</p></>
+                    }
+                    {tab === 'register' && (
+                        <div className="form-group">
+                            <label>Imię</label>
+                            <input type="text" placeholder="np. Kamil" value={name} onChange={e => setName(e.target.value)} />
+                        </div>
+                    )}
+                    <div className="form-group">
+                        <label>Adres e-mail</label>
+                        <input type="email" placeholder="twoj@email.pl" value={email} onChange={e => setEmail(e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                        <label>Hasło {tab==='register' && <span style={{color:'#aaa',fontWeight:400}}>(min. 6 znaków)</span>}</label>
+                        <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)}
+                            onKeyDown={e => e.key==='Enter' && (tab==='login' ? handleLogin() : handleRegister())} />
+                    </div>
+                    {error && <div className="auth-error"><i className="fas fa-exclamation-circle"></i> {error}</div>}
+                    {success && <div className="auth-success"><i className="fas fa-check-circle"></i> {success}</div>}
+                    <button className={`btn-apply ${loading?'btn-loading':''}`} onClick={tab==='login' ? handleLogin : handleRegister}>
+                        {loading ? 'Proszę czekać...' : tab==='login' ? 'Zaloguj się' : 'Zarejestruj się'}
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    function ProfileScreen({ user }) {
+        const fb = window.__firebase;
+        const [profileTab, setProfileTab] = useState('info'); 
+        const [playedList, setPlayedList] = useState([]);
+        const [showAddPlayed, setShowAddPlayed] = useState(false);
+        const [selectedCourt, setSelectedCourt] = useState(DATA[0].name);
+        const [playedDate, setPlayedDate] = useState(new Date().toISOString().split('T')[0]);
+        const [playedOpponent, setPlayedOpponent] = useState('');
+        const [playedScore, setPlayedScore] = useState('');
+        const [playedResult, setPlayedResult] = useState('');
+        const [saving, setSaving] = useState(false);
+        const [editName, setEditName] = useState(user.displayName || '');
+        const [editSaving, setEditSaving] = useState(false);
+        const [editMsg, setEditMsg] = useState('');
+        const [showFavourites, setShowFavourites] = useState(true);
+        const [showHistory, setShowHistory] = useState(true);
+
+        const userDocRef = fb.doc(fb.db, 'users', user.uid);
+
+        useEffect(() => {
+            fb.getDoc(userDocRef).then(snap => {
+                if (snap.exists()) {
+                    const data = snap.data();
+                    setPlayedList(data.playedHistory || []);
+                    if (data.privacy) {
+                        setShowFavourites(data.privacy.showFavourites !== false);
+                        setShowHistory(data.privacy.showHistory !== false);
+                    }
+                }
+            });
+        }, [user.uid]);
+
+        const handleLogout = async () => { await fb.signOut(fb.auth); };
+
+        const addPlayedEntry = async () => {
+            setSaving(true);
+            const entry = {
+                court: selectedCourt,
+                date: playedDate,
+                addedAt: new Date().toISOString(),
+                ...(playedOpponent.trim() && { opponent: playedOpponent.trim() }),
+                ...(playedScore.trim() && { score: playedScore.trim() }),
+                ...(playedResult && { result: playedResult }),
+            };
+            const newList = [entry, ...playedList].slice(0, 30);
+            await fb.setDoc(userDocRef, { playedHistory: newList }, { merge: true });
+            setPlayedList(newList);
+            setShowAddPlayed(false);
+            setPlayedOpponent('');
+            setPlayedScore('');
+            setPlayedResult('');
+            setSaving(false);
+        };
+
+        const removePlayedEntry = async (idx) => {
+            const newList = playedList.filter((_, i) => i !== idx);
+            await fb.setDoc(userDocRef, { playedHistory: newList }, { merge: true });
+            setPlayedList(newList);
+        };
+
+        const saveEditName = async () => {
+            if (!editName.trim()) return setEditMsg('Imię nie może być puste.');
+            setEditSaving(true);
+            try {
+                await fb.updateProfile(fb.auth.currentUser, { displayName: editName.trim() });
+                await fb.setDoc(userDocRef, { name: editName.trim() }, { merge: true });
+                setEditMsg('✅ Imię zostało zaktualizowane!');
+            } catch(e) { setEditMsg('Błąd zapisu. Spróbuj ponownie.'); }
+            setEditSaving(false);
+        };
+
+        const savePrivacy = async (key, value) => {
+            const update = { privacy: { showFavourites, showHistory, [key]: value } };
+            await fb.setDoc(userDocRef, update, { merge: true });
+        };
+
+        const handlePrivacyToggle = (key, value) => {
+            if (key === 'showFavourites') setShowFavourites(value);
+            if (key === 'showHistory') setShowHistory(value);
+            savePrivacy(key, value);
+        };
+
+        const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+        const joinDate = user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' }) : '—';
+        const resultLabel = { W: 'Wygrana', L: 'Przegrana', D: 'Remis' };
+
+        return (
+            <div>
+                <div className="profile-header">
+                    <div className="profile-avatar-big">{initials}</div>
+                    <div className="profile-name">{user.displayName || 'Użytkownik'}</div>
+                    <div className="profile-email">{user.email}</div>
+                    <button className="btn-edit-profile" onClick={() => setProfileTab('edit')}>
+                        <i className="fas fa-pen"></i> Edytuj profil
+                    </button>
+                </div>
+
+                <div className="profile-tabs">
+                    <button className={`profile-tab ${profileTab==='info'?'active':''}`} onClick={() => setProfileTab('info')}>
+                        <i className="fas fa-user"></i> Profil
+                    </button>
+                    <button className={`profile-tab ${profileTab==='history'?'active':''}`} onClick={() => setProfileTab('history')}>
+                        <i className="fas fa-history"></i> Historia
+                    </button>
+                    <button className={`profile-tab ${profileTab==='edit'?'active':''}`} onClick={() => setProfileTab('edit')}>
+                        <i className="fas fa-cog"></i> Ustawienia
+                    </button>
+                </div>
+
+                <div className="profile-body">
+                    {profileTab === 'info' && (<>
+                        <div className="profile-card">
+                            <h4><i className="fas fa-user" style={{color:'var(--primary)',marginRight:6}}></i> Dane konta</h4>
+                            <div className="profile-row"><span>Imię</span><span>{user.displayName || '—'}</span></div>
+                            <div className="profile-row"><span>E-mail</span><span>{user.email}</span></div>
+                            <div className="profile-row"><span>Konto od</span><span>{joinDate}</span></div>
+                            <div className="profile-row"><span>Gier w historii</span><span>{playedList.length}</span></div>
+                            <div className="profile-row"><span>Status</span><span style={{color:'var(--primary)'}}>✔ Aktywny</span></div>
+                        </div>
+
+                        <div className="profile-card">
+                            <h4><i className="fas fa-shield-alt" style={{color:'var(--primary)',marginRight:6}}></i> Prywatność</h4>
+                            <div className="privacy-row">
+                                <div className="privacy-label">Ulubione obiekty<small>Znajomi widzą Twoje polubione korty</small></div>
+                                <label className="toggle-wrap">
+                                    <input type="checkbox" checked={showFavourites} onChange={e => handlePrivacyToggle('showFavourites', e.target.checked)} />
+                                    <span className="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div className="privacy-row">
+                                <div className="privacy-label">Historia gier<small>Znajomi widzą gdzie ostatnio grałeś</small></div>
+                                <label className="toggle-wrap">
+                                    <input type="checkbox" checked={showHistory} onChange={e => handlePrivacyToggle('showHistory', e.target.checked)} />
+                                    <span className="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </>)}
+
+                    {profileTab === 'history' && (
+                        <div className="profile-card">
+                            <h4 style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                                <span><i className="fas fa-history" style={{color:'var(--primary)',marginRight:6}}></i> Ostatnio grałem</span>
+                                <button className="btn-add-small" style={{width:'auto',padding:'5px 12px'}} onClick={() => setShowAddPlayed(!showAddPlayed)}>
+                                    <i className="fas fa-plus"></i> Dodaj
+                                </button>
+                            </h4>
+                            {showAddPlayed && (
+                                <div className="add-played-form">
+                                    <label>Obiekt *</label>
+                                    <select value={selectedCourt} onChange={e => setSelectedCourt(e.target.value)}>
+                                        {DATA.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+                                    </select>
+                                    <label>Data *</label>
+                                    <input type="date" value={playedDate} onChange={e => setPlayedDate(e.target.value)} />
+                                    <label>Z kim grałem? <span style={{fontWeight:400}}>(opcjonalnie)</span></label>
+                                    <input type="text" placeholder="np. Kamil" value={playedOpponent} onChange={e => setPlayedOpponent(e.target.value)} />
+                                    <label>Wynik <span style={{fontWeight:400}}>(opcjonalnie, np. 6:3)</span></label>
+                                    <input type="text" placeholder="np. 6:3" value={playedScore} onChange={e => setPlayedScore(e.target.value)} />
+                                    <label>Rezultat</label>
+                                    <select value={playedResult} onChange={e => setPlayedResult(e.target.value)}>
+                                        <option value="">— nie podawaj —</option>
+                                        <option value="W">🏆 Wygrana</option>
+                                        <option value="L">❌ Przegrana</option>
+                                        <option value="D">🤝 Remis</option>
+                                    </select>
+                                    <button className="btn-add-small" onClick={addPlayedEntry} disabled={saving}>{saving ? 'Zapisywanie...' : '✔ Zapisz grę'}</button>
+                                </div>
+                            )}
+                            {playedList.length === 0 && !showAddPlayed
+                                ? <div className="section-empty">Brak wpisów — dodaj gdzie ostatnio grałeś!</div>
+                                : playedList.map((entry, idx) => (
+                                    <div key={idx} className="played-entry">
+                                        <div className="played-entry-left">
+                                            <strong>🎾 {entry.court} {entry.result && <span className={`result-badge result-${entry.result}`}>{resultLabel[entry.result]}</span>}</strong>
+                                            <span>{new Date(entry.date).toLocaleDateString('pl-PL')}</span>
+                                            <div className="played-entry-details">
+                                                {entry.opponent && <span><i className="fas fa-user"></i> {entry.opponent}</span>}
+                                                {entry.score && <span><i className="fas fa-table-tennis"></i> {entry.score}</span>}
+                                            </div>
+                                        </div>
+                                        <div className="played-entry-right" onClick={() => removePlayedEntry(idx)}><i className="fas fa-times"></i></div>
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    )}
+
+                    {profileTab === 'edit' && (
+                        <div className="profile-card">
+                            <h4><i className="fas fa-pen" style={{color:'var(--primary)',marginRight:6}}></i> Edytuj profil</h4>
+                            <div className="form-group">
+                                <label>Imię wyświetlane</label>
+                                <input type="text" value={editName} onChange={e => setEditName(e.target.value)} />
+                            </div>
+                            <button className="btn-apply" style={{marginTop:0}} onClick={saveEditName} disabled={editSaving}>{editSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}</button>
+                            {editMsg && <div className={editMsg.startsWith('✅') ? 'auth-success' : 'auth-error'} style={{marginTop:10}}>{editMsg}</div>}
+                        </div>
+                    )}
+                    <button className="btn-logout" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> Wyloguj się</button>
+                </div>
+            </div>
+        );
+    }
+
+    function FavouritesScreen({ user, favourites, onToggleFav }) {
+        const favItems = DATA.filter(item => favourites.includes(item.id));
+        if (!user) {
+            return (
+                <div className="lock-banner" style={{marginTop:20}}>
+                    <i className="fas fa-lock"></i>
+                    <p>Ta sekcja jest dostępna tylko dla zalogowanych użytkowników.</p>
+                    <button className="btn-apply" style={{marginTop:0}} onClick={() => window.__setView('auth')}>Zaloguj się</button>
+                </div>
+            );
+        }
+        return (
+            <div className="container">
+                <h4>Moje ulubione ({favItems.length})</h4>
+                {favItems.length === 0
+                    ? <div style={{background:'white',borderRadius:12,padding:20,textAlign:'center',color:'#aaa',boxShadow:'0 4px 10px rgba(0,0,0,0.08)'}}>Brak ulubionych</div>
+                    : favItems.map(item => (
+                        <div key={item.id} className="fav-card">
+                            <img src={item.img} alt={item.name} />
+                            <div className="fav-card-info"><h5>{item.name}</h5><span>{item.surface} · {item.courts} kortów</span></div>
+                            <button className="btn-fav-remove" onClick={() => onToggleFav(item.id)}><i className="fas fa-heart" style={{color:'#e74c3c'}}></i></button>
+                        </div>
+                    ))
+                }
+            </div>
+        );
+    }
+
+    function FriendsScreen({ user }) {
+        const fb = window.__firebase;
+        const [subTab, setSubTab] = useState('friends');
+        const [searchQuery, setSearchQuery] = useState('');
+        const [searchResults, setSearchResults] = useState([]);
+        const [searching, setSearching] = useState(false);
+        const [searchError, setSearchError] = useState('');
+        const [friends, setFriends] = useState([]);
+        const [friendsData, setFriendsData] = useState([]);
+        const [loadingFriends, setLoadingFriends] = useState(true);
+
+        useEffect(() => {
+            if (!user) return;
+            fb.getDoc(fb.doc(fb.db, 'users', user.uid)).then(snap => {
+                const friendUids = snap.exists() ? (snap.data().friends || []) : [];
+                setFriends(friendUids);
+                if (friendUids.length === 0) { setLoadingFriends(false); return; }
+                Promise.all(friendUids.map(uid => fb.getDoc(fb.doc(fb.db, 'users', uid))))
+                    .then(snaps => {
+                        setFriendsData(snaps.filter(s => s.exists()).map(s => ({ uid: s.id, ...s.data() })));
+                        setLoadingFriends(false);
+                    });
+            });
+        }, [user?.uid]);
+
+        const handleSearch = async () => {
+            setSearchError('');
+            if (searchQuery.trim().length < 2) return setSearchError('Wpisz min. 2 znaki.');
+            setSearching(true);
+            try {
+                const snap = await fb.getDocs(fb.collection(fb.db, 'users'));
+                const term = searchQuery.trim().toLowerCase();
+                const results = snap.docs
+                    .map(d => ({ uid: d.id, ...d.data() }))
+                    .filter(u => u.uid !== user.uid && ((u.name||'').toLowerCase().includes(term) || (u.email||'').toLowerCase().includes(term)));
+                setSearchResults(results);
+                if (results.length === 0) setSearchError('Nie znaleziono użytkownika.');
+            } catch(e) { setSearchError('Błąd wyszukiwania.'); }
+            setSearching(false);
+        };
+
+        const addFriend = async (friendUid) => {
+            const newFriends = [...friends, friendUid];
+            setFriends(newFriends);
+            await fb.setDoc(fb.doc(fb.db, 'users', user.uid), { friends: newFriends }, { merge: true });
+            const snap = await fb.getDoc(fb.doc(fb.db, 'users', friendUid));
+            if (snap.exists()) setFriendsData(prev => [...prev, { uid: snap.id, ...snap.data() }]);
+        };
+
+        const removeFriend = async (friendUid) => {
+            const newFriends = friends.filter(id => id !== friendUid);
+            setFriends(newFriends);
+            setFriendsData(prev => prev.filter(f => f.uid !== friendUid));
+            await fb.setDoc(fb.doc(fb.db, 'users', user.uid), { friends: newFriends }, { merge: true });
+        };
+
+        if (!user) return <div className="lock-banner"><i className="fas fa-lock"></i><p>Zaloguj się aby zobaczyć znajomych</p></div>;
+
+        return (
+            <div className="container">
+                <div className="tabs-mini">
+                    <button className={`tab-mini ${subTab==='friends'?'active':''}`} onClick={() => setSubTab('friends')}>Znajomi ({friends.length})</button>
+                    <button className={`tab-mini ${subTab==='search'?'active':''}`} onClick={() => setSubTab('search')}>Szukaj</button>
+                </div>
+                {subTab === 'search' && (
+                    <div>
+                        <div className="friends-search-bar">
+                            <input type="text" placeholder="Imię lub email..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                            <button className="btn-search" onClick={handleSearch} disabled={searching}>{searching ? '...' : 'Szukaj'}</button>
+                        </div>
+                        {searchResults.map(result => (
+                            <div key={result.uid} className="search-result-card">
+                                <div className="friend-card-header">
+                                    <div className="friend-avatar">{(result.name||'?').charAt(0).toUpperCase()}</div>
+                                    <div className="friend-info"><h5>{result.name}</h5><span>{result.email}</span></div>
+                                    {friends.includes(result.uid) ? <button className="btn-remove-friend">✔ Dodano</button> : <button className="btn-add-friend" onClick={() => addFriend(result.uid)}>+ Dodaj</button>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {subTab === 'friends' && (
+                    <div>
+                        {loadingFriends && <div className="section-empty">Ładowanie...</div>}
+                        {friendsData.map(friend => {
+                            const canSeeFav = friend.privacy?.showFavourites !== false;
+                            const canSeeHistory = friend.privacy?.showHistory !== false;
+                            const favItems = canSeeFav ? DATA.filter(d => (friend.favourites||[]).includes(d.id)) : [];
+                            const played = canSeeHistory ? (friend.playedHistory||[]).slice(0,3) : [];
+                            return (
+                                <div key={friend.uid} className="friend-card">
+                                    <div className="friend-card-header">
+                                        <div className="friend-avatar">{(friend.name||'?').charAt(0).toUpperCase()}</div>
+                                        <div className="friend-info"><h5>{friend.name}</h5><span>{favItems.length} ulubionych</span></div>
+                                        <button className="btn-remove-friend" onClick={() => removeFriend(friend.uid)}>Usuń</button>
+                                    </div>
+                                    {favItems.length > 0 && <div className="friend-fav-list">{favItems.map(item => <span key={item.id} className="friend-fav-tag">🎾 {item.name}</span>)}</div>}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    function App() {
+        const [view, setView] = useState('home');
+        const [leftMenu, setLeftMenu] = useState(false);
+        const [filterPanel, setFilterPanel] = useState(false);
+        const [filtered, setFiltered] = useState(DATA);
+        const [mapItem, setMapItem] = useState(null);
+        const [user, setUser] = useState(undefined);
+        const [favourites, setFavourites] = useState([]);
+        const [f, setF] = useState({ parking: 'all', surface: 'all', shop: 'all', testRackets: 'all' });
+
+        window.__setView = setView;
+
+        useEffect(() => {
+            const interval = setInterval(() => {
+                if (window.__firebase) {
+                    clearInterval(interval);
+                    window.__firebase.onAuthStateChanged(window.__firebase.auth, u => {
+                        setUser(u || null);
+                        if (u) {
+                            window.__firebase.getDoc(window.__firebase.doc(window.__firebase.db, 'users', u.uid))
+                                .then(snap => { if (snap.exists()) setFavourites(snap.data().favourites || []); });
+                        } else { setFavourites([]); }
+                    });
+                }
+            }, 100);
+        }, []);
+
+        const toggleFav = async (itemId) => {
+            if (!user) { setView('auth'); return; }
+            const fb = window.__firebase;
+            const isFav = favourites.includes(itemId);
+            const newFavs = isFav ? favourites.filter(id => id !== itemId) : [...favourites, itemId];
+            setFavourites(newFavs);
+            await fb.setDoc(fb.doc(fb.db, 'users', user.uid), { favourites: newFavs }, { merge: true });
+        };
+
+        const applyFilters = () => {
+            const res = DATA.filter(item =>
+                (f.parking==='all' || item.parking===f.parking) &&
+                (f.surface==='all' || item.surface===f.surface) &&
+                (f.shop==='all' || item.shop===f.shop) &&
+                (f.testRackets==='all' || item.testRackets===f.testRackets)
+            );
+            setFiltered(res); setFilterPanel(false);
+        };
+
+        const initials = user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || null;
+
+        return (
+            <div>
+                <div className={`overlay ${(leftMenu||filterPanel)?'show':''}`} onClick={() => { setLeftMenu(false); setFilterPanel(false); }}></div>
+                {mapItem && <MapModal item={mapItem} onClose={() => setMapItem(null)} />}
+
+                <div className={`side-panel panel-left ${leftMenu?'open':''}`}>
+                    <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView('home'); setLeftMenu(false); }}>Główna</a>
+                    <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView('search'); setLeftMenu(false); }}>Szukaj</a>
+                    <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView('favourites'); setLeftMenu(false); }}>Ulubione</a>
+                    {user && <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView('friends'); setLeftMenu(false); }}>Znajomi</a>}
+                    <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView(user ? 'profile' : 'auth'); setLeftMenu(false); }}>Konto</a>
+                </div>
+
+                <div className={`side-panel panel-right ${filterPanel?'open':''}`}>
+                    <h3>Filtry</h3>
+                    <div className="filter-item"><label>Nawierzchnia</label>
+                        <select value={f.surface} onChange={e => setF({...f,surface:e.target.value})}><option value="all">Wszystkie</option><option value="ziemna">Ziemna</option><option value="twarda">Twarda</option></select>
+                    </div>
+                    <button className="btn-apply" onClick={applyFilters}>ZASTOSUJ</button>
+                </div>
+
+                <nav className="top-nav">
+                    <div onClick={() => setLeftMenu(true)}><i className="fas fa-bars"></i></div>
+                    <div style={{fontWeight:700}}>ACTIVO</div>
+                    <div className="nav-user">
+                        {user === undefined ? <i className="fas fa-spinner fa-spin"></i> : user ? <div className="nav-avatar" onClick={() => setView('profile')}>{initials}</div> : <span onClick={() => setView('auth')}>Zaloguj</span>}
+                    </div>
+                </nav>
+
+                {view === 'home' && (
+                    <div className="container">
+                        <div className="hero-card"><h2>Znajdź swój kort 🎾</h2><p>Najlepsza wyszukiwarka w Twoim mieście.</p><button className="btn-apply" onClick={() => setView('search')}>Szukaj teraz</button></div>
+                    </div>
+                )}
+                {view === 'search' && (
+                    <div className="container">
+                        <button className="btn-more" onClick={() => setFilterPanel(true)}>Filtruj</button>
+                        {filtered.map(item => (
+                            <div key={item.id} className="card">
+                                <img src={item.img} alt={item.name} />
+                                <div className="card-body">
+                                    <h4>{item.name} <span className="courts-badge">{item.courts}</span></h4>
+                                    <div className="card-actions">
+                                        <button className="btn-map" onClick={() => setMapItem(item)}>Mapa</button>
+                                        <button className="btn-heart" onClick={() => toggleFav(item.id)}>{favourites.includes(item.id) ? '❤️' : '🤍'}</button>
+                                        <button className="btn-reserve" onClick={() => user ? alert('Zarezerwowano') : setView('auth')}>Rezerwuj</button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {view === 'auth' && <AuthScreen />}
+                {view === 'profile' && (user ? <ProfileScreen user={user} /> : <AuthScreen />)}
+                {view === 'favourites' && <FavouritesScreen user={user} favourites={favourites} onToggleFav={toggleFav} />}
+                {view === 'friends' && <FriendsScreen user={user} />}
+
+                <nav className="bottom-nav">
+                    <div className={`bottom-nav-item ${view==='home'?'active':''}`} onClick={() => setView('home')}><i className="fas fa-home"></i>Główna</div>
+                    <div className={`bottom-nav-item ${view==='search'?'active':''}`} onClick={() => setView('search')}><i className="fas fa-search"></i>Szukaj</div>
+                    <div className={`bottom-nav-item ${view==='favourites'?'active':''}`} onClick={() => setView('favourites')}><i className="fas fa-heart"></i>Ulubione</div>
+                    <div className={`bottom-nav-item ${view==='auth'||view==='profile'?'active':''}`} onClick={() => setView(user ? 'profile' : 'auth')}><i className="fas fa-user"></i>Konto</div>
+                </nav>
+            </div>
+        );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+</script>
+</body>
+</html>
