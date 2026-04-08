@@ -1,176 +1,199 @@
 <!DOCTYPE html>
+
 <html lang="pl">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Activo - Zaawansowana Wyszukiwarka</title>
-    
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <style>
-        :root { --primary: #2ecc71; --dark: #0b3d91; --bg: #f4f6f9; --white: #ffffff; --danger: #e74c3c; }
-        * { box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); overflow-x: hidden; }
+```
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-        .top-nav { background: var(--dark); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-        .top-nav i { font-size: 1.1em; cursor: pointer; }
-        .nav-user { display: flex; align-items: center; gap: 12px; }
-        .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85em; cursor: pointer; }
+<style>
+    :root { --primary: #2ecc71; --dark: #0b3d91; --bg: #f4f6f9; --white: #ffffff; --danger: #e74c3c; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); overflow-x: hidden; }
 
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e0e0e0; display: flex; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); }
-        .bottom-nav-item { flex: 1; padding: 10px 5px; text-align: center; cursor: pointer; font-size: 0.65em; color: #999; transition: color 0.2s; }
-        .bottom-nav-item i { display: block; font-size: 1.4em; margin-bottom: 3px; }
-        .bottom-nav-item.active { color: var(--dark); font-weight: 600; }
-        .bottom-nav-item.active i { color: var(--primary); }
+    .top-nav { background: var(--dark); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+    .top-nav i { font-size: 1.1em; cursor: pointer; }
+    .nav-user { display: flex; align-items: center; gap: 12px; }
+    .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85em; cursor: pointer; }
 
-        .side-panel { position: fixed; top: 0; height: 100%; width: 280px; background: var(--dark); color: white; transition: 0.3s; z-index: 2000; padding: 60px 20px 20px; }
-        .panel-left { left: -280px; }
-        .panel-left.open { left: 0; }
-        .panel-right { right: -280px; background: white; color: #333; }
-        .panel-right.open { right: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
-        .overlay.show { display: block; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e0e0e0; display: flex; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); }
+    .bottom-nav-item { flex: 1; padding: 10px 5px; text-align: center; cursor: pointer; font-size: 0.65em; color: #999; transition: color 0.2s; }
+    .bottom-nav-item i { display: block; font-size: 1.4em; margin-bottom: 3px; }
+    .bottom-nav-item.active { color: var(--dark); font-weight: 600; }
+    .bottom-nav-item.active i { color: var(--primary); }
 
-        .container { padding: 20px; padding-bottom: 80px; }
+    .side-panel { position: fixed; top: 0; height: 100%; width: 280px; background: var(--dark); color: white; transition: 0.3s; z-index: 2000; padding: 60px 20px 20px; }
+    .panel-left { left: -280px; }
+    .panel-left.open { left: 0; }
+    .panel-right { right: -280px; background: white; color: #333; }
+    .panel-right.open { right: 0; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
+    .overlay.show { display: block; }
 
-        .btn-more { background: white; border: 1px solid var(--dark); padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 20px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .card img { width: 100%; height: 150px; object-fit: cover; }
-        .card-body { padding: 15px; }
-        .card-address { font-size: 0.78em; color: #888; margin: 4px 0 8px; display: flex; align-items: center; gap: 5px; }
-        .card-address i { color: var(--dark); }
-        .courts-badge { display: inline-block; background: #e8f4fd; color: var(--dark); font-size: 0.75em; font-weight: 700; padding: 3px 8px; border-radius: 20px; margin-left: 8px; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8em; margin: 10px 0; color: #666; }
-        .prop i { color: var(--primary); margin-right: 5px; }
-        .card-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-map { background: var(--dark); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
-        .btn-reserve { background: var(--primary); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
+    .container { padding: 20px; padding-bottom: 80px; }
 
-        .filter-item { margin-bottom: 15px; }
-        .filter-item label { display: block; font-size: 0.8em; font-weight: 600; margin-bottom: 5px; }
-        select, input[type="email"], input[type="password"], input[type="text"], input[type="date"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 16px; }
-        .btn-apply { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 20px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
+    .btn-more { background: white; border: 1px solid var(--dark); padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 20px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+    .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card img { width: 100%; height: 150px; object-fit: cover; }
+    .card-body { padding: 15px; }
+    .card-address { font-size: 0.78em; color: #888; margin: 4px 0 8px; display: flex; align-items: center; gap: 5px; }
+    .card-address i { color: var(--dark); }
+    .courts-badge { display: inline-block; background: #e8f4fd; color: var(--dark); font-size: 0.75em; font-weight: 700; padding: 3px 8px; border-radius: 20px; margin-left: 8px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8em; margin: 10px 0; color: #666; }
+    .prop i { color: var(--primary); margin-right: 5px; }
+    .card-actions { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-map { background: var(--dark); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
+    .btn-reserve { background: var(--primary); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
 
-        .map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 3000; display: flex; align-items: flex-end; }
-        .map-modal-content { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; }
-        .map-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .map-modal-header h3 { margin: 0; color: var(--dark); }
-        .btn-close { background: none; border: none; font-size: 1.4em; cursor: pointer; color: #999; }
-        #map-container { width: 100%; height: 280px; border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
-        .map-info-row { display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; margin-bottom: 8px; }
-        .map-info-row i { color: var(--dark); width: 16px; }
+    .filter-item { margin-bottom: 15px; }
+    .filter-item label { display: block; font-size: 0.8em; font-weight: 600; margin-bottom: 5px; }
+    select, input[type="email"], input[type="password"], input[type="text"], input[type="date"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 16px; }
+    .btn-apply { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 20px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
 
-        .auth-container { padding: 20px; padding-bottom: 80px; }
-        .auth-tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .auth-tab { flex: 1; padding: 14px; text-align: center; font-weight: 600; font-size: 0.9em; cursor: pointer; color: #999; border: none; background: none; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
-        .auth-tab.active { background: var(--dark); color: white; }
-        .auth-form { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-        .auth-form h2 { margin: 0 0 5px; color: var(--dark); font-size: 1.3em; }
-        .auth-form p { margin: 0 0 20px; color: #888; font-size: 0.85em; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.8em; font-weight: 600; color: #555; margin-bottom: 6px; }
-        .form-group input { border: 1.5px solid #e0e0e0; transition: border 0.2s; }
-        .form-group input:focus { outline: none; border-color: var(--dark); }
-        .auth-error { background: #fdecea; color: var(--danger); padding: 10px 14px; border-radius: 8px; font-size: 0.82em; margin-top: 10px; }
-        .auth-success { background: #eafaf1; color: #27ae60; padding: 10px 14px; border-radius: 8px; font-size: 0.82em; margin-top: 10px; }
-        .btn-loading { opacity: 0.7; pointer-events: none; }
+    .map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 3000; display: flex; align-items: flex-end; }
+    .map-modal-content { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; }
+    .map-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .map-modal-header h3 { margin: 0; color: var(--dark); }
+    .btn-close { background: none; border: none; font-size: 1.4em; cursor: pointer; color: #999; }
+    #map-container { width: 100%; height: 280px; border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
+    .map-info-row { display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; margin-bottom: 8px; }
+    .map-info-row i { color: var(--dark); width: 16px; }
 
-        .profile-header { background: var(--dark); color: white; padding: 30px 20px 50px; text-align: center; }
-        .profile-avatar-big { width: 70px; height: 70px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: 700; margin: 0 auto 12px; }
-        .profile-name { font-size: 1.2em; font-weight: 700; }
-        .profile-email { font-size: 0.82em; opacity: 0.8; margin-top: 4px; }
-        .profile-body { padding: 20px; padding-bottom: 80px; margin-top: -30px; }
-        .profile-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 16px; }
-        .profile-card h4 { margin: 0 0 15px; color: var(--dark); font-size: 0.95em; }
-        .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85em; }
-        .profile-row:last-child { border-bottom: none; }
-        .profile-row span:first-child { color: #888; }
-        .profile-row span:last-child { font-weight: 600; color: #333; }
-        .btn-logout { background: #fdecea; color: var(--danger); border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
+    .auth-container { padding: 20px; padding-bottom: 80px; }
+    .auth-tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .auth-tab { flex: 1; padding: 14px; text-align: center; font-weight: 600; font-size: 0.9em; cursor: pointer; color: #999; border: none; background: none; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
+    .auth-tab.active { background: var(--dark); color: white; }
+    .auth-form { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    .auth-form h2 { margin: 0 0 5px; color: var(--dark); font-size: 1.3em; }
+    .auth-form p { margin: 0 0 20px; color: #888; font-size: 0.85em; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 0.8em; font-weight: 600; color: #555; margin-bottom: 6px; }
+    .form-group input { border: 1.5px solid #e0e0e0; transition: border 0.2s; }
+    .form-group input:focus { outline: none; border-color: var(--dark); }
+    .auth-error { background: #fdecea; color: var(--danger); padding: 10px 14px; border-radius: 8px; font-size: 0.82em; margin-top: 10px; }
+    .auth-success { background: #eafaf1; color: #27ae60; padding: 10px 14px; border-radius: 8px; font-size: 0.82em; margin-top: 10px; }
+    .btn-loading { opacity: 0.7; pointer-events: none; }
 
-        .hero-card { background: var(--dark); color: white; padding: 25px 20px; border-radius: 12px; margin-bottom: 20px; }
-        .hero-card h2 { margin: 0 0 8px; font-size: 1.3em; }
-        .hero-card p { margin: 0 0 16px; font-size: 0.85em; opacity: 0.85; }
+    .profile-header { background: var(--dark); color: white; padding: 30px 20px 50px; text-align: center; }
+    .profile-avatar-big { width: 70px; height: 70px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: 700; margin: 0 auto 12px; }
+    .profile-name { font-size: 1.2em; font-weight: 700; }
+    .profile-email { font-size: 0.82em; opacity: 0.8; margin-top: 4px; }
+    .profile-body { padding: 20px; padding-bottom: 80px; margin-top: -30px; }
+    .profile-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 16px; }
+    .profile-card h4 { margin: 0 0 15px; color: var(--dark); font-size: 0.95em; }
+    .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85em; }
+    .profile-row:last-child { border-bottom: none; }
+    .profile-row span:first-child { color: #888; }
+    .profile-row span:last-child { font-weight: 600; color: #333; }
+    .btn-logout { background: #fdecea; color: var(--danger); border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
 
-        .fav-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; padding: 12px; }
-        .fav-card img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-        .fav-card-info { flex: 1; }
-        .fav-card-info h5 { margin: 0 0 3px; color: var(--dark); font-size: 0.9em; }
-        .fav-card-info span { font-size: 0.75em; color: #888; }
-        .btn-fav-remove { background: none; border: none; color: #ddd; font-size: 1.2em; cursor: pointer; padding: 5px; }
-        .btn-fav-remove:hover { color: var(--danger); }
-        .btn-heart { background: none; border: none; font-size: 1.3em; cursor: pointer; padding: 4px 8px; line-height: 1; }
-        .played-entry { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85em; }
-        .played-entry:last-child { border-bottom: none; }
-        .played-entry-left { display: flex; flex-direction: column; gap: 2px; }
-        .played-entry-left strong { color: #333; }
-        .played-entry-left span { color: #aaa; font-size: 0.8em; }
-        .played-entry-right { color: #aaa; font-size: 0.75em; cursor: pointer; }
-        .add-played-form { background: #f9f9f9; border-radius: 8px; padding: 12px; margin-top: 10px; }
-        .add-played-form select, .add-played-form input { margin-bottom: 8px; background: white; }
-        .btn-add-small { background: var(--dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 0.82em; font-weight: 600; cursor: pointer; width: 100%; }
-        .section-empty { color: #bbb; font-size: 0.85em; text-align: center; padding: 15px 0; }
-        .lock-banner { background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 20px; text-align: center; margin: 20px; }
-        .lock-banner i { font-size: 2em; color: #f9a825; margin-bottom: 10px; display: block; }
-        .lock-banner p { margin: 0 0 12px; color: #555; font-size: 0.9em; }
+    .hero-card { background: var(--dark); color: white; padding: 25px 20px; border-radius: 12px; margin-bottom: 20px; }
+    .hero-card h2 { margin: 0 0 8px; font-size: 1.3em; }
+    .hero-card p { margin: 0 0 16px; font-size: 0.85em; opacity: 0.85; }
 
-        .friends-search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
-        .friends-search-bar input { flex: 1; margin-bottom: 0; }
-        .btn-search { background: var(--dark); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; white-space: nowrap; }
-        .friend-card { background: white; border-radius: 12px; padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 12px; }
-        .friend-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-        .friend-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--dark); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1em; flex-shrink: 0; }
-        .friend-info { flex: 1; }
-        .friend-info h5 { margin: 0 0 2px; color: var(--dark); font-size: 0.95em; }
-        .friend-info span { font-size: 0.75em; color: #aaa; }
-        .btn-add-friend { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
-        .btn-remove-friend { background: #f0f0f0; color: #888; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
-        .friend-fav-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-        .friend-fav-tag { background: #e8f4fd; color: var(--dark); font-size: 0.72em; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
-        .friend-played-list { margin-top: 6px; }
-        .friend-played-item { font-size: 0.78em; color: #666; padding: 3px 0; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; }
-        .friend-played-item:last-child { border-bottom: none; }
-        .friend-section-title { font-size: 0.75em; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin: 10px 0 4px; }
-        .search-result-card { background: #f0f7ff; border: 1.5px solid #c5ddf7; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
-        .tabs-mini { display: flex; gap: 8px; margin-bottom: 16px; }
-        .tab-mini { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.82em; font-weight: 600; cursor: pointer; border: 1.5px solid #e0e0e0; background: white; color: #888; font-family: 'Poppins', sans-serif; }
-        .tab-mini.active { background: var(--dark); color: white; border-color: var(--dark); }
+    .fav-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; padding: 12px; }
+    .fav-card img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .fav-card-info { flex: 1; }
+    .fav-card-info h5 { margin: 0 0 3px; color: var(--dark); font-size: 0.9em; }
+    .fav-card-info span { font-size: 0.75em; color: #888; }
+    .btn-fav-remove { background: none; border: none; color: #ddd; font-size: 1.2em; cursor: pointer; padding: 5px; }
+    .btn-fav-remove:hover { color: var(--danger); }
+    .btn-heart { background: none; border: none; font-size: 1.3em; cursor: pointer; padding: 4px 8px; line-height: 1; }
+    .played-entry { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85em; }
+    .played-entry:last-child { border-bottom: none; }
+    .played-entry-left { display: flex; flex-direction: column; gap: 2px; }
+    .played-entry-left strong { color: #333; }
+    .played-entry-left span { color: #aaa; font-size: 0.8em; }
+    .played-entry-right { color: #aaa; font-size: 0.75em; cursor: pointer; }
+    .add-played-form { background: #f9f9f9; border-radius: 8px; padding: 12px; margin-top: 10px; }
+    .add-played-form select, .add-played-form input { margin-bottom: 8px; background: white; }
+    .btn-add-small { background: var(--dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 0.82em; font-weight: 600; cursor: pointer; width: 100%; }
+    .section-empty { color: #bbb; font-size: 0.85em; text-align: center; padding: 15px 0; }
+    .lock-banner { background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 20px; text-align: center; margin: 20px; }
+    .lock-banner i { font-size: 2em; color: #f9a825; margin-bottom: 10px; display: block; }
+    .lock-banner p { margin: 0 0 12px; color: #555; font-size: 0.9em; }
 
-        .edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 4000; display: flex; align-items: flex-end; }
-        .edit-sheet { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px 40px; max-height: 90vh; overflow-y: auto; }
-        .edit-sheet h3 { margin: 0 0 20px; color: var(--dark); font-size: 1.1em; }
-        .edit-sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .edit-sheet-header h3 { margin: 0; }
+    .friends-search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .friends-search-bar input { flex: 1; margin-bottom: 0; }
+    .btn-search { background: var(--dark); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .friend-card { background: white; border-radius: 12px; padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 12px; }
+    .friend-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .friend-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--dark); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1em; flex-shrink: 0; }
+    .friend-info { flex: 1; }
+    .friend-info h5 { margin: 0 0 2px; color: var(--dark); font-size: 0.95em; }
+    .friend-info span { font-size: 0.75em; color: #aaa; }
+    .btn-add-friend { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
+    .btn-remove-friend { background: #f0f0f0; color: #888; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
+    .friend-fav-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .friend-fav-tag { background: #e8f4fd; color: var(--dark); font-size: 0.72em; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+    .friend-played-list { margin-top: 6px; }
+    .friend-played-item { font-size: 0.78em; color: #666; padding: 3px 0; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; }
+    .friend-played-item:last-child { border-bottom: none; }
+    .friend-section-title { font-size: 0.75em; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin: 10px 0 4px; }
+    .search-result-card { background: #f0f7ff; border: 1.5px solid #c5ddf7; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+    .tabs-mini { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab-mini { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.82em; font-weight: 600; cursor: pointer; border: 1.5px solid #e0e0e0; background: white; color: #888; font-family: 'Poppins', sans-serif; }
+    .tab-mini.active { background: var(--dark); color: white; border-color: var(--dark); }
 
-        .privacy-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .privacy-row:last-child { border-bottom: none; }
-        .privacy-label { font-size: 0.88em; color: #444; }
-        .privacy-label small { display: block; color: #aaa; font-size: 0.8em; margin-top: 2px; }
-        .toggle-wrap { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
-        .toggle-wrap input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider { position: absolute; inset: 0; background: #ddd; border-radius: 24px; cursor: pointer; transition: 0.3s; }
-        .toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.3s; }
-        .toggle-wrap input:checked + .toggle-slider { background: var(--primary); }
-        .toggle-wrap input:checked + .toggle-slider:before { transform: translateX(20px); }
+    .edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 4000; display: flex; align-items: flex-end; }
+    .edit-sheet { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px 40px; max-height: 90vh; overflow-y: auto; }
+    .edit-sheet h3 { margin: 0 0 20px; color: var(--dark); font-size: 1.1em; }
+    .edit-sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .edit-sheet-header h3 { margin: 0; }
 
-        .played-entry-details { font-size: 0.75em; color: #888; margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .played-entry-details span { display: flex; align-items: center; gap: 3px; }
-        .result-badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.8em; font-weight: 700; }
-        .result-W { background: #eafaf1; color: #27ae60; }
-        .result-L { background: #fdecea; color: #e74c3c; }
-        .result-D { background: #fef9e7; color: #f39c12; }
+    .privacy-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .privacy-row:last-child { border-bottom: none; }
+    .privacy-label { font-size: 0.88em; color: #444; }
+    .privacy-label small { display: block; color: #aaa; font-size: 0.8em; margin-top: 2px; }
+    .toggle-wrap { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-wrap input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #ddd; border-radius: 24px; cursor: pointer; transition: 0.3s; }
+    .toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+    .toggle-wrap input:checked + .toggle-slider { background: var(--primary); }
+    .toggle-wrap input:checked + .toggle-slider:before { transform: translateX(20px); }
 
-        .profile-tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; margin: 0 20px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .profile-tab { flex: 1; padding: 11px 5px; text-align: center; font-size: 0.72em; font-weight: 600; cursor: pointer; color: #999; border: none; background: none; font-family: 'Poppins', sans-serif; }
-        .profile-tab.active { background: var(--dark); color: white; }
-        .btn-edit-profile { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 600; cursor: pointer; margin-top: 10px; }
-    </style>
+    .played-entry-details { font-size: 0.75em; color: #888; margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .played-entry-details span { display: flex; align-items: center; gap: 3px; }
+    .result-badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.8em; font-weight: 700; }
+    .result-W { background: #eafaf1; color: #27ae60; }
+    .result-L { background: #fdecea; color: #e74c3c; }
+    .result-D { background: #fef9e7; color: #f39c12; }
+
+    /* Sport type badge */
+    .sport-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 700; margin-right: 5px; }
+    .sport-tenis { background: #e8f4fd; color: #0b3d91; }
+    .sport-padel { background: #fef5e7; color: #d68910; }
+
+    /* Sport selector row */
+    .sport-selector { display: flex; gap: 8px; margin-bottom: 8px; }
+    .sport-option { flex: 1; padding: 10px 5px; border: 2px solid #e0e0e0; border-radius: 10px; background: white; font-family: 'Poppins', sans-serif; font-size: 0.85em; font-weight: 600; cursor: pointer; text-align: center; color: #888; transition: all 0.2s; }
+    .sport-option.selected-tenis { border-color: #0b3d91; background: #e8f4fd; color: #0b3d91; }
+    .sport-option.selected-padel { border-color: #d68910; background: #fef5e7; color: #d68910; }
+
+    /* Opponent selector */
+    .opponent-select-wrap { position: relative; margin-bottom: 8px; }
+    .opponent-select-wrap select { background: white; appearance: none; -webkit-appearance: none; padding-right: 36px; }
+    .opponent-select-wrap::after { content: '\f107'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; pointer-events: none; }
+
+    .profile-tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; margin: 0 20px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .profile-tab { flex: 1; padding: 11px 5px; text-align: center; font-size: 0.72em; font-weight: 600; cursor: pointer; color: #999; border: none; background: none; font-family: 'Poppins', sans-serif; }
+    .profile-tab.active { background: var(--dark); color: white; }
+    .btn-edit-profile { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 600; cursor: pointer; margin-top: 10px; }
+
+    .add-played-form label { display: block; font-size: 0.78em; font-weight: 600; color: #555; margin-bottom: 4px; margin-top: 0; }
+    .no-friends-note { font-size: 0.78em; color: #aaa; text-align: center; padding: 8px 0 4px; font-style: italic; }
+</style>
+```
+
 </head>
 <body>
 <div id="root"></div>
@@ -350,7 +373,15 @@
         const [showAddPlayed, setShowAddPlayed] = useState(false);
         const [selectedCourt, setSelectedCourt] = useState(DATA[0].name);
         const [playedDate, setPlayedDate] = useState(new Date().toISOString().split('T')[0]);
-        const [playedOpponent, setPlayedOpponent] = useState('');
+
+        // NEW: sport type state
+        const [playedSport, setPlayedSport] = useState('tenis');
+
+        // NEW: opponent from friends list
+        const [playedOpponentUid, setPlayedOpponentUid] = useState('');
+        const [friendsList, setFriendsList] = useState([]); // [{uid, name}]
+        const [loadingFriends, setLoadingFriends] = useState(false);
+
         const [playedScore, setPlayedScore] = useState('');
         const [playedResult, setPlayedResult] = useState('');
         const [saving, setSaving] = useState(false);
@@ -371,6 +402,20 @@
                         setShowFavourites(data.privacy.showFavourites !== false);
                         setShowHistory(data.privacy.showHistory !== false);
                     }
+
+                    // Load friends names for dropdown
+                    const friendUids = data.friends || [];
+                    if (friendUids.length > 0) {
+                        setLoadingFriends(true);
+                        Promise.all(friendUids.map(uid => fb.getDoc(fb.doc(fb.db, 'users', uid))))
+                            .then(snaps => {
+                                const list = snaps
+                                    .filter(s => s.exists())
+                                    .map(s => ({ uid: s.id, name: s.data().name || s.data().email || s.id }));
+                                setFriendsList(list);
+                                setLoadingFriends(false);
+                            });
+                    }
                 }
             });
         }, [user.uid]);
@@ -379,11 +424,18 @@
 
         const addPlayedEntry = async () => {
             setSaving(true);
+
+            // Resolve opponent name from uid or leave blank
+            const opponentName = playedOpponentUid
+                ? (friendsList.find(f => f.uid === playedOpponentUid)?.name || '')
+                : '';
+
             const entry = {
                 court: selectedCourt,
                 date: playedDate,
+                sport: playedSport,
                 addedAt: new Date().toISOString(),
-                ...(playedOpponent.trim() && { opponent: playedOpponent.trim() }),
+                ...(opponentName && { opponent: opponentName, opponentUid: playedOpponentUid }),
                 ...(playedScore.trim() && { score: playedScore.trim() }),
                 ...(playedResult && { result: playedResult }),
             };
@@ -391,9 +443,10 @@
             await fb.setDoc(userDocRef, { playedHistory: newList }, { merge: true });
             setPlayedList(newList);
             setShowAddPlayed(false);
-            setPlayedOpponent('');
+            setPlayedOpponentUid('');
             setPlayedScore('');
             setPlayedResult('');
+            setPlayedSport('tenis');
             setSaving(false);
         };
 
@@ -428,6 +481,8 @@
         const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
         const joinDate = user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' }) : '—';
         const resultLabel = { W: 'Wygrana', L: 'Przegrana', D: 'Remis' };
+        const sportEmoji = { tenis: '🎾', padel: '🏓' };
+        const sportLabel = { tenis: 'Tenis', padel: 'Padel' };
 
         return (
             <div>
@@ -490,18 +545,64 @@
                                     <i className="fas fa-plus"></i> Dodaj
                                 </button>
                             </h4>
+
                             {showAddPlayed && (
                                 <div className="add-played-form">
+
+                                    {/* SPORT TYPE SELECTOR */}
+                                    <label>Dyscyplina *</label>
+                                    <div className="sport-selector">
+                                        <button
+                                            type="button"
+                                            className={`sport-option ${playedSport==='tenis' ? 'selected-tenis' : ''}`}
+                                            onClick={() => setPlayedSport('tenis')}
+                                        >
+                                            🎾 Tenis
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`sport-option ${playedSport==='padel' ? 'selected-padel' : ''}`}
+                                            onClick={() => setPlayedSport('padel')}
+                                        >
+                                            🏓 Padel
+                                        </button>
+                                    </div>
+
                                     <label>Obiekt *</label>
                                     <select value={selectedCourt} onChange={e => setSelectedCourt(e.target.value)}>
                                         {DATA.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
                                     </select>
+
                                     <label>Data *</label>
                                     <input type="date" value={playedDate} onChange={e => setPlayedDate(e.target.value)} />
-                                    <label>Z kim grałem? <span style={{fontWeight:400}}>(opcjonalnie)</span></label>
-                                    <input type="text" placeholder="np. Kamil" value={playedOpponent} onChange={e => setPlayedOpponent(e.target.value)} />
-                                    <label>Wynik <span style={{fontWeight:400}}>(opcjonalnie, np. 6:3)</span></label>
+
+                                    {/* OPPONENT FROM FRIENDS DROPDOWN */}
+                                    <label>Z kim grałem? <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
+                                    <div className="opponent-select-wrap">
+                                        <select
+                                            value={playedOpponentUid}
+                                            onChange={e => setPlayedOpponentUid(e.target.value)}
+                                            disabled={loadingFriends}
+                                        >
+                                            <option value="">— nie wybrano —</option>
+                                            {loadingFriends && <option disabled>Ładowanie znajomych...</option>}
+                                            {!loadingFriends && friendsList.length === 0 && (
+                                                <option disabled>Brak znajomych na liście</option>
+                                            )}
+                                            {friendsList.map(f => (
+                                                <option key={f.uid} value={f.uid}>{f.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {!loadingFriends && friendsList.length === 0 && (
+                                        <div className="no-friends-note">
+                                            Dodaj znajomych w zakładce Znajomi, aby móc ich tu wybrać.
+                                        </div>
+                                    )}
+
+                                    <label>Wynik <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie, np. 6:3)</span></label>
                                     <input type="text" placeholder="np. 6:3" value={playedScore} onChange={e => setPlayedScore(e.target.value)} />
+
                                     <label>Rezultat</label>
                                     <select value={playedResult} onChange={e => setPlayedResult(e.target.value)}>
                                         <option value="">— nie podawaj —</option>
@@ -509,15 +610,27 @@
                                         <option value="L">❌ Przegrana</option>
                                         <option value="D">🤝 Remis</option>
                                     </select>
-                                    <button className="btn-add-small" onClick={addPlayedEntry} disabled={saving}>{saving ? 'Zapisywanie...' : '✔ Zapisz grę'}</button>
+
+                                    <button className="btn-add-small" onClick={addPlayedEntry} disabled={saving}>
+                                        {saving ? 'Zapisywanie...' : '✔ Zapisz grę'}
+                                    </button>
                                 </div>
                             )}
+
                             {playedList.length === 0 && !showAddPlayed
                                 ? <div className="section-empty">Brak wpisów — dodaj gdzie ostatnio grałeś!</div>
                                 : playedList.map((entry, idx) => (
                                     <div key={idx} className="played-entry">
                                         <div className="played-entry-left">
-                                            <strong>🎾 {entry.court} {entry.result && <span className={`result-badge result-${entry.result}`}>{resultLabel[entry.result]}</span>}</strong>
+                                            <strong>
+                                                {entry.sport && (
+                                                    <span className={`sport-badge sport-${entry.sport}`}>
+                                                        {sportEmoji[entry.sport] || '🎾'} {sportLabel[entry.sport] || entry.sport}
+                                                    </span>
+                                                )}
+                                                {entry.court}
+                                                {entry.result && <span className={`result-badge result-${entry.result}`} style={{marginLeft:5}}>{resultLabel[entry.result]}</span>}
+                                            </strong>
                                             <span>{new Date(entry.date).toLocaleDateString('pl-PL')}</span>
                                             <div className="played-entry-details">
                                                 {entry.opponent && <span><i className="fas fa-user"></i> {entry.opponent}</span>}
@@ -662,9 +775,7 @@
                         {loadingFriends && <div className="section-empty">Ładowanie...</div>}
                         {friendsData.map(friend => {
                             const canSeeFav = friend.privacy?.showFavourites !== false;
-                            const canSeeHistory = friend.privacy?.showHistory !== false;
                             const favItems = canSeeFav ? DATA.filter(d => (friend.favourites||[]).includes(d.id)) : [];
-                            const played = canSeeHistory ? (friend.playedHistory||[]).slice(0,3) : [];
                             return (
                                 <div key={friend.uid} className="friend-card">
                                     <div className="friend-card-header">
@@ -800,5 +911,6 @@
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
 </script>
+
 </body>
 </html>
