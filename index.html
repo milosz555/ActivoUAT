@@ -45,11 +45,7 @@
     .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
     .card img { width: 100%; height: 150px; object-fit: cover; }
     .card-body { padding: 15px; }
-    .card-address { font-size: 0.78em; color: #888; margin: 4px 0 8px; display: flex; align-items: center; gap: 5px; }
-    .card-address i { color: var(--dark); }
     .courts-badge { display: inline-block; background: #e8f4fd; color: var(--dark); font-size: 0.75em; font-weight: 700; padding: 3px 8px; border-radius: 20px; margin-left: 8px; }
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.8em; margin: 10px 0; color: #666; }
-    .prop i { color: var(--primary); margin-right: 5px; }
     .card-actions { display: flex; gap: 10px; margin-top: 10px; }
     .btn-map { background: var(--dark); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
     .btn-reserve { background: var(--primary); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
@@ -106,17 +102,30 @@
     .fav-card-info h5 { margin: 0 0 3px; color: var(--dark); font-size: 0.9em; }
     .fav-card-info span { font-size: 0.75em; color: #888; }
     .btn-fav-remove { background: none; border: none; color: #ddd; font-size: 1.2em; cursor: pointer; padding: 5px; }
-    .btn-fav-remove:hover { color: var(--danger); }
     .btn-heart { background: none; border: none; font-size: 1.3em; cursor: pointer; padding: 4px 8px; line-height: 1; }
-    .played-entry { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85em; }
+
+    /* ── HISTORY ENTRY ── */
+    .played-entry { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
     .played-entry:last-child { border-bottom: none; }
-    .played-entry-left { display: flex; flex-direction: column; gap: 2px; }
-    .played-entry-left strong { color: #333; }
-    .played-entry-left span { color: #aaa; font-size: 0.8em; }
-    .played-entry-right { color: #aaa; font-size: 0.75em; cursor: pointer; }
+    .played-entry-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .played-entry-left { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+    .played-entry-left strong { color: #333; font-size: 0.88em; line-height: 1.4; }
+    .played-entry-left .date-line { color: #aaa; font-size: 0.78em; }
+    .played-entry-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; margin-left: 8px; }
+    .btn-edit-entry { background: none; border: none; color: #bbb; font-size: 1em; cursor: pointer; padding: 4px 6px; }
+    .btn-edit-entry:hover { color: var(--dark); }
+    .played-entry-details { font-size: 0.75em; color: #888; margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .played-entry-details span { display: flex; align-items: center; gap: 3px; }
+
+    /* shared badge */
+    .shared-badge { display: inline-flex; align-items: center; gap: 3px; background: #f0f7ff; color: #0b3d91; font-size: 0.7em; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: 5px; }
+    .shared-badge-received { background: #f5f0ff; color: #7d3c98; }
+
     .add-played-form { background: #f9f9f9; border-radius: 8px; padding: 12px; margin-top: 10px; }
-    .add-played-form select, .add-played-form input { margin-bottom: 8px; background: white; }
-    .btn-add-small { background: var(--dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 0.82em; font-weight: 600; cursor: pointer; width: 100%; }
+    .add-played-form label { display: block; font-size: 0.78em; font-weight: 600; color: #555; margin-bottom: 4px; margin-top: 10px; }
+    .add-played-form label:first-child { margin-top: 0; }
+    .add-played-form select, .add-played-form input { margin-bottom: 0; background: white; }
+    .btn-add-small { background: var(--dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 0.82em; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; }
     .section-empty { color: #bbb; font-size: 0.85em; text-align: center; padding: 15px 0; }
     .lock-banner { background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 20px; text-align: center; margin: 20px; }
     .lock-banner i { font-size: 2em; color: #f9a825; margin-bottom: 10px; display: block; }
@@ -135,20 +144,10 @@
     .btn-remove-friend { background: #f0f0f0; color: #888; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
     .friend-fav-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .friend-fav-tag { background: #e8f4fd; color: var(--dark); font-size: 0.72em; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
-    .friend-played-list { margin-top: 6px; }
-    .friend-played-item { font-size: 0.78em; color: #666; padding: 3px 0; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; }
-    .friend-played-item:last-child { border-bottom: none; }
-    .friend-section-title { font-size: 0.75em; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin: 10px 0 4px; }
     .search-result-card { background: #f0f7ff; border: 1.5px solid #c5ddf7; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
     .tabs-mini { display: flex; gap: 8px; margin-bottom: 16px; }
     .tab-mini { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.82em; font-weight: 600; cursor: pointer; border: 1.5px solid #e0e0e0; background: white; color: #888; font-family: 'Poppins', sans-serif; }
     .tab-mini.active { background: var(--dark); color: white; border-color: var(--dark); }
-
-    .edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 4000; display: flex; align-items: flex-end; }
-    .edit-sheet { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px 40px; max-height: 90vh; overflow-y: auto; }
-    .edit-sheet h3 { margin: 0 0 20px; color: var(--dark); font-size: 1.1em; }
-    .edit-sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .edit-sheet-header h3 { margin: 0; }
 
     .privacy-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
     .privacy-row:last-child { border-bottom: none; }
@@ -161,26 +160,21 @@
     .toggle-wrap input:checked + .toggle-slider { background: var(--primary); }
     .toggle-wrap input:checked + .toggle-slider:before { transform: translateX(20px); }
 
-    .played-entry-details { font-size: 0.75em; color: #888; margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .played-entry-details span { display: flex; align-items: center; gap: 3px; }
-    .result-badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.8em; font-weight: 700; }
+    .result-badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.78em; font-weight: 700; }
     .result-W { background: #eafaf1; color: #27ae60; }
     .result-L { background: #fdecea; color: #e74c3c; }
     .result-D { background: #fef9e7; color: #f39c12; }
 
-    /* Sport type badge */
-    .sport-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 700; margin-right: 5px; }
+    .sport-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 700; margin-right: 4px; }
     .sport-tenis { background: #e8f4fd; color: #0b3d91; }
     .sport-padel { background: #fef5e7; color: #d68910; }
 
-    /* Sport selector row */
-    .sport-selector { display: flex; gap: 8px; margin-bottom: 8px; }
+    .sport-selector { display: flex; gap: 8px; margin-bottom: 0; }
     .sport-option { flex: 1; padding: 10px 5px; border: 2px solid #e0e0e0; border-radius: 10px; background: white; font-family: 'Poppins', sans-serif; font-size: 0.85em; font-weight: 600; cursor: pointer; text-align: center; color: #888; transition: all 0.2s; }
     .sport-option.selected-tenis { border-color: #0b3d91; background: #e8f4fd; color: #0b3d91; }
     .sport-option.selected-padel { border-color: #d68910; background: #fef5e7; color: #d68910; }
 
-    /* Opponent selector */
-    .opponent-select-wrap { position: relative; margin-bottom: 8px; }
+    .opponent-select-wrap { position: relative; }
     .opponent-select-wrap select { background: white; appearance: none; -webkit-appearance: none; padding-right: 36px; }
     .opponent-select-wrap::after { content: '\f107'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; pointer-events: none; }
 
@@ -189,8 +183,29 @@
     .profile-tab.active { background: var(--dark); color: white; }
     .btn-edit-profile { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 600; cursor: pointer; margin-top: 10px; }
 
-    .add-played-form label { display: block; font-size: 0.78em; font-weight: 600; color: #555; margin-bottom: 4px; margin-top: 0; }
-    .no-friends-note { font-size: 0.78em; color: #aaa; text-align: center; padding: 8px 0 4px; font-style: italic; }
+    .no-friends-note { font-size: 0.78em; color: #aaa; text-align: center; padding: 6px 0 2px; font-style: italic; }
+
+    /* ── EDIT BOTTOM SHEET ── */
+    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 5000; display: flex; align-items: flex-end; }
+    .edit-sheet { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px 40px; max-height: 92vh; overflow-y: auto; }
+    .edit-sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .edit-sheet-header h3 { margin: 0; color: var(--dark); font-size: 1.05em; }
+    .edit-sheet label { display: block; font-size: 0.78em; font-weight: 600; color: #555; margin-bottom: 4px; margin-top: 12px; }
+    .edit-sheet label:first-of-type { margin-top: 0; }
+    .edit-sheet select, .edit-sheet input[type="text"], .edit-sheet input[type="date"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 15px; background: white; }
+    .btn-save-edit { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 16px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
+    .btn-delete-game { background: #fdecea; color: var(--danger); border: none; padding: 13px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 10px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.92em; }
+    .read-only-note { font-size: 0.78em; color: #aaa; font-style: italic; margin-top: 4px; }
+
+    /* ── CONFIRM POPUP ── */
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 6000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .confirm-box { background: white; border-radius: 16px; padding: 28px 22px 22px; width: 100%; max-width: 340px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .confirm-box i { font-size: 2.2em; color: var(--danger); margin-bottom: 12px; display: block; }
+    .confirm-box h4 { margin: 0 0 8px; color: #222; font-size: 1.05em; }
+    .confirm-box p { margin: 0 0 20px; color: #666; font-size: 0.85em; line-height: 1.5; }
+    .confirm-actions { display: flex; gap: 10px; }
+    .btn-confirm-cancel { flex: 1; padding: 12px; border: 1.5px solid #e0e0e0; border-radius: 10px; background: white; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.88em; cursor: pointer; color: #666; }
+    .btn-confirm-delete { flex: 1; padding: 12px; border: none; border-radius: 10px; background: var(--danger); color: white; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 0.88em; cursor: pointer; }
 </style>
 ```
 
@@ -203,7 +218,7 @@
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
              signOut, onAuthStateChanged, updateProfile }
         from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, collection, query, where, getDocs, orderBy, limit }
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, getDocs }
         from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -222,19 +237,24 @@
 
     window.__firebase = { auth, db, createUserWithEmailAndPassword,
         signInWithEmailAndPassword, signOut, onAuthStateChanged,
-        updateProfile, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, collection, query, where, getDocs, orderBy, limit };
+        updateProfile, doc, setDoc, getDoc, serverTimestamp, collection, getDocs };
 </script>
 
 <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
     const DATA = [
-        { id: 1, name: "Olimpia", courts: 10, address: "ul. Warmińska 1, 61-001 Poznań", lat: 52.4064, lng: 16.9252, parking: "Tak", rental: "Tak", trainers: "Tak", shop: "Tak", testRackets: "Tak", surface: "ziemna", img: "https://images.unsplash.com/photo-1595435064212-3629224444e1?w=600" },
-        { id: 2, name: "Posir Rataje", courts: 5, address: "ul. Łukaszewicza 34, 61-762 Poznań", lat: 52.3980, lng: 16.9640, parking: "Tak", rental: "Tak", trainers: "Tak", shop: "Tak", testRackets: "Nie", surface: "ziemna", img: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600" },
-        { id: 3, name: "FairPlayce", courts: 4, address: "ul. Ratajczaka 10, 61-815 Poznań", lat: 52.4068, lng: 16.9299, parking: "Nie", rental: "Nie", trainers: "Nie", shop: "Nie", testRackets: "Nie", surface: "twarda", img: "https://images.unsplash.com/photo-1622279457486-62dcc4a4bd13?w=600" },
-        { id: 4, name: "Kortowo", courts: 8, address: "ul. Bułgarska 67, 60-320 Poznań", lat: 52.3901, lng: 16.8902, parking: "Tak", rental: "Nie", trainers: "Nie", shop: "Tak", testRackets: "Nie", surface: "dywan", img: "https://images.unsplash.com/photo-1544333346-64e4fe18274b?w=600" }
+        { id: 1, name: "Olimpia", courts: 10, address: "ul. Warmińska 1, 61-001 Poznań", lat: 52.4064, lng: 16.9252, surface: "ziemna", img: "https://images.unsplash.com/photo-1595435064212-3629224444e1?w=600" },
+        { id: 2, name: "Posir Rataje", courts: 5, address: "ul. Łukaszewicza 34, 61-762 Poznań", lat: 52.3980, lng: 16.9640, surface: "ziemna", img: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600" },
+        { id: 3, name: "FairPlayce", courts: 4, address: "ul. Ratajczaka 10, 61-815 Poznań", lat: 52.4068, lng: 16.9299, surface: "twarda", img: "https://images.unsplash.com/photo-1622279457486-62dcc4a4bd13?w=600" },
+        { id: 4, name: "Kortowo", courts: 8, address: "ul. Bułgarska 67, 60-320 Poznań", lat: 52.3901, lng: 16.8902, surface: "dywan", img: "https://images.unsplash.com/photo-1544333346-64e4fe18274b?w=600" }
     ];
 
+    const sportEmoji = { tenis: '🎾', padel: '🏓' };
+    const sportLabel = { tenis: 'Tenis', padel: 'Padel' };
+    const resultLabel = { W: 'Wygrana', L: 'Przegrana', D: 'Remis' };
+
+    /* ─────────────────────────── MAP MODAL ─────────────────────────── */
     function MapModal({ item, onClose }) {
         const mapRef = useRef(null);
         const mapInstance = useRef(null);
@@ -250,14 +270,10 @@
         return (
             <div className="map-modal" onClick={e => e.target === e.currentTarget && onClose()}>
                 <div className="map-modal-content">
-                    <div className="map-modal-header">
-                        <h3>{item.name}</h3>
-                        <button className="btn-close" onClick={onClose}>✕</button>
-                    </div>
+                    <div className="map-modal-header"><h3>{item.name}</h3><button className="btn-close" onClick={onClose}>✕</button></div>
                     <div id="map-container" ref={mapRef}></div>
                     <div className="map-info-row"><i className="fas fa-map-marker-alt"></i> {item.address}</div>
                     <div className="map-info-row"><i className="fas fa-layer-group"></i> Nawierzchnia: {item.surface}</div>
-                    <div className="map-info-row"><i className="fas fa-th-large"></i> Korty: {item.courts}</div>
                     <button className="btn-apply" style={{marginTop:10}} onClick={() => window.open(`http://maps.google.com/?q=${item.lat},${item.lng}`, '_blank')}>
                         <i className="fas fa-external-link-alt"></i> Otwórz w Google Maps
                     </button>
@@ -266,6 +282,200 @@
         );
     }
 
+    /* ─────────────────────────── CONFIRM POPUP ─────────────────────── */
+    function ConfirmPopup({ onConfirm, onCancel }) {
+        return (
+            <div className="confirm-overlay">
+                <div className="confirm-box">
+                    <i className="fas fa-trash-alt"></i>
+                    <h4>Usuń rozgrywkę?</h4>
+                    <p>Tego działania nie można cofnąć. Wpis zostanie trwale usunięty z Twojej historii.</p>
+                    <div className="confirm-actions">
+                        <button className="btn-confirm-cancel" onClick={onCancel}>Anuluj</button>
+                        <button className="btn-confirm-delete" onClick={onConfirm}>Usuń</button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    /* ─────────────────────────── EDIT SHEET ────────────────────────── */
+    /*
+     * entry      – the game object being edited
+     * isOwner    – true = user added this game; false = it was shared with them (can edit some fields, cannot delete)
+     * friendsList– [{uid, name}] for opponent dropdowns
+     * onSave(updatedEntry) – callback
+     * onDelete() – callback (only called when isOwner)
+     * onClose()  – callback
+     */
+    function EditGameSheet({ entry, isOwner, friendsList, onSave, onDelete, onClose }) {
+        const [court, setCourt] = useState(entry.court || DATA[0].name);
+        const [date, setDate] = useState(entry.date || new Date().toISOString().split('T')[0]);
+        const [sport, setSport] = useState(entry.sport || 'tenis');
+        const [score, setScore] = useState(entry.score || '');
+        const [result, setResult] = useState(entry.result || '');
+        // For tenis: single opponent uid
+        const [opponentUid, setOpponentUid] = useState(entry.opponentUid || '');
+        // For padel: up to 3 opponents (array of uid strings)
+        const [padelOpponents, setPadelOpponents] = useState(
+            entry.padelOpponentUids ? [...entry.padelOpponentUids, '', '', ''].slice(0, 3) : ['', '', '']
+        );
+        const [showConfirm, setShowConfirm] = useState(false);
+        const [saving, setSaving] = useState(false);
+
+        const setPadelOpp = (idx, val) => {
+            const copy = [...padelOpponents];
+            copy[idx] = val;
+            setPadelOpponents(copy);
+        };
+
+        const friendOptions = (excludeUids = []) =>
+            friendsList.filter(f => !excludeUids.includes(f.uid));
+
+        const handleSave = async () => {
+            setSaving(true);
+
+            let opponentName = '';
+            let padelOpponentNames = [];
+            let padelOpponentUids = [];
+
+            if (sport === 'tenis') {
+                if (opponentUid) {
+                    opponentName = friendsList.find(f => f.uid === opponentUid)?.name || '';
+                }
+            } else {
+                padelOpponentUids = padelOpponents.filter(Boolean);
+                padelOpponentNames = padelOpponentUids.map(uid => friendsList.find(f => f.uid === uid)?.name || uid);
+            }
+
+            const updated = {
+                ...entry,
+                court,
+                date,
+                sport,
+                score,
+                result,
+                ...(sport === 'tenis'
+                    ? { opponent: opponentName, opponentUid }
+                    : { padelOpponents: padelOpponentNames, padelOpponentUids }),
+            };
+            // clean up stale keys when switching sport
+            if (sport === 'tenis') { delete updated.padelOpponents; delete updated.padelOpponentUids; }
+            else { delete updated.opponent; delete updated.opponentUid; }
+
+            await onSave(updated);
+            setSaving(false);
+        };
+
+        const usedUids = padelOpponents.filter(Boolean);
+
+        return (
+            <>
+                {showConfirm && (
+                    <ConfirmPopup
+                        onConfirm={() => { setShowConfirm(false); onDelete(); }}
+                        onCancel={() => setShowConfirm(false)}
+                    />
+                )}
+                <div className="sheet-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+                    <div className="edit-sheet">
+                        <div className="edit-sheet-header">
+                            <h3>{isOwner ? 'Edytuj rozgrywkę' : 'Twój wynik w tej grze'}</h3>
+                            <button className="btn-close" onClick={onClose}>✕</button>
+                        </div>
+
+                        {/* Sport – editable only by owner */}
+                        {isOwner ? (
+                            <>
+                                <label>Dyscyplina</label>
+                                <div className="sport-selector" style={{marginBottom:0}}>
+                                    <button type="button" className={`sport-option ${sport==='tenis'?'selected-tenis':''}`} onClick={() => setSport('tenis')}>🎾 Tenis</button>
+                                    <button type="button" className={`sport-option ${sport==='padel'?'selected-padel':''}`} onClick={() => setSport('padel')}>🏓 Padel</button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <label>Dyscyplina</label>
+                                <div style={{fontSize:'0.9em',padding:'8px 0',color:'#333'}}>{sportEmoji[entry.sport]} {sportLabel[entry.sport]}</div>
+                                <div className="read-only-note"><i className="fas fa-lock" style={{marginRight:4}}></i>Dyscyplinę i uczestników może edytować tylko twórca gry.</div>
+                            </>
+                        )}
+
+                        {/* Court + Date – owner only */}
+                        {isOwner && (
+                            <>
+                                <label>Obiekt</label>
+                                <select value={court} onChange={e => setCourt(e.target.value)}>
+                                    {DATA.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+                                </select>
+                                <label>Data</label>
+                                <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+                            </>
+                        )}
+
+                        {/* Opponents – owner only */}
+                        {isOwner && sport === 'tenis' && (
+                            <>
+                                <label>Przeciwnik <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
+                                <div className="opponent-select-wrap">
+                                    <select value={opponentUid} onChange={e => setOpponentUid(e.target.value)}>
+                                        <option value="">— nie wybrano —</option>
+                                        {friendsList.map(f => <option key={f.uid} value={f.uid}>{f.name}</option>)}
+                                    </select>
+                                </div>
+                            </>
+                        )}
+                        {isOwner && sport === 'padel' && (
+                            <>
+                                <label>Gracze (do 3 osób) <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
+                                {[0, 1, 2].map(idx => {
+                                    const otherSelected = padelOpponents.filter((_, i) => i !== idx).filter(Boolean);
+                                    return (
+                                        <div key={idx} className="opponent-select-wrap" style={{marginBottom: idx < 2 ? 6 : 0}}>
+                                            <select value={padelOpponents[idx]} onChange={e => setPadelOpp(idx, e.target.value)}>
+                                                <option value="">— Gracz {idx + 1} —</option>
+                                                {friendsList
+                                                    .filter(f => !otherSelected.includes(f.uid))
+                                                    .map(f => <option key={f.uid} value={f.uid}>{f.name}</option>)
+                                                }
+                                            </select>
+                                        </div>
+                                    );
+                                })}
+                                {friendsList.length === 0 && (
+                                    <div className="no-friends-note">Dodaj znajomych, aby ich tu wybrać.</div>
+                                )}
+                            </>
+                        )}
+
+                        {/* Score + Result – editable by everyone (owner & shared players) */}
+                        <label>Wynik <span style={{fontWeight:400,color:'#aaa'}}>(np. 6:3)</span></label>
+                        <input type="text" placeholder="np. 6:3" value={score} onChange={e => setScore(e.target.value)} />
+
+                        <label>Rezultat</label>
+                        <select value={result} onChange={e => setResult(e.target.value)}>
+                            <option value="">— nie podawaj —</option>
+                            <option value="W">🏆 Wygrana</option>
+                            <option value="L">❌ Przegrana</option>
+                            <option value="D">🤝 Remis</option>
+                        </select>
+
+                        <button className="btn-save-edit" onClick={handleSave} disabled={saving}>
+                            {saving ? 'Zapisywanie...' : '✔ Zapisz zmiany'}
+                        </button>
+
+                        {isOwner && (
+                            <button className="btn-delete-game" onClick={() => setShowConfirm(true)}>
+                                <i className="fas fa-trash-alt"></i> Usuń rozgrywkę
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    /* ─────────────────────────── AUTH ──────────────────────────────── */
     function translateError(code) {
         const map = {
             'auth/email-already-in-use': 'Ten adres e-mail jest już zarejestrowany.',
@@ -300,33 +510,24 @@
                 const uid = cred.user.uid;
                 await fb.updateProfile(cred.user, { displayName: name.trim() });
                 await fb.setDoc(fb.doc(fb.db, 'users', uid), {
-                    uid: uid,
-                    name: name.trim(),
-                    email: email.trim().toLowerCase(),
-                    createdAt: fb.serverTimestamp(),
-                    role: 'user'
+                    uid, name: name.trim(), email: email.trim().toLowerCase(),
+                    createdAt: fb.serverTimestamp(), role: 'user'
                 });
                 await fb.signOut(fb.auth);
                 setSuccess('Konto utworzone! Teraz się zaloguj.');
-                setTab('login');
-                setName('');
-                setPassword('');
-            } catch (e) {
-                setError(translateError(e.code));
-            }
+                setTab('login'); setName(''); setPassword('');
+            } catch (e) { setError(translateError(e.code)); }
             setLoading(false);
         };
 
         const handleLogin = async () => {
             setError(''); setSuccess('');
             if (!email.trim()) return setError('Podaj adres e-mail.');
-            if (!password.trim()) return setError('Podaj haslo.');
+            if (!password.trim()) return setError('Podaj hasło.');
             setLoading(true);
             try {
                 await fb.signInWithEmailAndPassword(fb.auth, email.trim().toLowerCase(), password);
-            } catch (e) {
-                setError(translateError(e.code));
-            }
+            } catch (e) { setError(translateError(e.code)); }
             setLoading(false);
         };
 
@@ -337,24 +538,12 @@
                     <button className={`auth-tab ${tab==='register'?'active':''}`} onClick={() => { setTab('register'); setError(''); setSuccess(''); }}>Rejestracja</button>
                 </div>
                 <div className="auth-form">
-                    {tab === 'login'
-                        ? <><h2>Witaj z powrotem 👋</h2><p>Zaloguj się, aby rezerwować korty.</p></>
-                        : <><h2>Utwórz konto 🎾</h2><p>Dołącz do Activo i rezerwuj korty w kilka sekund.</p></>
-                    }
-                    {tab === 'register' && (
-                        <div className="form-group">
-                            <label>Imię</label>
-                            <input type="text" placeholder="np. Kamil" value={name} onChange={e => setName(e.target.value)} />
-                        </div>
-                    )}
-                    <div className="form-group">
-                        <label>Adres e-mail</label>
-                        <input type="email" placeholder="twoj@email.pl" value={email} onChange={e => setEmail(e.target.value)} />
-                    </div>
+                    {tab === 'login' ? <><h2>Witaj z powrotem 👋</h2><p>Zaloguj się, aby rezerwować korty.</p></> : <><h2>Utwórz konto 🎾</h2><p>Dołącz do Activo i rezerwuj korty w kilka sekund.</p></>}
+                    {tab === 'register' && <div className="form-group"><label>Imię</label><input type="text" placeholder="np. Kamil" value={name} onChange={e => setName(e.target.value)} /></div>}
+                    <div className="form-group"><label>Adres e-mail</label><input type="email" placeholder="twoj@email.pl" value={email} onChange={e => setEmail(e.target.value)} /></div>
                     <div className="form-group">
                         <label>Hasło {tab==='register' && <span style={{color:'#aaa',fontWeight:400}}>(min. 6 znaków)</span>}</label>
-                        <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)}
-                            onKeyDown={e => e.key==='Enter' && (tab==='login' ? handleLogin() : handleRegister())} />
+                        <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key==='Enter' && (tab==='login' ? handleLogin() : handleRegister())} />
                     </div>
                     {error && <div className="auth-error"><i className="fas fa-exclamation-circle"></i> {error}</div>}
                     {success && <div className="auth-success"><i className="fas fa-check-circle"></i> {success}</div>}
@@ -366,25 +555,32 @@
         );
     }
 
+    /* ─────────────────────────── PROFILE ───────────────────────────── */
     function ProfileScreen({ user }) {
         const fb = window.__firebase;
-        const [profileTab, setProfileTab] = useState('info'); 
+        const [profileTab, setProfileTab] = useState('info');
+
+        // own games
         const [playedList, setPlayedList] = useState([]);
+        // games shared to this user by others
+        const [sharedGames, setSharedGames] = useState([]);
+
         const [showAddPlayed, setShowAddPlayed] = useState(false);
+        const [editEntry, setEditEntry] = useState(null); // {entry, idx, isOwner}
+
+        // add form state
         const [selectedCourt, setSelectedCourt] = useState(DATA[0].name);
         const [playedDate, setPlayedDate] = useState(new Date().toISOString().split('T')[0]);
-
-        // NEW: sport type state
         const [playedSport, setPlayedSport] = useState('tenis');
-
-        // NEW: opponent from friends list
         const [playedOpponentUid, setPlayedOpponentUid] = useState('');
-        const [friendsList, setFriendsList] = useState([]); // [{uid, name}]
-        const [loadingFriends, setLoadingFriends] = useState(false);
-
+        const [padelOpponents, setPadelOpponents] = useState(['', '', '']);
         const [playedScore, setPlayedScore] = useState('');
         const [playedResult, setPlayedResult] = useState('');
         const [saving, setSaving] = useState(false);
+
+        const [friendsList, setFriendsList] = useState([]);
+        const [loadingFriends, setLoadingFriends] = useState(false);
+
         const [editName, setEditName] = useState(user.displayName || '');
         const [editSaving, setEditSaving] = useState(false);
         const [editMsg, setEditMsg] = useState('');
@@ -395,66 +591,140 @@
 
         useEffect(() => {
             fb.getDoc(userDocRef).then(snap => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    setPlayedList(data.playedHistory || []);
-                    if (data.privacy) {
-                        setShowFavourites(data.privacy.showFavourites !== false);
-                        setShowHistory(data.privacy.showHistory !== false);
-                    }
-
-                    // Load friends names for dropdown
-                    const friendUids = data.friends || [];
-                    if (friendUids.length > 0) {
-                        setLoadingFriends(true);
-                        Promise.all(friendUids.map(uid => fb.getDoc(fb.doc(fb.db, 'users', uid))))
-                            .then(snaps => {
-                                const list = snaps
-                                    .filter(s => s.exists())
-                                    .map(s => ({ uid: s.id, name: s.data().name || s.data().email || s.id }));
-                                setFriendsList(list);
-                                setLoadingFriends(false);
-                            });
-                    }
+                if (!snap.exists()) return;
+                const data = snap.data();
+                setPlayedList(data.playedHistory || []);
+                setSharedGames(data.sharedGames || []);
+                if (data.privacy) {
+                    setShowFavourites(data.privacy.showFavourites !== false);
+                    setShowHistory(data.privacy.showHistory !== false);
+                }
+                const friendUids = data.friends || [];
+                if (friendUids.length > 0) {
+                    setLoadingFriends(true);
+                    Promise.all(friendUids.map(uid => fb.getDoc(fb.doc(fb.db, 'users', uid))))
+                        .then(snaps => {
+                            setFriendsList(snaps.filter(s => s.exists()).map(s => ({ uid: s.id, name: s.data().name || s.data().email || s.id })));
+                            setLoadingFriends(false);
+                        });
                 }
             });
         }, [user.uid]);
 
-        const handleLogout = async () => { await fb.signOut(fb.auth); };
+        const setPadelOpp = (idx, val) => {
+            const copy = [...padelOpponents];
+            copy[idx] = val;
+            setPadelOpponents(copy);
+        };
 
+        /* ── Save new game ── */
         const addPlayedEntry = async () => {
             setSaving(true);
+            const gameId = `game_${Date.now()}_${user.uid}`;
 
-            // Resolve opponent name from uid or leave blank
-            const opponentName = playedOpponentUid
-                ? (friendsList.find(f => f.uid === playedOpponentUid)?.name || '')
-                : '';
+            let opponentName = '';
+            let padelOpponentNames = [];
+            let padelOpponentUids = [];
+
+            if (playedSport === 'tenis') {
+                opponentName = playedOpponentUid ? (friendsList.find(f => f.uid === playedOpponentUid)?.name || '') : '';
+            } else {
+                padelOpponentUids = padelOpponents.filter(Boolean);
+                padelOpponentNames = padelOpponentUids.map(uid => friendsList.find(f => f.uid === uid)?.name || uid);
+            }
 
             const entry = {
+                gameId,
+                ownerUid: user.uid,
                 court: selectedCourt,
                 date: playedDate,
                 sport: playedSport,
                 addedAt: new Date().toISOString(),
-                ...(opponentName && { opponent: opponentName, opponentUid: playedOpponentUid }),
+                ...(playedSport === 'tenis'
+                    ? { ...(opponentName && { opponent: opponentName, opponentUid: playedOpponentUid }) }
+                    : { padelOpponents: padelOpponentNames, padelOpponentUids }),
                 ...(playedScore.trim() && { score: playedScore.trim() }),
                 ...(playedResult && { result: playedResult }),
             };
-            const newList = [entry, ...playedList].slice(0, 30);
-            await fb.setDoc(userDocRef, { playedHistory: newList }, { merge: true });
-            setPlayedList(newList);
+
+            // Save to owner's playedHistory
+            const newOwnerList = [entry, ...playedList].slice(0, 50);
+            await fb.setDoc(userDocRef, { playedHistory: newOwnerList }, { merge: true });
+            setPlayedList(newOwnerList);
+
+            // Share to each participant's sharedGames
+            const participantUids = playedSport === 'tenis'
+                ? (playedOpponentUid ? [playedOpponentUid] : [])
+                : padelOpponentUids;
+
+            const ownerName = user.displayName || user.email || 'Ktoś';
+            for (const uid of participantUids) {
+                const pRef = fb.doc(fb.db, 'users', uid);
+                const pSnap = await fb.getDoc(pRef);
+                if (pSnap.exists()) {
+                    const existing = pSnap.data().sharedGames || [];
+                    const sharedEntry = { ...entry, sharedWith: uid, ownerName };
+                    const updated = [sharedEntry, ...existing].slice(0, 50);
+                    await fb.setDoc(pRef, { sharedGames: updated }, { merge: true });
+                }
+            }
+
+            // Reset form
             setShowAddPlayed(false);
             setPlayedOpponentUid('');
+            setPadelOpponents(['', '', '']);
             setPlayedScore('');
             setPlayedResult('');
             setPlayedSport('tenis');
             setSaving(false);
         };
 
-        const removePlayedEntry = async (idx) => {
-            const newList = playedList.filter((_, i) => i !== idx);
+        /* ── Save edited own game ── */
+        const saveEditedOwnGame = async (updatedEntry) => {
+            const newList = playedList.map((e, i) => i === editEntry.idx ? updatedEntry : e);
             await fb.setDoc(userDocRef, { playedHistory: newList }, { merge: true });
             setPlayedList(newList);
+
+            // Also update this entry in all participants' sharedGames
+            const participantUids = updatedEntry.padelOpponentUids
+                ? updatedEntry.padelOpponentUids
+                : updatedEntry.opponentUid ? [updatedEntry.opponentUid] : [];
+
+            for (const uid of participantUids) {
+                const pRef = fb.doc(fb.db, 'users', uid);
+                const pSnap = await fb.getDoc(pRef);
+                if (pSnap.exists()) {
+                    const existing = pSnap.data().sharedGames || [];
+                    const updated = existing.map(e => e.gameId === updatedEntry.gameId
+                        ? { ...updatedEntry, sharedWith: uid, ownerName: user.displayName || user.email }
+                        : e
+                    );
+                    await fb.setDoc(pRef, { sharedGames: updated }, { merge: true });
+                }
+            }
+
+            setEditEntry(null);
         };
+
+        /* ── Save edited shared game (only score/result) ── */
+        const saveEditedSharedGame = async (updatedEntry) => {
+            const newList = sharedGames.map((e, i) => i === editEntry.idx ? updatedEntry : e);
+            await fb.setDoc(userDocRef, { sharedGames: newList }, { merge: true });
+            setSharedGames(newList);
+            setEditEntry(null);
+        };
+
+        /* ── Delete own game ── */
+        const deleteOwnGame = async () => {
+            const entry = playedList[editEntry.idx];
+            const newList = playedList.filter((_, i) => i !== editEntry.idx);
+            await fb.setDoc(userDocRef, { playedHistory: newList }, { merge: true });
+            setPlayedList(newList);
+            setEditEntry(null);
+        };
+
+        /* ── Profile helpers ── */
+        const handleLogout = async () => { await fb.signOut(fb.auth); };
 
         const saveEditName = async () => {
             if (!editName.trim()) return setEditMsg('Imię nie może być puste.');
@@ -468,8 +738,7 @@
         };
 
         const savePrivacy = async (key, value) => {
-            const update = { privacy: { showFavourites, showHistory, [key]: value } };
-            await fb.setDoc(userDocRef, update, { merge: true });
+            await fb.setDoc(userDocRef, { privacy: { showFavourites, showHistory, [key]: value } }, { merge: true });
         };
 
         const handlePrivacyToggle = (key, value) => {
@@ -479,13 +748,62 @@
         };
 
         const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-        const joinDate = user.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' }) : '—';
-        const resultLabel = { W: 'Wygrana', L: 'Przegrana', D: 'Remis' };
-        const sportEmoji = { tenis: '🎾', padel: '🏓' };
-        const sportLabel = { tenis: 'Tenis', padel: 'Padel' };
+        const joinDate = user.metadata?.creationTime
+            ? new Date(user.metadata.creationTime).toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' })
+            : '—';
+
+        /* ── Render one history entry row ── */
+        const renderEntry = (entry, idx, isOwner) => {
+            const players = entry.sport === 'padel'
+                ? (entry.padelOpponents || [])
+                : entry.opponent ? [entry.opponent] : [];
+
+            return (
+                <div key={`${isOwner?'own':'sh'}-${idx}`} className="played-entry">
+                    <div className="played-entry-top">
+                        <div className="played-entry-left">
+                            <strong>
+                                <span className={`sport-badge sport-${entry.sport || 'tenis'}`}>
+                                    {sportEmoji[entry.sport] || '🎾'} {sportLabel[entry.sport] || 'Tenis'}
+                                </span>
+                                {entry.court}
+                                {entry.result && <span className={`result-badge result-${entry.result}`} style={{marginLeft:5}}>{resultLabel[entry.result]}</span>}
+                                {!isOwner && <span className="shared-badge shared-badge-received"><i className="fas fa-share-alt"></i> {entry.ownerName}</span>}
+                            </strong>
+                            <span className="date-line">{new Date(entry.date).toLocaleDateString('pl-PL')}</span>
+                            <div className="played-entry-details">
+                                {players.length > 0 && <span><i className="fas fa-users"></i> {players.join(', ')}</span>}
+                                {entry.score && <span><i className="fas fa-table-tennis"></i> {entry.score}</span>}
+                            </div>
+                        </div>
+                        <div className="played-entry-actions">
+                            <button className="btn-edit-entry" title="Edytuj" onClick={() => setEditEntry({ entry, idx, isOwner })}>
+                                <i className="fas fa-pen"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const allEntries = [
+            ...playedList.map((e, i) => ({ e, i, own: true })),
+            ...sharedGames.map((e, i) => ({ e, i, own: false })),
+        ].sort((a, b) => new Date(b.e.date) - new Date(a.e.date));
 
         return (
             <div>
+                {editEntry && (
+                    <EditGameSheet
+                        entry={editEntry.entry}
+                        isOwner={editEntry.isOwner}
+                        friendsList={friendsList}
+                        onSave={editEntry.isOwner ? saveEditedOwnGame : saveEditedSharedGame}
+                        onDelete={deleteOwnGame}
+                        onClose={() => setEditEntry(null)}
+                    />
+                )}
+
                 <div className="profile-header">
                     <div className="profile-avatar-big">{initials}</div>
                     <div className="profile-name">{user.displayName || 'Użytkownik'}</div>
@@ -496,15 +814,9 @@
                 </div>
 
                 <div className="profile-tabs">
-                    <button className={`profile-tab ${profileTab==='info'?'active':''}`} onClick={() => setProfileTab('info')}>
-                        <i className="fas fa-user"></i> Profil
-                    </button>
-                    <button className={`profile-tab ${profileTab==='history'?'active':''}`} onClick={() => setProfileTab('history')}>
-                        <i className="fas fa-history"></i> Historia
-                    </button>
-                    <button className={`profile-tab ${profileTab==='edit'?'active':''}`} onClick={() => setProfileTab('edit')}>
-                        <i className="fas fa-cog"></i> Ustawienia
-                    </button>
+                    <button className={`profile-tab ${profileTab==='info'?'active':''}`} onClick={() => setProfileTab('info')}><i className="fas fa-user"></i> Profil</button>
+                    <button className={`profile-tab ${profileTab==='history'?'active':''}`} onClick={() => setProfileTab('history')}><i className="fas fa-history"></i> Historia</button>
+                    <button className={`profile-tab ${profileTab==='edit'?'active':''}`} onClick={() => setProfileTab('edit')}><i className="fas fa-cog"></i> Ustawienia</button>
                 </div>
 
                 <div className="profile-body">
@@ -514,25 +826,18 @@
                             <div className="profile-row"><span>Imię</span><span>{user.displayName || '—'}</span></div>
                             <div className="profile-row"><span>E-mail</span><span>{user.email}</span></div>
                             <div className="profile-row"><span>Konto od</span><span>{joinDate}</span></div>
-                            <div className="profile-row"><span>Gier w historii</span><span>{playedList.length}</span></div>
+                            <div className="profile-row"><span>Gier w historii</span><span>{playedList.length + sharedGames.length}</span></div>
                             <div className="profile-row"><span>Status</span><span style={{color:'var(--primary)'}}>✔ Aktywny</span></div>
                         </div>
-
                         <div className="profile-card">
                             <h4><i className="fas fa-shield-alt" style={{color:'var(--primary)',marginRight:6}}></i> Prywatność</h4>
                             <div className="privacy-row">
                                 <div className="privacy-label">Ulubione obiekty<small>Znajomi widzą Twoje polubione korty</small></div>
-                                <label className="toggle-wrap">
-                                    <input type="checkbox" checked={showFavourites} onChange={e => handlePrivacyToggle('showFavourites', e.target.checked)} />
-                                    <span className="toggle-slider"></span>
-                                </label>
+                                <label className="toggle-wrap"><input type="checkbox" checked={showFavourites} onChange={e => handlePrivacyToggle('showFavourites', e.target.checked)} /><span className="toggle-slider"></span></label>
                             </div>
                             <div className="privacy-row">
                                 <div className="privacy-label">Historia gier<small>Znajomi widzą gdzie ostatnio grałeś</small></div>
-                                <label className="toggle-wrap">
-                                    <input type="checkbox" checked={showHistory} onChange={e => handlePrivacyToggle('showHistory', e.target.checked)} />
-                                    <span className="toggle-slider"></span>
-                                </label>
+                                <label className="toggle-wrap"><input type="checkbox" checked={showHistory} onChange={e => handlePrivacyToggle('showHistory', e.target.checked)} /><span className="toggle-slider"></span></label>
                             </div>
                         </div>
                     </>)}
@@ -540,32 +845,18 @@
                     {profileTab === 'history' && (
                         <div className="profile-card">
                             <h4 style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                                <span><i className="fas fa-history" style={{color:'var(--primary)',marginRight:6}}></i> Ostatnio grałem</span>
-                                <button className="btn-add-small" style={{width:'auto',padding:'5px 12px'}} onClick={() => setShowAddPlayed(!showAddPlayed)}>
+                                <span><i className="fas fa-history" style={{color:'var(--primary)',marginRight:6}}></i> Moje gry</span>
+                                <button className="btn-add-small" style={{width:'auto',padding:'5px 12px',marginTop:0}} onClick={() => setShowAddPlayed(!showAddPlayed)}>
                                     <i className="fas fa-plus"></i> Dodaj
                                 </button>
                             </h4>
 
                             {showAddPlayed && (
                                 <div className="add-played-form">
-
-                                    {/* SPORT TYPE SELECTOR */}
                                     <label>Dyscyplina *</label>
                                     <div className="sport-selector">
-                                        <button
-                                            type="button"
-                                            className={`sport-option ${playedSport==='tenis' ? 'selected-tenis' : ''}`}
-                                            onClick={() => setPlayedSport('tenis')}
-                                        >
-                                            🎾 Tenis
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={`sport-option ${playedSport==='padel' ? 'selected-padel' : ''}`}
-                                            onClick={() => setPlayedSport('padel')}
-                                        >
-                                            🏓 Padel
-                                        </button>
+                                        <button type="button" className={`sport-option ${playedSport==='tenis'?'selected-tenis':''}`} onClick={() => setPlayedSport('tenis')}>🎾 Tenis</button>
+                                        <button type="button" className={`sport-option ${playedSport==='padel'?'selected-padel':''}`} onClick={() => setPlayedSport('padel')}>🏓 Padel</button>
                                     </div>
 
                                     <label>Obiekt *</label>
@@ -576,31 +867,35 @@
                                     <label>Data *</label>
                                     <input type="date" value={playedDate} onChange={e => setPlayedDate(e.target.value)} />
 
-                                    {/* OPPONENT FROM FRIENDS DROPDOWN */}
-                                    <label>Z kim grałem? <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
-                                    <div className="opponent-select-wrap">
-                                        <select
-                                            value={playedOpponentUid}
-                                            onChange={e => setPlayedOpponentUid(e.target.value)}
-                                            disabled={loadingFriends}
-                                        >
-                                            <option value="">— nie wybrano —</option>
-                                            {loadingFriends && <option disabled>Ładowanie znajomych...</option>}
-                                            {!loadingFriends && friendsList.length === 0 && (
-                                                <option disabled>Brak znajomych na liście</option>
-                                            )}
-                                            {friendsList.map(f => (
-                                                <option key={f.uid} value={f.uid}>{f.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    {!loadingFriends && friendsList.length === 0 && (
-                                        <div className="no-friends-note">
-                                            Dodaj znajomych w zakładce Znajomi, aby móc ich tu wybrać.
+                                    {playedSport === 'tenis' && (<>
+                                        <label>Z kim grałem? <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
+                                        <div className="opponent-select-wrap">
+                                            <select value={playedOpponentUid} onChange={e => setPlayedOpponentUid(e.target.value)} disabled={loadingFriends}>
+                                                <option value="">— nie wybrano —</option>
+                                                {loadingFriends && <option disabled>Ładowanie znajomych...</option>}
+                                                {friendsList.map(f => <option key={f.uid} value={f.uid}>{f.name}</option>)}
+                                            </select>
                                         </div>
-                                    )}
+                                        {!loadingFriends && friendsList.length === 0 && <div className="no-friends-note">Dodaj znajomych, aby ich tu wybrać.</div>}
+                                    </>)}
 
-                                    <label>Wynik <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie, np. 6:3)</span></label>
+                                    {playedSport === 'padel' && (<>
+                                        <label>Gracze (do 3 osób) <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
+                                        {[0, 1, 2].map(idx => {
+                                            const otherSelected = padelOpponents.filter((_, i) => i !== idx).filter(Boolean);
+                                            return (
+                                                <div key={idx} className="opponent-select-wrap" style={{marginBottom: idx < 2 ? 6 : 0}}>
+                                                    <select value={padelOpponents[idx]} onChange={e => setPadelOpp(idx, e.target.value)}>
+                                                        <option value="">— Gracz {idx + 1} —</option>
+                                                        {friendsList.filter(f => !otherSelected.includes(f.uid)).map(f => <option key={f.uid} value={f.uid}>{f.name}</option>)}
+                                                    </select>
+                                                </div>
+                                            );
+                                        })}
+                                        {!loadingFriends && friendsList.length === 0 && <div className="no-friends-note">Dodaj znajomych, aby ich tu wybrać.</div>}
+                                    </>)}
+
+                                    <label>Wynik <span style={{fontWeight:400,color:'#aaa'}}>(np. 6:3)</span></label>
                                     <input type="text" placeholder="np. 6:3" value={playedScore} onChange={e => setPlayedScore(e.target.value)} />
 
                                     <label>Rezultat</label>
@@ -617,30 +912,10 @@
                                 </div>
                             )}
 
-                            {playedList.length === 0 && !showAddPlayed
-                                ? <div className="section-empty">Brak wpisów — dodaj gdzie ostatnio grałeś!</div>
-                                : playedList.map((entry, idx) => (
-                                    <div key={idx} className="played-entry">
-                                        <div className="played-entry-left">
-                                            <strong>
-                                                {entry.sport && (
-                                                    <span className={`sport-badge sport-${entry.sport}`}>
-                                                        {sportEmoji[entry.sport] || '🎾'} {sportLabel[entry.sport] || entry.sport}
-                                                    </span>
-                                                )}
-                                                {entry.court}
-                                                {entry.result && <span className={`result-badge result-${entry.result}`} style={{marginLeft:5}}>{resultLabel[entry.result]}</span>}
-                                            </strong>
-                                            <span>{new Date(entry.date).toLocaleDateString('pl-PL')}</span>
-                                            <div className="played-entry-details">
-                                                {entry.opponent && <span><i className="fas fa-user"></i> {entry.opponent}</span>}
-                                                {entry.score && <span><i className="fas fa-table-tennis"></i> {entry.score}</span>}
-                                            </div>
-                                        </div>
-                                        <div className="played-entry-right" onClick={() => removePlayedEntry(idx)}><i className="fas fa-times"></i></div>
-                                    </div>
-                                ))
-                            }
+                            {allEntries.length === 0 && !showAddPlayed && (
+                                <div className="section-empty">Brak wpisów — dodaj gdzie ostatnio grałeś!</div>
+                            )}
+                            {allEntries.map(({ e, i, own }) => renderEntry(e, i, own))}
                         </div>
                     )}
 
@@ -655,12 +930,14 @@
                             {editMsg && <div className={editMsg.startsWith('✅') ? 'auth-success' : 'auth-error'} style={{marginTop:10}}>{editMsg}</div>}
                         </div>
                     )}
+
                     <button className="btn-logout" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> Wyloguj się</button>
                 </div>
             </div>
         );
     }
 
+    /* ─────────────────────────── FAVOURITES ────────────────────────── */
     function FavouritesScreen({ user, favourites, onToggleFav }) {
         const favItems = DATA.filter(item => favourites.includes(item.id));
         if (!user) {
@@ -689,6 +966,7 @@
         );
     }
 
+    /* ─────────────────────────── FRIENDS ───────────────────────────── */
     function FriendsScreen({ user }) {
         const fb = window.__firebase;
         const [subTab, setSubTab] = useState('friends');
@@ -721,8 +999,7 @@
             try {
                 const snap = await fb.getDocs(fb.collection(fb.db, 'users'));
                 const term = searchQuery.trim().toLowerCase();
-                const results = snap.docs
-                    .map(d => ({ uid: d.id, ...d.data() }))
+                const results = snap.docs.map(d => ({ uid: d.id, ...d.data() }))
                     .filter(u => u.uid !== user.uid && ((u.name||'').toLowerCase().includes(term) || (u.email||'').toLowerCase().includes(term)));
                 setSearchResults(results);
                 if (results.length === 0) setSearchError('Nie znaleziono użytkownika.');
@@ -759,6 +1036,7 @@
                             <input type="text" placeholder="Imię lub email..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                             <button className="btn-search" onClick={handleSearch} disabled={searching}>{searching ? '...' : 'Szukaj'}</button>
                         </div>
+                        {searchError && <div className="section-empty">{searchError}</div>}
                         {searchResults.map(result => (
                             <div key={result.uid} className="search-result-card">
                                 <div className="friend-card-header">
@@ -773,6 +1051,7 @@
                 {subTab === 'friends' && (
                     <div>
                         {loadingFriends && <div className="section-empty">Ładowanie...</div>}
+                        {!loadingFriends && friendsData.length === 0 && <div className="section-empty">Nie masz jeszcze znajomych. Znajdź ich w zakładce Szukaj!</div>}
                         {friendsData.map(friend => {
                             const canSeeFav = friend.privacy?.showFavourites !== false;
                             const favItems = canSeeFav ? DATA.filter(d => (friend.favourites||[]).includes(d.id)) : [];
@@ -793,6 +1072,7 @@
         );
     }
 
+    /* ─────────────────────────── APP ROOT ──────────────────────────── */
     function App() {
         const [view, setView] = useState('home');
         const [leftMenu, setLeftMenu] = useState(false);
@@ -801,7 +1081,7 @@
         const [mapItem, setMapItem] = useState(null);
         const [user, setUser] = useState(undefined);
         const [favourites, setFavourites] = useState([]);
-        const [f, setF] = useState({ parking: 'all', surface: 'all', shop: 'all', testRackets: 'all' });
+        const [f, setF] = useState({ surface: 'all' });
 
         window.__setView = setView;
 
@@ -830,13 +1110,8 @@
         };
 
         const applyFilters = () => {
-            const res = DATA.filter(item =>
-                (f.parking==='all' || item.parking===f.parking) &&
-                (f.surface==='all' || item.surface===f.surface) &&
-                (f.shop==='all' || item.shop===f.shop) &&
-                (f.testRackets==='all' || item.testRackets===f.testRackets)
-            );
-            setFiltered(res); setFilterPanel(false);
+            setFiltered(DATA.filter(item => f.surface === 'all' || item.surface === f.surface));
+            setFilterPanel(false);
         };
 
         const initials = user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || null;
@@ -857,7 +1132,9 @@
                 <div className={`side-panel panel-right ${filterPanel?'open':''}`}>
                     <h3>Filtry</h3>
                     <div className="filter-item"><label>Nawierzchnia</label>
-                        <select value={f.surface} onChange={e => setF({...f,surface:e.target.value})}><option value="all">Wszystkie</option><option value="ziemna">Ziemna</option><option value="twarda">Twarda</option></select>
+                        <select value={f.surface} onChange={e => setF({...f,surface:e.target.value})}>
+                            <option value="all">Wszystkie</option><option value="ziemna">Ziemna</option><option value="twarda">Twarda</option><option value="dywan">Dywan</option>
+                        </select>
                     </div>
                     <button className="btn-apply" onClick={applyFilters}>ZASTOSUJ</button>
                 </div>
@@ -866,7 +1143,9 @@
                     <div onClick={() => setLeftMenu(true)}><i className="fas fa-bars"></i></div>
                     <div style={{fontWeight:700}}>ACTIVO</div>
                     <div className="nav-user">
-                        {user === undefined ? <i className="fas fa-spinner fa-spin"></i> : user ? <div className="nav-avatar" onClick={() => setView('profile')}>{initials}</div> : <span onClick={() => setView('auth')}>Zaloguj</span>}
+                        {user === undefined ? <i className="fas fa-spinner fa-spin"></i>
+                            : user ? <div className="nav-avatar" onClick={() => setView('profile')}>{initials}</div>
+                            : <span onClick={() => setView('auth')}>Zaloguj</span>}
                     </div>
                 </nav>
 
