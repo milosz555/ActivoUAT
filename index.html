@@ -4,66 +4,87 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Activo - Zaawansowana Wyszukiwarka</title>
+    <title>Activo</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root { --primary: #2ecc71; --dark: #0b3d91; --bg: #f4f6f9; --danger: #e74c3c; --padel: #d68910; --padel-bg: #fef5e7; --tenis-bg: #e8f4fd; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); overflow-x: hidden; }
 
 ```
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<style>
-    :root { --primary: #2ecc71; --dark: #0b3d91; --bg: #f4f6f9; --white: #ffffff; --danger: #e74c3c; }
-    * { box-sizing: border-box; }
-    body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); overflow-x: hidden; }
-
+    /* ── NAV ── */
     .top-nav { background: var(--dark); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-    .top-nav i { font-size: 1.1em; cursor: pointer; }
-    .nav-user { display: flex; align-items: center; gap: 12px; }
     .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85em; cursor: pointer; }
-
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e0e0e0; display: flex; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); }
     .bottom-nav-item { flex: 1; padding: 10px 5px; text-align: center; cursor: pointer; font-size: 0.65em; color: #999; transition: color 0.2s; }
     .bottom-nav-item i { display: block; font-size: 1.4em; margin-bottom: 3px; }
     .bottom-nav-item.active { color: var(--dark); font-weight: 600; }
     .bottom-nav-item.active i { color: var(--primary); }
 
+    /* ── PANELS ── */
     .side-panel { position: fixed; top: 0; height: 100%; width: 280px; background: var(--dark); color: white; transition: 0.3s; z-index: 2000; padding: 60px 20px 20px; }
-    .panel-left { left: -280px; }
-    .panel-left.open { left: 0; }
-    .panel-right { right: -280px; background: white; color: #333; }
-    .panel-right.open { right: 0; }
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
-    .overlay.show { display: block; }
+    .panel-left { left: -280px; } .panel-left.open { left: 0; }
+    .panel-right { right: -280px; background: white; color: #333; } .panel-right.open { right: 0; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1500; } .overlay.show { display: block; }
 
+    /* ── GENERAL ── */
     .container { padding: 20px; padding-bottom: 80px; }
+    select, input[type="email"], input[type="password"], input[type="text"], input[type="date"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 16px; }
+    .btn-apply { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 20px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
+    .btn-close { background: none; border: none; font-size: 1.4em; cursor: pointer; color: #999; }
+    .section-empty { color: #bbb; font-size: 0.85em; text-align: center; padding: 20px 0; }
 
-    .btn-more { background: white; border: 1px solid var(--dark); padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 20px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
+    /* ── COURTS ── */
     .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
     .card img { width: 100%; height: 150px; object-fit: cover; }
     .card-body { padding: 15px; }
-    .courts-badge { display: inline-block; background: #e8f4fd; color: var(--dark); font-size: 0.75em; font-weight: 700; padding: 3px 8px; border-radius: 20px; margin-left: 8px; }
+    .courts-badge { display: inline-block; background: var(--tenis-bg); color: var(--dark); font-size: 0.75em; font-weight: 700; padding: 3px 8px; border-radius: 20px; margin-left: 8px; }
     .card-actions { display: flex; gap: 10px; margin-top: 10px; }
-    .btn-map { background: var(--dark); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
-    .btn-reserve { background: var(--primary); color: white; border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
-
+    .btn-map, .btn-reserve { border: none; padding: 10px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; font-family: 'Poppins', sans-serif; }
+    .btn-map { background: var(--dark); color: white; }
+    .btn-reserve { background: var(--primary); color: white; }
+    .btn-heart { background: none; border: none; font-size: 1.3em; cursor: pointer; padding: 4px 8px; line-height: 1; }
+    .btn-more { background: white; border: 1px solid var(--dark); padding: 10px; border-radius: 8px; width: 100%; margin-bottom: 20px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
     .filter-item { margin-bottom: 15px; }
     .filter-item label { display: block; font-size: 0.8em; font-weight: 600; margin-bottom: 5px; }
-    select, input[type="email"], input[type="password"], input[type="text"], input[type="date"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 16px; }
-    .btn-apply { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 20px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
 
-    .map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 3000; display: flex; align-items: flex-end; }
-    .map-modal-content { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; }
-    .map-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .map-modal-header h3 { margin: 0; color: var(--dark); }
-    .btn-close { background: none; border: none; font-size: 1.4em; cursor: pointer; color: #999; }
-    #map-container { width: 100%; height: 280px; border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
-    .map-info-row { display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; margin-bottom: 8px; }
-    .map-info-row i { color: var(--dark); width: 16px; }
+    /* ── FAVOURITES ── */
+    .fav-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; padding: 12px; }
+    .fav-card img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .fav-card-info { flex: 1; }
+    .fav-card-info h5 { margin: 0 0 3px; color: var(--dark); font-size: 0.9em; }
+    .fav-card-info span { font-size: 0.75em; color: #888; }
+    .btn-fav-remove { background: none; border: none; color: #ddd; font-size: 1.2em; cursor: pointer; padding: 5px; }
+    .lock-banner { background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 20px; text-align: center; margin: 20px; }
+    .lock-banner i { font-size: 2em; color: #f9a825; margin-bottom: 10px; display: block; }
+    .lock-banner p { margin: 0 0 12px; color: #555; font-size: 0.9em; }
 
+    /* ── FRIENDS ── */
+    .tabs-mini { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab-mini { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.82em; font-weight: 600; cursor: pointer; border: 1.5px solid #e0e0e0; background: white; color: #888; font-family: 'Poppins', sans-serif; }
+    .tab-mini.active { background: var(--dark); color: white; border-color: var(--dark); }
+    .friends-search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .friends-search-bar input { flex: 1; margin-bottom: 0; }
+    .btn-search { background: var(--dark); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .friend-card { background: white; border-radius: 12px; padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 12px; }
+    .friend-card-header { display: flex; align-items: center; gap: 12px; }
+    .friend-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--dark); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1em; flex-shrink: 0; }
+    .friend-info { flex: 1; }
+    .friend-info h5 { margin: 0 0 2px; color: var(--dark); font-size: 0.95em; }
+    .friend-info span { font-size: 0.75em; color: #aaa; }
+    .btn-add-friend { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
+    .btn-remove-friend { background: #f0f0f0; color: #888; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
+    .friend-fav-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .friend-fav-tag { background: var(--tenis-bg); color: var(--dark); font-size: 0.72em; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+    .search-result-card { background: #f0f7ff; border: 1.5px solid #c5ddf7; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+
+    /* ── AUTH ── */
     .auth-container { padding: 20px; padding-bottom: 80px; }
     .auth-tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
     .auth-tab { flex: 1; padding: 14px; text-align: center; font-weight: 600; font-size: 0.9em; cursor: pointer; color: #999; border: none; background: none; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
@@ -79,79 +100,31 @@
     .auth-success { background: #eafaf1; color: #27ae60; padding: 10px 14px; border-radius: 8px; font-size: 0.82em; margin-top: 10px; }
     .btn-loading { opacity: 0.7; pointer-events: none; }
 
-    .profile-header { background: var(--dark); color: white; padding: 30px 20px 50px; text-align: center; }
-    .profile-avatar-big { width: 70px; height: 70px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.8em; font-weight: 700; margin: 0 auto 12px; }
-    .profile-name { font-size: 1.2em; font-weight: 700; }
-    .profile-email { font-size: 0.82em; opacity: 0.8; margin-top: 4px; }
-    .profile-body { padding: 20px; padding-bottom: 80px; margin-top: -30px; }
-    .profile-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 16px; }
-    .profile-card h4 { margin: 0 0 15px; color: var(--dark); font-size: 0.95em; }
-    .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85em; }
+    /* ── PROFILE HEADER ── */
+    .profile-header { background: var(--dark); color: white; padding: 24px 20px 52px; text-align: center; }
+    .profile-avatar-big { width: 66px; height: 66px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.7em; font-weight: 700; margin: 0 auto 10px; }
+    .profile-name { font-size: 1.15em; font-weight: 700; }
+    .profile-email { font-size: 0.8em; opacity: 0.75; margin-top: 3px; }
+    .btn-edit-profile { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 5px 13px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.75em; font-weight: 600; cursor: pointer; margin-top: 10px; }
+    .profile-body { padding: 16px 16px 80px; margin-top: -36px; }
+
+    /* ── PROFILE TABS ── */
+    .profile-tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; margin: 0 16px 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .profile-tab { flex: 1; padding: 11px 4px; text-align: center; font-size: 0.68em; font-weight: 600; cursor: pointer; color: #999; border: none; background: none; font-family: 'Poppins', sans-serif; line-height: 1.3; }
+    .profile-tab i { display: block; font-size: 1.25em; margin-bottom: 3px; }
+    .profile-tab.active { background: var(--dark); color: white; }
+
+    /* ── PROFILE CARD ── */
+    .profile-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 14px; }
+    .profile-card h4 { margin: 0 0 12px; color: var(--dark); font-size: 0.92em; display: flex; align-items: center; gap: 7px; }
+    .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.84em; }
     .profile-row:last-child { border-bottom: none; }
     .profile-row span:first-child { color: #888; }
     .profile-row span:last-child { font-weight: 600; color: #333; }
     .btn-logout { background: #fdecea; color: var(--danger); border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
-
-    .hero-card { background: var(--dark); color: white; padding: 25px 20px; border-radius: 12px; margin-bottom: 20px; }
-    .hero-card h2 { margin: 0 0 8px; font-size: 1.3em; }
-    .hero-card p { margin: 0 0 16px; font-size: 0.85em; opacity: 0.85; }
-
-    .fav-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; padding: 12px; }
-    .fav-card img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-    .fav-card-info { flex: 1; }
-    .fav-card-info h5 { margin: 0 0 3px; color: var(--dark); font-size: 0.9em; }
-    .fav-card-info span { font-size: 0.75em; color: #888; }
-    .btn-fav-remove { background: none; border: none; color: #ddd; font-size: 1.2em; cursor: pointer; padding: 5px; }
-    .btn-heart { background: none; border: none; font-size: 1.3em; cursor: pointer; padding: 4px 8px; line-height: 1; }
-
-    /* ── HISTORY ENTRY ── */
-    .played-entry { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-    .played-entry:last-child { border-bottom: none; }
-    .played-entry-top { display: flex; justify-content: space-between; align-items: flex-start; }
-    .played-entry-left { display: flex; flex-direction: column; gap: 3px; flex: 1; }
-    .played-entry-left strong { color: #333; font-size: 0.88em; line-height: 1.4; }
-    .played-entry-left .date-line { color: #aaa; font-size: 0.78em; }
-    .played-entry-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; margin-left: 8px; }
-    .btn-edit-entry { background: none; border: none; color: #bbb; font-size: 1em; cursor: pointer; padding: 4px 6px; }
-    .btn-edit-entry:hover { color: var(--dark); }
-    .played-entry-details { font-size: 0.75em; color: #888; margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .played-entry-details span { display: flex; align-items: center; gap: 3px; }
-
-    /* shared badge */
-    .shared-badge { display: inline-flex; align-items: center; gap: 3px; background: #f0f7ff; color: #0b3d91; font-size: 0.7em; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: 5px; }
-    .shared-badge-received { background: #f5f0ff; color: #7d3c98; }
-
-    .add-played-form { background: #f9f9f9; border-radius: 8px; padding: 12px; margin-top: 10px; }
-    .add-played-form label { display: block; font-size: 0.78em; font-weight: 600; color: #555; margin-bottom: 4px; margin-top: 10px; }
-    .add-played-form label:first-child { margin-top: 0; }
-    .add-played-form select, .add-played-form input { margin-bottom: 0; background: white; }
-    .btn-add-small { background: var(--dark); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 0.82em; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; }
-    .section-empty { color: #bbb; font-size: 0.85em; text-align: center; padding: 15px 0; }
-    .lock-banner { background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 20px; text-align: center; margin: 20px; }
-    .lock-banner i { font-size: 2em; color: #f9a825; margin-bottom: 10px; display: block; }
-    .lock-banner p { margin: 0 0 12px; color: #555; font-size: 0.9em; }
-
-    .friends-search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
-    .friends-search-bar input { flex: 1; margin-bottom: 0; }
-    .btn-search { background: var(--dark); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; white-space: nowrap; }
-    .friend-card { background: white; border-radius: 12px; padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 12px; }
-    .friend-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-    .friend-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--dark); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1em; flex-shrink: 0; }
-    .friend-info { flex: 1; }
-    .friend-info h5 { margin: 0 0 2px; color: var(--dark); font-size: 0.95em; }
-    .friend-info span { font-size: 0.75em; color: #aaa; }
-    .btn-add-friend { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
-    .btn-remove-friend { background: #f0f0f0; color: #888; border: none; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 700; cursor: pointer; }
-    .friend-fav-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .friend-fav-tag { background: #e8f4fd; color: var(--dark); font-size: 0.72em; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
-    .search-result-card { background: #f0f7ff; border: 1.5px solid #c5ddf7; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
-    .tabs-mini { display: flex; gap: 8px; margin-bottom: 16px; }
-    .tab-mini { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.82em; font-weight: 600; cursor: pointer; border: 1.5px solid #e0e0e0; background: white; color: #888; font-family: 'Poppins', sans-serif; }
-    .tab-mini.active { background: var(--dark); color: white; border-color: var(--dark); }
-
-    .privacy-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+    .privacy-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #f0f0f0; }
     .privacy-row:last-child { border-bottom: none; }
-    .privacy-label { font-size: 0.88em; color: #444; }
+    .privacy-label { font-size: 0.86em; color: #444; }
     .privacy-label small { display: block; color: #aaa; font-size: 0.8em; margin-top: 2px; }
     .toggle-wrap { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
     .toggle-wrap input { opacity: 0; width: 0; height: 0; }
@@ -160,52 +133,130 @@
     .toggle-wrap input:checked + .toggle-slider { background: var(--primary); }
     .toggle-wrap input:checked + .toggle-slider:before { transform: translateX(20px); }
 
-    .result-badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.78em; font-weight: 700; }
+    /* ── ACTIVITY ENTRY ── */
+    .activity-entry { padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+    .activity-entry:last-child { border-bottom: none; }
+    .activity-entry-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .activity-entry-left { flex: 1; }
+    .activity-title { font-size: 0.86em; font-weight: 600; color: #222; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; line-height: 1.5; }
+    .activity-date { font-size: 0.75em; color: #aaa; margin-top: 2px; }
+    .activity-details { font-size: 0.74em; color: #888; margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .activity-details span { display: flex; align-items: center; gap: 3px; }
+    .btn-edit-entry { background: none; border: none; color: #ccc; font-size: 0.95em; cursor: pointer; padding: 4px 6px; flex-shrink: 0; }
+    .btn-edit-entry:hover { color: var(--dark); }
+
+    /* ── BADGES ── */
+    .sport-badge { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 10px; font-size: 0.72em; font-weight: 700; }
+    .sport-tenis { background: var(--tenis-bg); color: var(--dark); }
+    .sport-padel { background: var(--padel-bg); color: var(--padel); }
+    .result-badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 0.72em; font-weight: 700; }
     .result-W { background: #eafaf1; color: #27ae60; }
     .result-L { background: #fdecea; color: #e74c3c; }
     .result-D { background: #fef9e7; color: #f39c12; }
+    .shared-badge { display: inline-flex; align-items: center; gap: 3px; background: #f5f0ff; color: #7d3c98; font-size: 0.68em; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
 
-    .sport-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 700; margin-right: 4px; }
-    .sport-tenis { background: #e8f4fd; color: #0b3d91; }
-    .sport-padel { background: #fef5e7; color: #d68910; }
+    /* ── ADD FORM ── */
+    .add-form { background: #f8f9fb; border-radius: 10px; padding: 14px; margin-top: 10px; border: 1px solid #eee; }
+    .add-form label { display: block; font-size: 0.76em; font-weight: 600; color: #555; margin-bottom: 4px; margin-top: 10px; }
+    .add-form label:first-child { margin-top: 0; }
+    .add-form select, .add-form input { background: white; margin-bottom: 0; }
+    .sport-selector { display: flex; gap: 8px; }
+    .sport-option { flex: 1; padding: 9px 5px; border: 2px solid #e0e0e0; border-radius: 9px; background: white; font-family: 'Poppins', sans-serif; font-size: 0.84em; font-weight: 600; cursor: pointer; text-align: center; color: #888; transition: all 0.2s; }
+    .sport-option.sel-tenis { border-color: var(--dark); background: var(--tenis-bg); color: var(--dark); }
+    .sport-option.sel-padel { border-color: var(--padel); background: var(--padel-bg); color: var(--padel); }
+    .btn-save-form { background: var(--dark); color: white; border: none; padding: 11px; width: 100%; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 0.85em; font-weight: 700; cursor: pointer; margin-top: 12px; }
+    .opp-wrap { position: relative; }
+    .opp-wrap select { appearance: none; -webkit-appearance: none; padding-right: 32px; }
+    .opp-wrap::after { content: '\f107'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 11px; top: 50%; transform: translateY(-50%); color: #aaa; pointer-events: none; font-size: 0.9em; }
+    .no-friends-note { font-size: 0.76em; color: #aaa; text-align: center; padding: 5px 0; font-style: italic; }
 
-    .sport-selector { display: flex; gap: 8px; margin-bottom: 0; }
-    .sport-option { flex: 1; padding: 10px 5px; border: 2px solid #e0e0e0; border-radius: 10px; background: white; font-family: 'Poppins', sans-serif; font-size: 0.85em; font-weight: 600; cursor: pointer; text-align: center; color: #888; transition: all 0.2s; }
-    .sport-option.selected-tenis { border-color: #0b3d91; background: #e8f4fd; color: #0b3d91; }
-    .sport-option.selected-padel { border-color: #d68910; background: #fef5e7; color: #d68910; }
+    /* ── CHART ── */
+    .chart-toggle { display: flex; background: #f0f2f5; border-radius: 8px; padding: 3px; margin-bottom: 14px; }
+    .chart-toggle-btn { flex: 1; padding: 7px; text-align: center; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 600; cursor: pointer; border: none; background: none; color: #888; border-radius: 6px; transition: all 0.2s; }
+    .chart-toggle-btn.active { background: white; color: var(--dark); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+    .chart-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+    .chart-svg { display: block; }
+    .chart-bar { fill: var(--dark); transition: opacity 0.15s; }
+    .chart-bar:hover { opacity: 0.75; }
+    .chart-bar-tenis { fill: var(--dark); }
+    .chart-bar-padel { fill: var(--padel); }
+    .chart-empty { font-size: 0.82em; color: #bbb; text-align: center; padding: 20px 0; }
 
-    .opponent-select-wrap { position: relative; }
-    .opponent-select-wrap select { background: white; appearance: none; -webkit-appearance: none; padding-right: 36px; }
-    .opponent-select-wrap::after { content: '\f107'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; pointer-events: none; }
+    /* ── STATS SUMMARY ROW ── */
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .stat-box { background: white; border-radius: 10px; padding: 12px 8px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
+    .stat-box .stat-num { font-size: 1.5em; font-weight: 700; color: var(--dark); line-height: 1; }
+    .stat-box .stat-lbl { font-size: 0.65em; color: #999; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
 
-    .profile-tabs { display: flex; background: white; border-radius: 12px; overflow: hidden; margin: 0 20px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .profile-tab { flex: 1; padding: 11px 5px; text-align: center; font-size: 0.72em; font-weight: 600; cursor: pointer; color: #999; border: none; background: none; font-family: 'Poppins', sans-serif; }
-    .profile-tab.active { background: var(--dark); color: white; }
-    .btn-edit-profile { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 14px; border-radius: 20px; font-family: 'Poppins', sans-serif; font-size: 0.78em; font-weight: 600; cursor: pointer; margin-top: 10px; }
+    /* ── STATS DETAIL BUTTON ── */
+    .btn-stats-detail { display: flex; align-items: center; justify-content: space-between; background: white; border: none; border-radius: 10px; padding: 13px 16px; width: 100%; font-family: 'Poppins', sans-serif; font-size: 0.86em; font-weight: 600; color: var(--dark); box-shadow: 0 2px 6px rgba(0,0,0,0.07); cursor: pointer; margin-bottom: 14px; }
+    .btn-stats-detail i { color: #bbb; }
 
-    .no-friends-note { font-size: 0.78em; color: #aaa; text-align: center; padding: 6px 0 2px; font-style: italic; }
+    /* ── STATS DETAIL SHEET ── */
+    .stats-sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 5000; display: flex; align-items: flex-end; }
+    .stats-sheet { background: var(--bg); width: 100%; border-radius: 20px 20px 0 0; max-height: 92vh; overflow-y: auto; }
+    .stats-sheet-header { background: var(--dark); color: white; padding: 18px 20px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
+    .stats-sheet-header h3 { margin: 0; font-size: 1.05em; }
+    .stats-sheet-body { padding: 16px; }
+    .stat-section-title { font-size: 0.72em; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin: 14px 0 8px; }
+    .stat-section-title:first-child { margin-top: 0; }
+    .stat-detail-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #eee; font-size: 0.84em; }
+    .stat-detail-row:last-child { border-bottom: none; }
+    .stat-detail-row span:first-child { color: #555; }
+    .stat-detail-row span:last-child { font-weight: 700; color: #222; }
+    .partner-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #eee; }
+    .partner-row:last-child { border-bottom: none; }
+    .partner-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--dark); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em; flex-shrink: 0; }
+    .partner-info { flex: 1; }
+    .partner-info .pname { font-size: 0.86em; font-weight: 600; color: #222; }
+    .partner-info .pgames { font-size: 0.75em; color: #888; }
+    .partner-bar-wrap { width: 60px; }
+    .partner-bar { height: 6px; background: var(--dark); border-radius: 3px; }
+    .sport-split { display: flex; gap: 8px; }
+    .sport-split-item { flex: 1; background: white; border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .sport-split-num { font-size: 1.4em; font-weight: 700; }
+    .sport-split-lbl { font-size: 0.68em; color: #888; margin-top: 2px; font-weight: 600; }
+    .win-rate-ring { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 8px 0; }
+    .ring-stat { text-align: center; }
+    .ring-stat .rnum { font-size: 1.6em; font-weight: 700; line-height: 1; }
+    .ring-stat .rlbl { font-size: 0.68em; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+    .ring-sep { width: 1px; height: 40px; background: #eee; }
 
-    /* ── EDIT BOTTOM SHEET ── */
+    /* ── EDIT SHEET ── */
     .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 5000; display: flex; align-items: flex-end; }
-    .edit-sheet { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 24px 20px 40px; max-height: 92vh; overflow-y: auto; }
-    .edit-sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-    .edit-sheet-header h3 { margin: 0; color: var(--dark); font-size: 1.05em; }
-    .edit-sheet label { display: block; font-size: 0.78em; font-weight: 600; color: #555; margin-bottom: 4px; margin-top: 12px; }
+    .edit-sheet { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 22px 18px 40px; max-height: 92vh; overflow-y: auto; }
+    .edit-sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .edit-sheet-header h3 { margin: 0; color: var(--dark); font-size: 1.02em; }
+    .edit-sheet label { display: block; font-size: 0.76em; font-weight: 600; color: #555; margin-bottom: 4px; margin-top: 11px; }
     .edit-sheet label:first-of-type { margin-top: 0; }
     .edit-sheet select, .edit-sheet input[type="text"], .edit-sheet input[type="date"] { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif; font-size: 15px; background: white; }
-    .btn-save-edit { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 16px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95em; }
-    .btn-delete-game { background: #fdecea; color: var(--danger); border: none; padding: 13px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 10px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.92em; }
-    .read-only-note { font-size: 0.78em; color: #aaa; font-style: italic; margin-top: 4px; }
+    .btn-save-edit { background: var(--primary); color: white; border: none; padding: 13px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 14px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.93em; }
+    .btn-delete-game { background: #fdecea; color: var(--danger); border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: 700; margin-top: 9px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.9em; }
+    .read-only-note { font-size: 0.76em; color: #aaa; font-style: italic; margin-top: 3px; }
 
-    /* ── CONFIRM POPUP ── */
+    /* ── CONFIRM ── */
     .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 6000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .confirm-box { background: white; border-radius: 16px; padding: 28px 22px 22px; width: 100%; max-width: 340px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
-    .confirm-box i { font-size: 2.2em; color: var(--danger); margin-bottom: 12px; display: block; }
-    .confirm-box h4 { margin: 0 0 8px; color: #222; font-size: 1.05em; }
-    .confirm-box p { margin: 0 0 20px; color: #666; font-size: 0.85em; line-height: 1.5; }
+    .confirm-box { background: white; border-radius: 16px; padding: 26px 20px 20px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+    .confirm-box i { font-size: 2em; color: var(--danger); margin-bottom: 10px; display: block; }
+    .confirm-box h4 { margin: 0 0 7px; color: #222; font-size: 1em; }
+    .confirm-box p { margin: 0 0 18px; color: #666; font-size: 0.83em; line-height: 1.5; }
     .confirm-actions { display: flex; gap: 10px; }
-    .btn-confirm-cancel { flex: 1; padding: 12px; border: 1.5px solid #e0e0e0; border-radius: 10px; background: white; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.88em; cursor: pointer; color: #666; }
-    .btn-confirm-delete { flex: 1; padding: 12px; border: none; border-radius: 10px; background: var(--danger); color: white; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 0.88em; cursor: pointer; }
+    .btn-confirm-cancel { flex: 1; padding: 11px; border: 1.5px solid #e0e0e0; border-radius: 9px; background: white; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.86em; cursor: pointer; color: #666; }
+    .btn-confirm-delete { flex: 1; padding: 11px; border: none; border-radius: 9px; background: var(--danger); color: white; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 0.86em; cursor: pointer; }
+
+    /* ── MAP ── */
+    .map-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 3000; display: flex; align-items: flex-end; }
+    .map-modal-content { background: white; width: 100%; border-radius: 20px 20px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto; }
+    .map-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .map-modal-header h3 { margin: 0; color: var(--dark); }
+    #map-container { width: 100%; height: 260px; border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
+    .map-info-row { display: flex; align-items: center; gap: 8px; font-size: 0.85em; color: #555; margin-bottom: 8px; }
+    .map-info-row i { color: var(--dark); width: 16px; }
+
+    /* ── HERO ── */
+    .hero-card { background: var(--dark); color: white; padding: 24px 20px; border-radius: 12px; margin-bottom: 20px; }
+    .hero-card h2 { margin: 0 0 7px; font-size: 1.25em; }
+    .hero-card p { margin: 0 0 14px; font-size: 0.84em; opacity: 0.85; }
 </style>
 ```
 
@@ -215,81 +266,213 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-             signOut, onAuthStateChanged, updateProfile }
-        from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, getDocs }
-        from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyAz01TWvm83M8OUYDevXmo1vt7q64zcbR8",
-        authDomain: "activo-2ccb5.firebaseapp.com",
-        projectId: "activo-2ccb5",
-        storageBucket: "activo-2ccb5.firebasestorage.app",
-        messagingSenderId: "158201159420",
-        appId: "1:158201159420:web:b2fdf18e9f7741fd0f0179",
-        measurementId: "G-3Y4XQE3E64"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    window.__firebase = { auth, db, createUserWithEmailAndPassword,
-        signInWithEmailAndPassword, signOut, onAuthStateChanged,
-        updateProfile, doc, setDoc, getDoc, serverTimestamp, collection, getDocs };
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    const app = initializeApp({ apiKey:"AIzaSyAz01TWvm83M8OUYDevXmo1vt7q64zcbR8", authDomain:"activo-2ccb5.firebaseapp.com", projectId:"activo-2ccb5", storageBucket:"activo-2ccb5.firebasestorage.app", messagingSenderId:"158201159420", appId:"1:158201159420:web:b2fdf18e9f7741fd0f0179" });
+    const auth = getAuth(app), db = getFirestore(app);
+    window.__firebase = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, doc, setDoc, getDoc, serverTimestamp, collection, getDocs };
 </script>
 
 <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect, useRef, useMemo } = React;
 
     const DATA = [
-        { id: 1, name: "Olimpia", courts: 10, address: "ul. Warmińska 1, 61-001 Poznań", lat: 52.4064, lng: 16.9252, surface: "ziemna", img: "https://images.unsplash.com/photo-1595435064212-3629224444e1?w=600" },
-        { id: 2, name: "Posir Rataje", courts: 5, address: "ul. Łukaszewicza 34, 61-762 Poznań", lat: 52.3980, lng: 16.9640, surface: "ziemna", img: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600" },
-        { id: 3, name: "FairPlayce", courts: 4, address: "ul. Ratajczaka 10, 61-815 Poznań", lat: 52.4068, lng: 16.9299, surface: "twarda", img: "https://images.unsplash.com/photo-1622279457486-62dcc4a4bd13?w=600" },
-        { id: 4, name: "Kortowo", courts: 8, address: "ul. Bułgarska 67, 60-320 Poznań", lat: 52.3901, lng: 16.8902, surface: "dywan", img: "https://images.unsplash.com/photo-1544333346-64e4fe18274b?w=600" }
+        { id:1, name:"Olimpia", courts:10, address:"ul. Warmińska 1, Poznań", lat:52.4064, lng:16.9252, surface:"ziemna", img:"https://images.unsplash.com/photo-1595435064212-3629224444e1?w=600" },
+        { id:2, name:"Posir Rataje", courts:5, address:"ul. Łukaszewicza 34, Poznań", lat:52.3980, lng:16.9640, surface:"ziemna", img:"https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600" },
+        { id:3, name:"FairPlayce", courts:4, address:"ul. Ratajczaka 10, Poznań", lat:52.4068, lng:16.9299, surface:"twarda", img:"https://images.unsplash.com/photo-1622279457486-62dcc4a4bd13?w=600" },
+        { id:4, name:"Kortowo", courts:8, address:"ul. Bułgarska 67, Poznań", lat:52.3901, lng:16.8902, surface:"dywan", img:"https://images.unsplash.com/photo-1544333346-64e4fe18274b?w=600" }
     ];
+    const SPORT_EMOJI = { tenis:'🎾', padel:'🏓' };
+    const SPORT_LABEL = { tenis:'Tenis', padel:'Padel' };
+    const RESULT_LABEL = { W:'Wygrana', L:'Przegrana', D:'Remis' };
+    const PL_MONTHS = ['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'];
 
-    const sportEmoji = { tenis: '🎾', padel: '🏓' };
-    const sportLabel = { tenis: 'Tenis', padel: 'Padel' };
-    const resultLabel = { W: 'Wygrana', L: 'Przegrana', D: 'Remis' };
+    /* ─── HELPERS ─── */
+    function getWeekKey(dateStr) {
+        const d = new Date(dateStr); d.setHours(0,0,0,0);
+        const day = d.getDay() || 7;
+        d.setDate(d.getDate() - day + 1);
+        return d.toISOString().split('T')[0];
+    }
+    function weekLabel(key) {
+        const d = new Date(key);
+        return `${d.getDate()}.${d.getMonth()+1}`;
+    }
+    function getAllPlayers(entry) {
+        if (entry.sport === 'padel') return entry.padelOpponents || [];
+        return entry.opponent ? [entry.opponent] : [];
+    }
 
-    /* ─────────────────────────── MAP MODAL ─────────────────────────── */
-    function MapModal({ item, onClose }) {
-        const mapRef = useRef(null);
-        const mapInstance = useRef(null);
-        useEffect(() => {
-            if (!mapRef.current || mapInstance.current) return;
-            const map = L.map(mapRef.current).setView([item.lat, item.lng], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-            const icon = L.divIcon({ html: `<div style="background:#0b3d91;color:white;padding:6px 10px;border-radius:20px;font-family:Poppins;font-weight:700;font-size:12px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3)">🎾 ${item.name}</div>`, className: '', iconAnchor: [0, 0] });
-            L.marker([item.lat, item.lng], { icon }).addTo(map);
-            mapInstance.current = map;
-            return () => { map.remove(); mapInstance.current = null; };
-        }, [item]);
+    /* ─── BAR CHART (pure SVG, no lib) ─── */
+    function BarChart({ data }) {
+        // data = [{label, tenis, padel}]
+        if (!data.length) return <div className="chart-empty">Brak danych do wykresu</div>;
+        const BAR_W = 28, GAP = 10, H = 120, PAD_L = 28, PAD_B = 24, PAD_T = 10;
+        const maxVal = Math.max(1, ...data.map(d => d.tenis + d.padel));
+        const colW = BAR_W * 2 + GAP;
+        const totalW = PAD_L + data.length * (colW + 8) + 8;
+        const toY = v => PAD_T + (H - PAD_B - PAD_T) * (1 - v / maxVal);
+        const barH = v => Math.max(2, (H - PAD_B - PAD_T) * (v / maxVal));
+        // y-axis labels
+        const yTicks = [0, Math.round(maxVal / 2), maxVal].filter((v,i,a) => a.indexOf(v) === i);
+
         return (
-            <div className="map-modal" onClick={e => e.target === e.currentTarget && onClose()}>
-                <div className="map-modal-content">
-                    <div className="map-modal-header"><h3>{item.name}</h3><button className="btn-close" onClick={onClose}>✕</button></div>
-                    <div id="map-container" ref={mapRef}></div>
-                    <div className="map-info-row"><i className="fas fa-map-marker-alt"></i> {item.address}</div>
-                    <div className="map-info-row"><i className="fas fa-layer-group"></i> Nawierzchnia: {item.surface}</div>
-                    <button className="btn-apply" style={{marginTop:10}} onClick={() => window.open(`http://maps.google.com/?q=${item.lat},${item.lng}`, '_blank')}>
-                        <i className="fas fa-external-link-alt"></i> Otwórz w Google Maps
-                    </button>
+            <div className="chart-wrap">
+                <svg className="chart-svg" width={totalW} height={H} style={{minWidth: totalW}}>
+                    {/* y axis ticks */}
+                    {yTicks.map(t => (
+                        <g key={t}>
+                            <line x1={PAD_L-4} x2={totalW} y1={toY(t)} y2={toY(t)} stroke="#f0f0f0" strokeWidth="1"/>
+                            <text x={PAD_L-6} y={toY(t)+4} textAnchor="end" fontSize="9" fill="#bbb">{t}</text>
+                        </g>
+                    ))}
+                    {data.map((d, i) => {
+                        const x0 = PAD_L + i * (colW + 8);
+                        const cx = x0 + colW / 2;
+                        return (
+                            <g key={i}>
+                                {/* tenis bar */}
+                                {d.tenis > 0 && <rect className="chart-bar-tenis" x={x0} y={toY(d.tenis)} width={BAR_W} height={barH(d.tenis)} rx="3"/>}
+                                {d.tenis === 0 && <rect x={x0} y={H-PAD_B-2} width={BAR_W} height={2} rx="1" fill="#eee"/>}
+                                {/* padel bar */}
+                                {d.padel > 0 && <rect className="chart-bar-padel" x={x0+BAR_W+GAP/2} y={toY(d.padel)} width={BAR_W} height={barH(d.padel)} rx="3"/>}
+                                {d.padel === 0 && <rect x={x0+BAR_W+GAP/2} y={H-PAD_B-2} width={BAR_W} height={2} rx="1" fill="#eee"/>}
+                                {/* label */}
+                                <text x={cx} y={H-4} textAnchor="middle" fontSize="9.5" fill="#aaa">{d.label}</text>
+                            </g>
+                        );
+                    })}
+                    {/* legend */}
+                    <rect x={PAD_L} y={2} width={8} height={8} rx="2" fill="var(--dark)"/>
+                    <text x={PAD_L+11} y={9} fontSize="8.5" fill="#888">Tenis</text>
+                    <rect x={PAD_L+48} y={2} width={8} height={8} rx="2" fill="var(--padel)"/>
+                    <text x={PAD_L+59} y={9} fontSize="8.5" fill="#888">Padel</text>
+                </svg>
+            </div>
+        );
+    }
+
+    /* ─── STATS DETAIL SHEET ─── */
+    function StatsSheet({ allEntries, onClose }) {
+        const games = allEntries.map(x => x.e);
+        const total = games.length;
+        const wins = games.filter(g => g.result === 'W').length;
+        const losses = games.filter(g => g.result === 'L').length;
+        const draws = games.filter(g => g.result === 'D').length;
+        const withResult = games.filter(g => g.result).length;
+        const winRate = withResult ? Math.round(wins / withResult * 100) : null;
+        const tenisCnt = games.filter(g => g.sport === 'tenis').length;
+        const padelCnt = games.filter(g => g.sport === 'padel').length;
+
+        // per month last 6m
+        const now = new Date();
+        const months = Array.from({length:6}, (_,i) => {
+            const d = new Date(now.getFullYear(), now.getMonth() - (5-i), 1);
+            return { key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: PL_MONTHS[d.getMonth()] };
+        });
+        const perMonth = months.map(m => {
+            const g = games.filter(x => x.date && x.date.startsWith(m.key));
+            return { ...m, tenis: g.filter(x=>x.sport==='tenis').length, padel: g.filter(x=>x.sport==='padel').length };
+        });
+
+        // partner frequency
+        const partnerCount = {};
+        games.forEach(g => getAllPlayers(g).forEach(p => { if (p) partnerCount[p] = (partnerCount[p]||0)+1; }));
+        const partners = Object.entries(partnerCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+        const maxPartnerGames = partners[0]?.[1] || 1;
+
+        // court frequency
+        const courtCount = {};
+        games.forEach(g => { if (g.court) courtCount[g.court] = (courtCount[g.court]||0)+1; });
+        const courts = Object.entries(courtCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+        return (
+            <div className="stats-sheet-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
+                <div className="stats-sheet">
+                    <div className="stats-sheet-header">
+                        <h3><i className="fas fa-chart-bar" style={{marginRight:8}}></i>Szczegółowe statystyki</h3>
+                        <button className="btn-close" style={{color:'white'}} onClick={onClose}>✕</button>
+                    </div>
+                    <div className="stats-sheet-body">
+
+                        {/* Wyniki */}
+                        <div className="stat-section-title">Wyniki</div>
+                        <div className="profile-card" style={{marginBottom:12}}>
+                            <div className="win-rate-ring">
+                                <div className="ring-stat"><div className="rnum" style={{color:'#27ae60'}}>{wins}</div><div className="rlbl">Wygrane</div></div>
+                                <div className="ring-sep"/>
+                                <div className="ring-stat"><div className="rnum" style={{color:wins>losses?'#27ae60':wins<losses?'var(--danger)':'#888'}}>{winRate !== null ? `${winRate}%` : '—'}</div><div className="rlbl">% wygranych</div></div>
+                                <div className="ring-sep"/>
+                                <div className="ring-stat"><div className="rnum" style={{color:'var(--danger)'}}>{losses}</div><div className="rlbl">Przegrane</div></div>
+                            </div>
+                            {draws > 0 && <div style={{textAlign:'center',fontSize:'0.8em',color:'#f39c12',marginTop:4}}>🤝 Remisy: {draws}</div>}
+                        </div>
+
+                        {/* Sport split */}
+                        <div className="stat-section-title">Dyscypliny</div>
+                        <div className="sport-split" style={{marginBottom:12}}>
+                            <div className="sport-split-item">
+                                <div className="sport-split-num" style={{color:'var(--dark)'}}>🎾 {tenisCnt}</div>
+                                <div className="sport-split-lbl">gier tenisa</div>
+                            </div>
+                            <div className="sport-split-item">
+                                <div className="sport-split-num" style={{color:'var(--padel)'}}>🏓 {padelCnt}</div>
+                                <div className="sport-split-lbl">gier padla</div>
+                            </div>
+                        </div>
+
+                        {/* Miesięcznie */}
+                        <div className="stat-section-title">Aktywność — ostatnie 6 miesięcy</div>
+                        <div className="profile-card" style={{marginBottom:12}}>
+                            <BarChart data={perMonth}/>
+                        </div>
+
+                        {/* Z kim gram najczęściej */}
+                        {partners.length > 0 && <>
+                            <div className="stat-section-title">Najczęstsi partnerzy gry</div>
+                            <div className="profile-card" style={{marginBottom:12}}>
+                                {partners.map(([name, cnt]) => (
+                                    <div key={name} className="partner-row">
+                                        <div className="partner-avatar">{name.charAt(0).toUpperCase()}</div>
+                                        <div className="partner-info">
+                                            <div className="pname">{name}</div>
+                                            <div className="pgames">{cnt} {cnt===1?'gra':'gier'}</div>
+                                        </div>
+                                        <div className="partner-bar-wrap">
+                                            <div className="partner-bar" style={{width:`${Math.round(cnt/maxPartnerGames*100)}%`}}/>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>}
+
+                        {/* Ulubione korty */}
+                        {courts.length > 0 && <>
+                            <div className="stat-section-title">Najczęstsze obiekty</div>
+                            <div className="profile-card" style={{marginBottom:12}}>
+                                {courts.map(([name, cnt]) => (
+                                    <div key={name} className="stat-detail-row">
+                                        <span>🎾 {name}</span><span>{cnt}×</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </>}
+
+                        {total === 0 && <div className="section-empty">Brak aktywności do wyświetlenia.</div>}
+                    </div>
                 </div>
             </div>
         );
     }
 
-    /* ─────────────────────────── CONFIRM POPUP ─────────────────────── */
+    /* ─── CONFIRM POPUP ─── */
     function ConfirmPopup({ onConfirm, onCancel }) {
         return (
             <div className="confirm-overlay">
                 <div className="confirm-box">
                     <i className="fas fa-trash-alt"></i>
-                    <h4>Usuń rozgrywkę?</h4>
-                    <p>Tego działania nie można cofnąć. Wpis zostanie trwale usunięty z Twojej historii.</p>
+                    <h4>Usuń aktywność?</h4>
+                    <p>Tego działania nie można cofnąć. Wpis zostanie trwale usunięty.</p>
                     <div className="confirm-actions">
                         <button className="btn-confirm-cancel" onClick={onCancel}>Anuluj</button>
                         <button className="btn-confirm-delete" onClick={onConfirm}>Usuń</button>
@@ -299,637 +482,398 @@
         );
     }
 
-    /* ─────────────────────────── EDIT SHEET ────────────────────────── */
-    /*
-     * entry      – the game object being edited
-     * isOwner    – true = user added this game; false = it was shared with them (can edit some fields, cannot delete)
-     * friendsList– [{uid, name}] for opponent dropdowns
-     * onSave(updatedEntry) – callback
-     * onDelete() – callback (only called when isOwner)
-     * onClose()  – callback
-     */
-    function EditGameSheet({ entry, isOwner, friendsList, onSave, onDelete, onClose }) {
+    /* ─── EDIT SHEET ─── */
+    function EditSheet({ entry, isOwner, friendsList, onSave, onDelete, onClose }) {
         const [court, setCourt] = useState(entry.court || DATA[0].name);
         const [date, setDate] = useState(entry.date || new Date().toISOString().split('T')[0]);
         const [sport, setSport] = useState(entry.sport || 'tenis');
         const [score, setScore] = useState(entry.score || '');
         const [result, setResult] = useState(entry.result || '');
-        // For tenis: single opponent uid
         const [opponentUid, setOpponentUid] = useState(entry.opponentUid || '');
-        // For padel: up to 3 opponents (array of uid strings)
-        const [padelOpponents, setPadelOpponents] = useState(
-            entry.padelOpponentUids ? [...entry.padelOpponentUids, '', '', ''].slice(0, 3) : ['', '', '']
-        );
+        const [padelOpps, setPadelOpps] = useState(entry.padelOpponentUids ? [...entry.padelOpponentUids,'','',''].slice(0,3) : ['','','']);
         const [showConfirm, setShowConfirm] = useState(false);
         const [saving, setSaving] = useState(false);
 
-        const setPadelOpp = (idx, val) => {
-            const copy = [...padelOpponents];
-            copy[idx] = val;
-            setPadelOpponents(copy);
-        };
-
-        const friendOptions = (excludeUids = []) =>
-            friendsList.filter(f => !excludeUids.includes(f.uid));
+        const setPO = (i,v) => { const c=[...padelOpps]; c[i]=v; setPadelOpps(c); };
 
         const handleSave = async () => {
             setSaving(true);
-
-            let opponentName = '';
-            let padelOpponentNames = [];
-            let padelOpponentUids = [];
-
-            if (sport === 'tenis') {
-                if (opponentUid) {
-                    opponentName = friendsList.find(f => f.uid === opponentUid)?.name || '';
-                }
-            } else {
-                padelOpponentUids = padelOpponents.filter(Boolean);
-                padelOpponentNames = padelOpponentUids.map(uid => friendsList.find(f => f.uid === uid)?.name || uid);
-            }
-
-            const updated = {
-                ...entry,
-                court,
-                date,
-                sport,
-                score,
-                result,
-                ...(sport === 'tenis'
-                    ? { opponent: opponentName, opponentUid }
-                    : { padelOpponents: padelOpponentNames, padelOpponentUids }),
-            };
-            // clean up stale keys when switching sport
-            if (sport === 'tenis') { delete updated.padelOpponents; delete updated.padelOpponentUids; }
+            let oName='', pNames=[], pUids=[];
+            if (sport==='tenis') { oName = opponentUid ? (friendsList.find(f=>f.uid===opponentUid)?.name||'') : ''; }
+            else { pUids=padelOpps.filter(Boolean); pNames=pUids.map(uid=>friendsList.find(f=>f.uid===uid)?.name||uid); }
+            const updated = { ...entry, court, date, sport, score, result,
+                ...(sport==='tenis' ? {opponent:oName, opponentUid} : {padelOpponents:pNames, padelOpponentUids:pUids}) };
+            if (sport==='tenis') { delete updated.padelOpponents; delete updated.padelOpponentUids; }
             else { delete updated.opponent; delete updated.opponentUid; }
-
             await onSave(updated);
             setSaving(false);
         };
 
-        const usedUids = padelOpponents.filter(Boolean);
-
         return (
             <>
-                {showConfirm && (
-                    <ConfirmPopup
-                        onConfirm={() => { setShowConfirm(false); onDelete(); }}
-                        onCancel={() => setShowConfirm(false)}
-                    />
-                )}
-                <div className="sheet-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+                {showConfirm && <ConfirmPopup onConfirm={()=>{setShowConfirm(false);onDelete();}} onCancel={()=>setShowConfirm(false)}/>}
+                <div className="sheet-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
                     <div className="edit-sheet">
                         <div className="edit-sheet-header">
-                            <h3>{isOwner ? 'Edytuj rozgrywkę' : 'Twój wynik w tej grze'}</h3>
+                            <h3>{isOwner ? 'Edytuj aktywność' : 'Twój wynik w tej grze'}</h3>
                             <button className="btn-close" onClick={onClose}>✕</button>
                         </div>
-
-                        {/* Sport – editable only by owner */}
-                        {isOwner ? (
-                            <>
-                                <label>Dyscyplina</label>
-                                <div className="sport-selector" style={{marginBottom:0}}>
-                                    <button type="button" className={`sport-option ${sport==='tenis'?'selected-tenis':''}`} onClick={() => setSport('tenis')}>🎾 Tenis</button>
-                                    <button type="button" className={`sport-option ${sport==='padel'?'selected-padel':''}`} onClick={() => setSport('padel')}>🏓 Padel</button>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <label>Dyscyplina</label>
-                                <div style={{fontSize:'0.9em',padding:'8px 0',color:'#333'}}>{sportEmoji[entry.sport]} {sportLabel[entry.sport]}</div>
-                                <div className="read-only-note"><i className="fas fa-lock" style={{marginRight:4}}></i>Dyscyplinę i uczestników może edytować tylko twórca gry.</div>
-                            </>
-                        )}
-
-                        {/* Court + Date – owner only */}
-                        {isOwner && (
-                            <>
-                                <label>Obiekt</label>
-                                <select value={court} onChange={e => setCourt(e.target.value)}>
-                                    {DATA.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
-                                </select>
-                                <label>Data</label>
-                                <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-                            </>
-                        )}
-
-                        {/* Opponents – owner only */}
-                        {isOwner && sport === 'tenis' && (
-                            <>
+                        {isOwner ? (<>
+                            <label>Dyscyplina</label>
+                            <div className="sport-selector">
+                                <button type="button" className={`sport-option ${sport==='tenis'?'sel-tenis':''}`} onClick={()=>setSport('tenis')}>🎾 Tenis</button>
+                                <button type="button" className={`sport-option ${sport==='padel'?'sel-padel':''}`} onClick={()=>setSport('padel')}>🏓 Padel</button>
+                            </div>
+                            <label>Obiekt</label>
+                            <select value={court} onChange={e=>setCourt(e.target.value)}>{DATA.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}</select>
+                            <label>Data</label>
+                            <input type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+                            {sport==='tenis' && <>
                                 <label>Przeciwnik <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
-                                <div className="opponent-select-wrap">
-                                    <select value={opponentUid} onChange={e => setOpponentUid(e.target.value)}>
-                                        <option value="">— nie wybrano —</option>
-                                        {friendsList.map(f => <option key={f.uid} value={f.uid}>{f.name}</option>)}
-                                    </select>
-                                </div>
-                            </>
-                        )}
-                        {isOwner && sport === 'padel' && (
-                            <>
-                                <label>Gracze (do 3 osób) <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
-                                {[0, 1, 2].map(idx => {
-                                    const otherSelected = padelOpponents.filter((_, i) => i !== idx).filter(Boolean);
-                                    return (
-                                        <div key={idx} className="opponent-select-wrap" style={{marginBottom: idx < 2 ? 6 : 0}}>
-                                            <select value={padelOpponents[idx]} onChange={e => setPadelOpp(idx, e.target.value)}>
-                                                <option value="">— Gracz {idx + 1} —</option>
-                                                {friendsList
-                                                    .filter(f => !otherSelected.includes(f.uid))
-                                                    .map(f => <option key={f.uid} value={f.uid}>{f.name}</option>)
-                                                }
-                                            </select>
-                                        </div>
-                                    );
-                                })}
-                                {friendsList.length === 0 && (
-                                    <div className="no-friends-note">Dodaj znajomych, aby ich tu wybrać.</div>
-                                )}
-                            </>
-                        )}
-
-                        {/* Score + Result – editable by everyone (owner & shared players) */}
+                                <div className="opp-wrap"><select value={opponentUid} onChange={e=>setOpponentUid(e.target.value)}><option value="">— nie wybrano —</option>{friendsList.map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>
+                            </>}
+                            {sport==='padel' && <>
+                                <label>Gracze (do 3) <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
+                                {[0,1,2].map(i=>{const oth=padelOpps.filter((_,j)=>j!==i).filter(Boolean); return(<div key={i} className="opp-wrap" style={{marginBottom:i<2?6:0}}><select value={padelOpps[i]} onChange={e=>setPO(i,e.target.value)}><option value="">— Gracz {i+1} —</option>{friendsList.filter(f=>!oth.includes(f.uid)).map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>);})}
+                            </>}
+                        </>) : (<>
+                            <div style={{fontSize:'0.88em',color:'#333',padding:'6px 0'}}>{SPORT_EMOJI[entry.sport]} {SPORT_LABEL[entry.sport]} · {entry.court} · {new Date(entry.date).toLocaleDateString('pl-PL')}</div>
+                            <div className="read-only-note"><i className="fas fa-lock" style={{marginRight:4}}></i>Szczegóły edytuje tylko twórca gry.</div>
+                        </>)}
                         <label>Wynik <span style={{fontWeight:400,color:'#aaa'}}>(np. 6:3)</span></label>
-                        <input type="text" placeholder="np. 6:3" value={score} onChange={e => setScore(e.target.value)} />
-
+                        <input type="text" placeholder="np. 6:3" value={score} onChange={e=>setScore(e.target.value)}/>
                         <label>Rezultat</label>
-                        <select value={result} onChange={e => setResult(e.target.value)}>
+                        <select value={result} onChange={e=>setResult(e.target.value)}>
                             <option value="">— nie podawaj —</option>
                             <option value="W">🏆 Wygrana</option>
                             <option value="L">❌ Przegrana</option>
                             <option value="D">🤝 Remis</option>
                         </select>
-
-                        <button className="btn-save-edit" onClick={handleSave} disabled={saving}>
-                            {saving ? 'Zapisywanie...' : '✔ Zapisz zmiany'}
-                        </button>
-
-                        {isOwner && (
-                            <button className="btn-delete-game" onClick={() => setShowConfirm(true)}>
-                                <i className="fas fa-trash-alt"></i> Usuń rozgrywkę
-                            </button>
-                        )}
+                        <button className="btn-save-edit" onClick={handleSave} disabled={saving}>{saving?'Zapisywanie...':'✔ Zapisz zmiany'}</button>
+                        {isOwner && <button className="btn-delete-game" onClick={()=>setShowConfirm(true)}><i className="fas fa-trash-alt"></i> Usuń aktywność</button>}
                     </div>
                 </div>
             </>
         );
     }
 
-    /* ─────────────────────────── AUTH ──────────────────────────────── */
+    /* ─── AUTH ─── */
     function translateError(code) {
-        const map = {
-            'auth/email-already-in-use': 'Ten adres e-mail jest już zarejestrowany.',
-            'auth/invalid-email': 'Nieprawidłowy adres e-mail.',
-            'auth/weak-password': 'Hasło jest za słabe (min. 6 znaków).',
-            'auth/user-not-found': 'Nie znaleziono konta z tym adresem e-mail.',
-            'auth/wrong-password': 'Nieprawidłowe hasło.',
-            'auth/invalid-credential': 'Nieprawidłowy e-mail lub hasło.',
-            'auth/too-many-requests': 'Zbyt wiele prób. Spróbuj ponownie za chwilę.',
-        };
-        return map[code] || 'Wystąpił błąd. Spróbuj ponownie.';
+        const m = {'auth/email-already-in-use':'Ten e-mail jest już zarejestrowany.','auth/invalid-email':'Nieprawidłowy e-mail.','auth/weak-password':'Hasło min. 6 znaków.','auth/user-not-found':'Nie znaleziono konta.','auth/wrong-password':'Złe hasło.','auth/invalid-credential':'Nieprawidłowy e-mail lub hasło.','auth/too-many-requests':'Zbyt wiele prób. Spróbuj później.'};
+        return m[code] || 'Wystąpił błąd. Spróbuj ponownie.';
     }
-
     function AuthScreen() {
-        const [tab, setTab] = useState('login');
-        const [name, setName] = useState('');
-        const [email, setEmail] = useState('');
-        const [password, setPassword] = useState('');
-        const [error, setError] = useState('');
-        const [success, setSuccess] = useState('');
-        const [loading, setLoading] = useState(false);
-        const fb = window.__firebase;
-
-        const handleRegister = async () => {
-            setError(''); setSuccess('');
-            if (!name.trim()) return setError('Podaj swoje imię.');
-            if (!email.trim()) return setError('Podaj adres e-mail.');
-            if (password.length < 6) return setError('Hasło musi mieć min. 6 znaków.');
-            setLoading(true);
-            try {
-                const cred = await fb.createUserWithEmailAndPassword(fb.auth, email.trim(), password);
-                const uid = cred.user.uid;
-                await fb.updateProfile(cred.user, { displayName: name.trim() });
-                await fb.setDoc(fb.doc(fb.db, 'users', uid), {
-                    uid, name: name.trim(), email: email.trim().toLowerCase(),
-                    createdAt: fb.serverTimestamp(), role: 'user'
-                });
-                await fb.signOut(fb.auth);
-                setSuccess('Konto utworzone! Teraz się zaloguj.');
-                setTab('login'); setName(''); setPassword('');
-            } catch (e) { setError(translateError(e.code)); }
-            setLoading(false);
-        };
-
-        const handleLogin = async () => {
-            setError(''); setSuccess('');
-            if (!email.trim()) return setError('Podaj adres e-mail.');
-            if (!password.trim()) return setError('Podaj hasło.');
-            setLoading(true);
-            try {
-                await fb.signInWithEmailAndPassword(fb.auth, email.trim().toLowerCase(), password);
-            } catch (e) { setError(translateError(e.code)); }
-            setLoading(false);
-        };
-
-        return (
+        const [tab,setTab]=useState('login'); const [name,setName]=useState(''); const [email,setEmail]=useState(''); const [password,setPassword]=useState(''); const [error,setError]=useState(''); const [success,setSuccess]=useState(''); const [loading,setLoading]=useState(false);
+        const fb=window.__firebase;
+        const handleRegister=async()=>{setError('');setSuccess('');if(!name.trim())return setError('Podaj imię.');if(!email.trim())return setError('Podaj e-mail.');if(password.length<6)return setError('Hasło min. 6 znaków.');setLoading(true);try{const c=await fb.createUserWithEmailAndPassword(fb.auth,email.trim(),password);await fb.updateProfile(c.user,{displayName:name.trim()});await fb.setDoc(fb.doc(fb.db,'users',c.user.uid),{uid:c.user.uid,name:name.trim(),email:email.trim().toLowerCase(),createdAt:fb.serverTimestamp(),role:'user'});await fb.signOut(fb.auth);setSuccess('Konto utworzone! Zaloguj się.');setTab('login');setName('');setPassword('');}catch(e){setError(translateError(e.code));}setLoading(false);};
+        const handleLogin=async()=>{setError('');setSuccess('');if(!email.trim())return setError('Podaj e-mail.');if(!password.trim())return setError('Podaj hasło.');setLoading(true);try{await fb.signInWithEmailAndPassword(fb.auth,email.trim().toLowerCase(),password);}catch(e){setError(translateError(e.code));}setLoading(false);};
+        return(
             <div className="auth-container">
                 <div className="auth-tabs">
-                    <button className={`auth-tab ${tab==='login'?'active':''}`} onClick={() => { setTab('login'); setError(''); setSuccess(''); }}>Logowanie</button>
-                    <button className={`auth-tab ${tab==='register'?'active':''}`} onClick={() => { setTab('register'); setError(''); setSuccess(''); }}>Rejestracja</button>
+                    <button className={`auth-tab ${tab==='login'?'active':''}`} onClick={()=>{setTab('login');setError('');setSuccess('');}}>Logowanie</button>
+                    <button className={`auth-tab ${tab==='register'?'active':''}`} onClick={()=>{setTab('register');setError('');setSuccess('');}}>Rejestracja</button>
                 </div>
                 <div className="auth-form">
-                    {tab === 'login' ? <><h2>Witaj z powrotem 👋</h2><p>Zaloguj się, aby rezerwować korty.</p></> : <><h2>Utwórz konto 🎾</h2><p>Dołącz do Activo i rezerwuj korty w kilka sekund.</p></>}
-                    {tab === 'register' && <div className="form-group"><label>Imię</label><input type="text" placeholder="np. Kamil" value={name} onChange={e => setName(e.target.value)} /></div>}
-                    <div className="form-group"><label>Adres e-mail</label><input type="email" placeholder="twoj@email.pl" value={email} onChange={e => setEmail(e.target.value)} /></div>
-                    <div className="form-group">
-                        <label>Hasło {tab==='register' && <span style={{color:'#aaa',fontWeight:400}}>(min. 6 znaków)</span>}</label>
-                        <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key==='Enter' && (tab==='login' ? handleLogin() : handleRegister())} />
-                    </div>
-                    {error && <div className="auth-error"><i className="fas fa-exclamation-circle"></i> {error}</div>}
-                    {success && <div className="auth-success"><i className="fas fa-check-circle"></i> {success}</div>}
-                    <button className={`btn-apply ${loading?'btn-loading':''}`} onClick={tab==='login' ? handleLogin : handleRegister}>
-                        {loading ? 'Proszę czekać...' : tab==='login' ? 'Zaloguj się' : 'Zarejestruj się'}
-                    </button>
+                    {tab==='login'?<><h2>Witaj z powrotem 👋</h2><p>Zaloguj się aby korzystać z Activo.</p></>:<><h2>Utwórz konto 🎾</h2><p>Dołącz do Activo i śledź swoje aktywności.</p></>}
+                    {tab==='register'&&<div className="form-group"><label>Imię</label><input type="text" placeholder="np. Kamil" value={name} onChange={e=>setName(e.target.value)}/></div>}
+                    <div className="form-group"><label>E-mail</label><input type="email" placeholder="twoj@email.pl" value={email} onChange={e=>setEmail(e.target.value)}/></div>
+                    <div className="form-group"><label>Hasło {tab==='register'&&<span style={{color:'#aaa',fontWeight:400}}>(min. 6 znaków)</span>}</label><input type="password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>e.key==='Enter'&&(tab==='login'?handleLogin():handleRegister())}/></div>
+                    {error&&<div className="auth-error"><i className="fas fa-exclamation-circle"></i> {error}</div>}
+                    {success&&<div className="auth-success"><i className="fas fa-check-circle"></i> {success}</div>}
+                    <button className={`btn-apply ${loading?'btn-loading':''}`} onClick={tab==='login'?handleLogin:handleRegister}>{loading?'Proszę czekać...':tab==='login'?'Zaloguj się':'Zarejestruj się'}</button>
                 </div>
             </div>
         );
     }
 
-    /* ─────────────────────────── PROFILE ───────────────────────────── */
+    /* ─── MAP MODAL ─── */
+    function MapModal({ item, onClose }) {
+        const mapRef=useRef(null); const mi=useRef(null);
+        useEffect(()=>{if(!mapRef.current||mi.current)return;const map=L.map(mapRef.current).setView([item.lat,item.lng],15);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);L.marker([item.lat,item.lng],{icon:L.divIcon({html:`<div style="background:#0b3d91;color:white;padding:5px 10px;border-radius:20px;font-family:Poppins;font-weight:700;font-size:12px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3)">🎾 ${item.name}</div>`,className:'',iconAnchor:[0,0]})}).addTo(map);mi.current=map;return()=>{map.remove();mi.current=null;};},[item]);
+        return(<div className="map-modal" onClick={e=>e.target===e.currentTarget&&onClose()}><div className="map-modal-content"><div className="map-modal-header"><h3>{item.name}</h3><button className="btn-close" onClick={onClose}>✕</button></div><div id="map-container" ref={mapRef}></div><div className="map-info-row"><i className="fas fa-map-marker-alt"></i>{item.address}</div><div className="map-info-row"><i className="fas fa-layer-group"></i>Nawierzchnia: {item.surface}</div><button className="btn-apply" style={{marginTop:10}} onClick={()=>window.open(`http://maps.google.com/?q=${item.lat},${item.lng}`,'_blank')}><i className="fas fa-external-link-alt"></i> Otwórz w Google Maps</button></div></div>);
+    }
+
+    /* ─── PROFILE SCREEN ─── */
     function ProfileScreen({ user }) {
         const fb = window.__firebase;
-        const [profileTab, setProfileTab] = useState('info');
-
-        // own games
+        const [profileTab, setProfileTab] = useState('activity'); // 'activity' | 'settings'
         const [playedList, setPlayedList] = useState([]);
-        // games shared to this user by others
         const [sharedGames, setSharedGames] = useState([]);
+        const [showAddForm, setShowAddForm] = useState(false);
+        const [showStats, setShowStats] = useState(false);
+        const [editEntry, setEditEntry] = useState(null);
+        const [chartMode, setChartMode] = useState('month'); // 'month' | 'week'
 
-        const [showAddPlayed, setShowAddPlayed] = useState(false);
-        const [editEntry, setEditEntry] = useState(null); // {entry, idx, isOwner}
-
-        // add form state
-        const [selectedCourt, setSelectedCourt] = useState(DATA[0].name);
-        const [playedDate, setPlayedDate] = useState(new Date().toISOString().split('T')[0]);
-        const [playedSport, setPlayedSport] = useState('tenis');
-        const [playedOpponentUid, setPlayedOpponentUid] = useState('');
-        const [padelOpponents, setPadelOpponents] = useState(['', '', '']);
-        const [playedScore, setPlayedScore] = useState('');
-        const [playedResult, setPlayedResult] = useState('');
+        // add form
+        const [court, setCourt] = useState(DATA[0].name);
+        const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+        const [sport, setSport] = useState('tenis');
+        const [oppUid, setOppUid] = useState('');
+        const [padelOpps, setPadelOpps] = useState(['','','']);
+        const [score, setScore] = useState('');
+        const [result, setResult] = useState('');
         const [saving, setSaving] = useState(false);
 
         const [friendsList, setFriendsList] = useState([]);
-        const [loadingFriends, setLoadingFriends] = useState(false);
-
-        const [editName, setEditName] = useState(user.displayName || '');
+        const [editName, setEditName] = useState(user.displayName||'');
         const [editSaving, setEditSaving] = useState(false);
         const [editMsg, setEditMsg] = useState('');
-        const [showFavourites, setShowFavourites] = useState(true);
+        const [showFav, setShowFav] = useState(true);
         const [showHistory, setShowHistory] = useState(true);
 
-        const userDocRef = fb.doc(fb.db, 'users', user.uid);
+        const uRef = fb.doc(fb.db,'users',user.uid);
 
-        useEffect(() => {
-            fb.getDoc(userDocRef).then(snap => {
-                if (!snap.exists()) return;
-                const data = snap.data();
-                setPlayedList(data.playedHistory || []);
-                setSharedGames(data.sharedGames || []);
-                if (data.privacy) {
-                    setShowFavourites(data.privacy.showFavourites !== false);
-                    setShowHistory(data.privacy.showHistory !== false);
-                }
-                const friendUids = data.friends || [];
-                if (friendUids.length > 0) {
-                    setLoadingFriends(true);
-                    Promise.all(friendUids.map(uid => fb.getDoc(fb.doc(fb.db, 'users', uid))))
-                        .then(snaps => {
-                            setFriendsList(snaps.filter(s => s.exists()).map(s => ({ uid: s.id, name: s.data().name || s.data().email || s.id })));
-                            setLoadingFriends(false);
-                        });
-                }
+        useEffect(()=>{
+            fb.getDoc(uRef).then(snap=>{
+                if(!snap.exists()) return;
+                const d=snap.data();
+                setPlayedList(d.playedHistory||[]);
+                setSharedGames(d.sharedGames||[]);
+                if(d.privacy){setShowFav(d.privacy.showFavourites!==false);setShowHistory(d.privacy.showHistory!==false);}
+                const uids=d.friends||[];
+                if(uids.length){Promise.all(uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)))).then(snaps=>setFriendsList(snaps.filter(s=>s.exists()).map(s=>({uid:s.id,name:s.data().name||s.data().email||s.id}))));}
             });
-        }, [user.uid]);
+        },[user.uid]);
 
-        const setPadelOpp = (idx, val) => {
-            const copy = [...padelOpponents];
-            copy[idx] = val;
-            setPadelOpponents(copy);
-        };
+        const setPO=(i,v)=>{const c=[...padelOpps];c[i]=v;setPadelOpps(c);};
 
-        /* ── Save new game ── */
-        const addPlayedEntry = async () => {
-            setSaving(true);
-            const gameId = `game_${Date.now()}_${user.uid}`;
+        const allEntries = useMemo(()=>[
+            ...playedList.map((e,i)=>({e,i,own:true})),
+            ...sharedGames.map((e,i)=>({e,i,own:false})),
+        ].sort((a,b)=>new Date(b.e.date)-new Date(a.e.date)),[playedList,sharedGames]);
 
-            let opponentName = '';
-            let padelOpponentNames = [];
-            let padelOpponentUids = [];
-
-            if (playedSport === 'tenis') {
-                opponentName = playedOpponentUid ? (friendsList.find(f => f.uid === playedOpponentUid)?.name || '') : '';
+        /* Chart data */
+        const chartData = useMemo(()=>{
+            const now = new Date();
+            if(chartMode==='month'){
+                return Array.from({length:6},(_,i)=>{
+                    const d=new Date(now.getFullYear(),now.getMonth()-(5-i),1);
+                    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                    const g=allEntries.filter(x=>x.e.date&&x.e.date.startsWith(key));
+                    return {label:PL_MONTHS[d.getMonth()],tenis:g.filter(x=>x.e.sport==='tenis').length,padel:g.filter(x=>x.e.sport==='padel').length};
+                });
             } else {
-                padelOpponentUids = padelOpponents.filter(Boolean);
-                padelOpponentNames = padelOpponentUids.map(uid => friendsList.find(f => f.uid === uid)?.name || uid);
+                // last 8 weeks
+                return Array.from({length:8},(_,i)=>{
+                    const d=new Date(now); d.setDate(d.getDate()-7*(7-i));
+                    const wk=getWeekKey(d.toISOString().split('T')[0]);
+                    const wkEnd=new Date(wk); wkEnd.setDate(wkEnd.getDate()+6);
+                    const g=allEntries.filter(x=>{if(!x.e.date)return false; const xd=new Date(x.e.date); return xd>=new Date(wk)&&xd<=wkEnd;});
+                    return {label:weekLabel(wk),tenis:g.filter(x=>x.e.sport==='tenis').length,padel:g.filter(x=>x.e.sport==='padel').length};
+                });
             }
+        },[allEntries,chartMode]);
 
-            const entry = {
-                gameId,
-                ownerUid: user.uid,
-                court: selectedCourt,
-                date: playedDate,
-                sport: playedSport,
-                addedAt: new Date().toISOString(),
-                ...(playedSport === 'tenis'
-                    ? { ...(opponentName && { opponent: opponentName, opponentUid: playedOpponentUid }) }
-                    : { padelOpponents: padelOpponentNames, padelOpponentUids }),
-                ...(playedScore.trim() && { score: playedScore.trim() }),
-                ...(playedResult && { result: playedResult }),
-            };
+        /* Stats summary */
+        const totalGames = allEntries.length;
+        const thisMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+        const thisMonth = allEntries.filter(x=>x.e.date&&x.e.date.startsWith(thisMonthKey)).length;
+        const wins = allEntries.filter(x=>x.e.result==='W').length;
 
-            // Save to owner's playedHistory
-            const newOwnerList = [entry, ...playedList].slice(0, 50);
-            await fb.setDoc(userDocRef, { playedHistory: newOwnerList }, { merge: true });
-            setPlayedList(newOwnerList);
-
-            // Share to each participant's sharedGames
-            const participantUids = playedSport === 'tenis'
-                ? (playedOpponentUid ? [playedOpponentUid] : [])
-                : padelOpponentUids;
-
-            const ownerName = user.displayName || user.email || 'Ktoś';
-            for (const uid of participantUids) {
-                const pRef = fb.doc(fb.db, 'users', uid);
-                const pSnap = await fb.getDoc(pRef);
-                if (pSnap.exists()) {
-                    const existing = pSnap.data().sharedGames || [];
-                    const sharedEntry = { ...entry, sharedWith: uid, ownerName };
-                    const updated = [sharedEntry, ...existing].slice(0, 50);
-                    await fb.setDoc(pRef, { sharedGames: updated }, { merge: true });
-                }
-            }
-
-            // Reset form
-            setShowAddPlayed(false);
-            setPlayedOpponentUid('');
-            setPadelOpponents(['', '', '']);
-            setPlayedScore('');
-            setPlayedResult('');
-            setPlayedSport('tenis');
-            setSaving(false);
-        };
-
-        /* ── Save edited own game ── */
-        const saveEditedOwnGame = async (updatedEntry) => {
-            const newList = playedList.map((e, i) => i === editEntry.idx ? updatedEntry : e);
-            await fb.setDoc(userDocRef, { playedHistory: newList }, { merge: true });
+        /* Save new */
+        const addEntry = async()=>{
+            setSaving(true);
+            const gameId=`game_${Date.now()}_${user.uid}`;
+            let oName='',pNames=[],pUids=[];
+            if(sport==='tenis'){oName=oppUid?(friendsList.find(f=>f.uid===oppUid)?.name||''):'';}
+            else{pUids=padelOpps.filter(Boolean);pNames=pUids.map(uid=>friendsList.find(f=>f.uid===uid)?.name||uid);}
+            const entry={gameId,ownerUid:user.uid,court,date,sport,addedAt:new Date().toISOString(),
+                ...(sport==='tenis'?(oName?{opponent:oName,opponentUid:oppUid}:{}):{padelOpponents:pNames,padelOpponentUids:pUids}),
+                ...(score.trim()&&{score:score.trim()}), ...(result&&{result})};
+            const newList=[entry,...playedList].slice(0,50);
+            await fb.setDoc(uRef,{playedHistory:newList},{merge:true});
             setPlayedList(newList);
+            const participantUids=sport==='tenis'?(oppUid?[oppUid]:[]):pUids;
+            const ownerName=user.displayName||user.email||'Ktoś';
+            for(const uid of participantUids){const pRef=fb.doc(fb.db,'users',uid);const pSnap=await fb.getDoc(pRef);if(pSnap.exists()){const ex=pSnap.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:[{...entry,sharedWith:uid,ownerName},...ex].slice(0,50)},{merge:true});}}
+            setShowAddForm(false);setOppUid('');setPadelOpps(['','','']);setScore('');setResult('');setSport('tenis');setSaving(false);
+        };
 
-            // Also update this entry in all participants' sharedGames
-            const participantUids = updatedEntry.padelOpponentUids
-                ? updatedEntry.padelOpponentUids
-                : updatedEntry.opponentUid ? [updatedEntry.opponentUid] : [];
-
-            for (const uid of participantUids) {
-                const pRef = fb.doc(fb.db, 'users', uid);
-                const pSnap = await fb.getDoc(pRef);
-                if (pSnap.exists()) {
-                    const existing = pSnap.data().sharedGames || [];
-                    const updated = existing.map(e => e.gameId === updatedEntry.gameId
-                        ? { ...updatedEntry, sharedWith: uid, ownerName: user.displayName || user.email }
-                        : e
-                    );
-                    await fb.setDoc(pRef, { sharedGames: updated }, { merge: true });
-                }
-            }
-
+        /* Save edited own */
+        const saveEditedOwn=async(upd)=>{
+            const newList=playedList.map((e,i)=>i===editEntry.idx?upd:e);
+            await fb.setDoc(uRef,{playedHistory:newList},{merge:true});setPlayedList(newList);
+            const pUids=upd.padelOpponentUids?upd.padelOpponentUids:upd.opponentUid?[upd.opponentUid]:[];
+            for(const uid of pUids){const pRef=fb.doc(fb.db,'users',uid);const pSnap=await fb.getDoc(pRef);if(pSnap.exists()){const ex=pSnap.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:ex.map(e=>e.gameId===upd.gameId?{...upd,sharedWith:uid,ownerName:user.displayName||user.email}:e)},{merge:true});}}
             setEditEntry(null);
         };
+        const saveEditedShared=async(upd)=>{const nl=sharedGames.map((e,i)=>i===editEntry.idx?upd:e);await fb.setDoc(uRef,{sharedGames:nl},{merge:true});setSharedGames(nl);setEditEntry(null);};
+        const deleteOwn=async()=>{const nl=playedList.filter((_,i)=>i!==editEntry.idx);await fb.setDoc(uRef,{playedHistory:nl},{merge:true});setPlayedList(nl);setEditEntry(null);};
 
-        /* ── Save edited shared game (only score/result) ── */
-        const saveEditedSharedGame = async (updatedEntry) => {
-            const newList = sharedGames.map((e, i) => i === editEntry.idx ? updatedEntry : e);
-            await fb.setDoc(userDocRef, { sharedGames: newList }, { merge: true });
-            setSharedGames(newList);
-            setEditEntry(null);
-        };
+        const handleLogout=async()=>{await fb.signOut(fb.auth);};
+        const saveEditName=async()=>{if(!editName.trim())return setEditMsg('Imię nie może być puste.');setEditSaving(true);try{await fb.updateProfile(fb.auth.currentUser,{displayName:editName.trim()});await fb.setDoc(uRef,{name:editName.trim()},{merge:true});setEditMsg('✅ Zaktualizowano!');}catch(e){setEditMsg('Błąd zapisu.');}setEditSaving(false);};
+        const savePrivacy=async(k,v)=>{await fb.setDoc(uRef,{privacy:{showFavourites:showFav,showHistory,[k]:v}},{merge:true});};
+        const togglePrivacy=(k,v)=>{if(k==='showFavourites')setShowFav(v);if(k==='showHistory')setShowHistory(v);savePrivacy(k,v);};
 
-        /* ── Delete own game ── */
-        const deleteOwnGame = async () => {
-            const entry = playedList[editEntry.idx];
-            const newList = playedList.filter((_, i) => i !== editEntry.idx);
-            await fb.setDoc(userDocRef, { playedHistory: newList }, { merge: true });
-            setPlayedList(newList);
-            setEditEntry(null);
-        };
+        const initials=(user.displayName||user.email||'U').charAt(0).toUpperCase();
+        const joinDate=user.metadata?.creationTime?new Date(user.metadata.creationTime).toLocaleDateString('pl-PL',{year:'numeric',month:'long'}):'—';
 
-        /* ── Profile helpers ── */
-        const handleLogout = async () => { await fb.signOut(fb.auth); };
-
-        const saveEditName = async () => {
-            if (!editName.trim()) return setEditMsg('Imię nie może być puste.');
-            setEditSaving(true);
-            try {
-                await fb.updateProfile(fb.auth.currentUser, { displayName: editName.trim() });
-                await fb.setDoc(userDocRef, { name: editName.trim() }, { merge: true });
-                setEditMsg('✅ Imię zostało zaktualizowane!');
-            } catch(e) { setEditMsg('Błąd zapisu. Spróbuj ponownie.'); }
-            setEditSaving(false);
-        };
-
-        const savePrivacy = async (key, value) => {
-            await fb.setDoc(userDocRef, { privacy: { showFavourites, showHistory, [key]: value } }, { merge: true });
-        };
-
-        const handlePrivacyToggle = (key, value) => {
-            if (key === 'showFavourites') setShowFavourites(value);
-            if (key === 'showHistory') setShowHistory(value);
-            savePrivacy(key, value);
-        };
-
-        const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-        const joinDate = user.metadata?.creationTime
-            ? new Date(user.metadata.creationTime).toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' })
-            : '—';
-
-        /* ── Render one history entry row ── */
-        const renderEntry = (entry, idx, isOwner) => {
-            const players = entry.sport === 'padel'
-                ? (entry.padelOpponents || [])
-                : entry.opponent ? [entry.opponent] : [];
-
-            return (
-                <div key={`${isOwner?'own':'sh'}-${idx}`} className="played-entry">
-                    <div className="played-entry-top">
-                        <div className="played-entry-left">
-                            <strong>
-                                <span className={`sport-badge sport-${entry.sport || 'tenis'}`}>
-                                    {sportEmoji[entry.sport] || '🎾'} {sportLabel[entry.sport] || 'Tenis'}
-                                </span>
-                                {entry.court}
-                                {entry.result && <span className={`result-badge result-${entry.result}`} style={{marginLeft:5}}>{resultLabel[entry.result]}</span>}
-                                {!isOwner && <span className="shared-badge shared-badge-received"><i className="fas fa-share-alt"></i> {entry.ownerName}</span>}
-                            </strong>
-                            <span className="date-line">{new Date(entry.date).toLocaleDateString('pl-PL')}</span>
-                            <div className="played-entry-details">
-                                {players.length > 0 && <span><i className="fas fa-users"></i> {players.join(', ')}</span>}
-                                {entry.score && <span><i className="fas fa-table-tennis"></i> {entry.score}</span>}
+        const renderEntry=(entry,idx,isOwner)=>{
+            const players=getAllPlayers(entry);
+            return(
+                <div key={`${isOwner?'o':'s'}-${idx}`} className="activity-entry">
+                    <div className="activity-entry-top">
+                        <div className="activity-entry-left">
+                            <div className="activity-title">
+                                <span className={`sport-badge sport-${entry.sport||'tenis'}`}>{SPORT_EMOJI[entry.sport||'tenis']} {SPORT_LABEL[entry.sport||'tenis']}</span>
+                                <span>{entry.court}</span>
+                                {entry.result&&<span className={`result-badge result-${entry.result}`}>{RESULT_LABEL[entry.result]}</span>}
+                                {!isOwner&&<span className="shared-badge"><i className="fas fa-share-alt"></i> {entry.ownerName}</span>}
                             </div>
+                            <div className="activity-date">{new Date(entry.date).toLocaleDateString('pl-PL',{day:'numeric',month:'short',year:'numeric'})}</div>
+                            {(players.length>0||entry.score)&&(
+                                <div className="activity-details">
+                                    {players.length>0&&<span><i className="fas fa-users"></i>{players.join(', ')}</span>}
+                                    {entry.score&&<span><i className="fas fa-table-tennis"></i>{entry.score}</span>}
+                                </div>
+                            )}
                         </div>
-                        <div className="played-entry-actions">
-                            <button className="btn-edit-entry" title="Edytuj" onClick={() => setEditEntry({ entry, idx, isOwner })}>
-                                <i className="fas fa-pen"></i>
-                            </button>
-                        </div>
+                        <button className="btn-edit-entry" onClick={()=>setEditEntry({entry,idx,isOwner})}><i className="fas fa-pen"></i></button>
                     </div>
                 </div>
             );
         };
 
-        const allEntries = [
-            ...playedList.map((e, i) => ({ e, i, own: true })),
-            ...sharedGames.map((e, i) => ({ e, i, own: false })),
-        ].sort((a, b) => new Date(b.e.date) - new Date(a.e.date));
-
         return (
             <div>
-                {editEntry && (
-                    <EditGameSheet
-                        entry={editEntry.entry}
-                        isOwner={editEntry.isOwner}
-                        friendsList={friendsList}
-                        onSave={editEntry.isOwner ? saveEditedOwnGame : saveEditedSharedGame}
-                        onDelete={deleteOwnGame}
-                        onClose={() => setEditEntry(null)}
-                    />
-                )}
+                {editEntry&&<EditSheet entry={editEntry.entry} isOwner={editEntry.isOwner} friendsList={friendsList} onSave={editEntry.isOwner?saveEditedOwn:saveEditedShared} onDelete={deleteOwn} onClose={()=>setEditEntry(null)}/>}
+                {showStats&&<StatsSheet allEntries={allEntries} onClose={()=>setShowStats(false)}/>}
 
+                {/* Header */}
                 <div className="profile-header">
                     <div className="profile-avatar-big">{initials}</div>
-                    <div className="profile-name">{user.displayName || 'Użytkownik'}</div>
+                    <div className="profile-name">{user.displayName||'Użytkownik'}</div>
                     <div className="profile-email">{user.email}</div>
-                    <button className="btn-edit-profile" onClick={() => setProfileTab('edit')}>
-                        <i className="fas fa-pen"></i> Edytuj profil
+                    <button className="btn-edit-profile" onClick={()=>setProfileTab('settings')}><i className="fas fa-pen"></i> Edytuj profil</button>
+                </div>
+
+                {/* Tabs */}
+                <div className="profile-tabs">
+                    <button className={`profile-tab ${profileTab==='activity'?'active':''}`} onClick={()=>setProfileTab('activity')}>
+                        <i className="fas fa-bolt"></i>Aktywności
+                    </button>
+                    <button className={`profile-tab ${profileTab==='info'?'active':''}`} onClick={()=>setProfileTab('info')}>
+                        <i className="fas fa-user"></i>Profil
+                    </button>
+                    <button className={`profile-tab ${profileTab==='settings'?'active':''}`} onClick={()=>setProfileTab('settings')}>
+                        <i className="fas fa-cog"></i>Ustawienia
                     </button>
                 </div>
 
-                <div className="profile-tabs">
-                    <button className={`profile-tab ${profileTab==='info'?'active':''}`} onClick={() => setProfileTab('info')}><i className="fas fa-user"></i> Profil</button>
-                    <button className={`profile-tab ${profileTab==='history'?'active':''}`} onClick={() => setProfileTab('history')}><i className="fas fa-history"></i> Historia</button>
-                    <button className={`profile-tab ${profileTab==='edit'?'active':''}`} onClick={() => setProfileTab('edit')}><i className="fas fa-cog"></i> Ustawienia</button>
-                </div>
-
                 <div className="profile-body">
-                    {profileTab === 'info' && (<>
+
+                    {/* ── ACTIVITY TAB ── */}
+                    {profileTab==='activity' && (
+                        <>
+                            {/* Quick stats */}
+                            <div className="stats-row">
+                                <div className="stat-box"><div className="stat-num">{totalGames}</div><div className="stat-lbl">Wszystkich</div></div>
+                                <div className="stat-box"><div className="stat-num">{thisMonth}</div><div className="stat-lbl">Ten miesiąc</div></div>
+                                <div className="stat-box"><div className="stat-num" style={{color:'#27ae60'}}>{wins}</div><div className="stat-lbl">Wygranych</div></div>
+                            </div>
+
+                            {/* Chart card */}
+                            <div className="profile-card">
+                                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+                                    <h4 style={{margin:0}}><i className="fas fa-chart-bar" style={{color:'var(--primary)'}}></i> Aktywność</h4>
+                                </div>
+                                <div className="chart-toggle">
+                                    <button className={`chart-toggle-btn ${chartMode==='month'?'active':''}`} onClick={()=>setChartMode('month')}>Miesiącami</button>
+                                    <button className={`chart-toggle-btn ${chartMode==='week'?'active':''}`} onClick={()=>setChartMode('week')}>Tygodniami</button>
+                                </div>
+                                <BarChart data={chartData}/>
+                            </div>
+
+                            {/* Stats detail link */}
+                            <button className="btn-stats-detail" onClick={()=>setShowStats(true)}>
+                                <span><i className="fas fa-chart-pie" style={{marginRight:8,color:'var(--primary)'}}></i>Szczegółowe statystyki</span>
+                                <i className="fas fa-chevron-right"></i>
+                            </button>
+
+                            {/* Activity list */}
+                            <div className="profile-card">
+                                <h4 style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom: showAddForm?12:0}}>
+                                    <span><i className="fas fa-bolt" style={{color:'var(--primary)'}}></i> Moje aktywności</span>
+                                    <button style={{background:'var(--dark)',color:'white',border:'none',padding:'5px 12px',borderRadius:8,fontFamily:'Poppins',fontSize:'0.8em',fontWeight:700,cursor:'pointer'}} onClick={()=>setShowAddForm(!showAddForm)}>
+                                        <i className="fas fa-plus"></i> Dodaj
+                                    </button>
+                                </h4>
+
+                                {showAddForm&&(
+                                    <div className="add-form">
+                                        <label>Dyscyplina *</label>
+                                        <div className="sport-selector">
+                                            <button type="button" className={`sport-option ${sport==='tenis'?'sel-tenis':''}`} onClick={()=>setSport('tenis')}>🎾 Tenis</button>
+                                            <button type="button" className={`sport-option ${sport==='padel'?'sel-padel':''}`} onClick={()=>setSport('padel')}>🏓 Padel</button>
+                                        </div>
+                                        <label>Obiekt *</label>
+                                        <select value={court} onChange={e=>setCourt(e.target.value)}>{DATA.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}</select>
+                                        <label>Data *</label>
+                                        <input type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+                                        {sport==='tenis'&&<>
+                                            <label>Z kim grałem? <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
+                                            <div className="opp-wrap"><select value={oppUid} onChange={e=>setOppUid(e.target.value)}><option value="">— nie wybrano —</option>{friendsList.map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>
+                                            {friendsList.length===0&&<div className="no-friends-note">Dodaj znajomych, aby ich wybrać.</div>}
+                                        </>}
+                                        {sport==='padel'&&<>
+                                            <label>Gracze (do 3) <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
+                                            {[0,1,2].map(i=>{const oth=padelOpps.filter((_,j)=>j!==i).filter(Boolean);return(<div key={i} className="opp-wrap" style={{marginBottom:i<2?6:0}}><select value={padelOpps[i]} onChange={e=>setPO(i,e.target.value)}><option value="">— Gracz {i+1} —</option>{friendsList.filter(f=>!oth.includes(f.uid)).map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>);})}
+                                            {friendsList.length===0&&<div className="no-friends-note">Dodaj znajomych, aby ich wybrać.</div>}
+                                        </>}
+                                        <label>Wynik <span style={{fontWeight:400,color:'#aaa'}}>(np. 6:3)</span></label>
+                                        <input type="text" placeholder="np. 6:3" value={score} onChange={e=>setScore(e.target.value)}/>
+                                        <label>Rezultat</label>
+                                        <select value={result} onChange={e=>setResult(e.target.value)}>
+                                            <option value="">— nie podawaj —</option>
+                                            <option value="W">🏆 Wygrana</option>
+                                            <option value="L">❌ Przegrana</option>
+                                            <option value="D">🤝 Remis</option>
+                                        </select>
+                                        <button className="btn-save-form" onClick={addEntry} disabled={saving}>{saving?'Zapisywanie...':'✔ Zapisz aktywność'}</button>
+                                    </div>
+                                )}
+
+                                {allEntries.length===0&&!showAddForm&&<div className="section-empty">Brak aktywności — dodaj swoją pierwszą grę!</div>}
+                                {allEntries.map(({e,i,own})=>renderEntry(e,i,own))}
+                            </div>
+                        </>
+                    )}
+
+                    {/* ── INFO TAB ── */}
+                    {profileTab==='info'&&(
                         <div className="profile-card">
-                            <h4><i className="fas fa-user" style={{color:'var(--primary)',marginRight:6}}></i> Dane konta</h4>
-                            <div className="profile-row"><span>Imię</span><span>{user.displayName || '—'}</span></div>
-                            <div className="profile-row"><span>E-mail</span><span>{user.email}</span></div>
+                            <h4><i className="fas fa-user" style={{color:'var(--primary)'}}></i> Dane konta</h4>
+                            <div className="profile-row"><span>Imię</span><span>{user.displayName||'—'}</span></div>
+                            <div className="profile-row"><span>E-mail</span><span style={{fontSize:'0.9em'}}>{user.email}</span></div>
                             <div className="profile-row"><span>Konto od</span><span>{joinDate}</span></div>
-                            <div className="profile-row"><span>Gier w historii</span><span>{playedList.length + sharedGames.length}</span></div>
+                            <div className="profile-row"><span>Aktywności</span><span>{totalGames}</span></div>
                             <div className="profile-row"><span>Status</span><span style={{color:'var(--primary)'}}>✔ Aktywny</span></div>
                         </div>
+                    )}
+
+                    {/* ── SETTINGS TAB ── */}
+                    {profileTab==='settings'&&(<>
                         <div className="profile-card">
-                            <h4><i className="fas fa-shield-alt" style={{color:'var(--primary)',marginRight:6}}></i> Prywatność</h4>
+                            <h4><i className="fas fa-pen" style={{color:'var(--primary)'}}></i> Edytuj profil</h4>
+                            <div className="form-group" style={{marginBottom:0}}>
+                                <label style={{fontSize:'0.8em',fontWeight:600,color:'#555',marginBottom:5,display:'block'}}>Imię wyświetlane</label>
+                                <input type="text" value={editName} onChange={e=>setEditName(e.target.value)}/>
+                            </div>
+                            <button className="btn-apply" style={{marginTop:12,padding:12}} onClick={saveEditName} disabled={editSaving}>{editSaving?'Zapisywanie...':'Zapisz zmiany'}</button>
+                            {editMsg&&<div className={editMsg.startsWith('✅')?'auth-success':'auth-error'} style={{marginTop:8}}>{editMsg}</div>}
+                        </div>
+                        <div className="profile-card">
+                            <h4><i className="fas fa-shield-alt" style={{color:'var(--primary)'}}></i> Prywatność</h4>
                             <div className="privacy-row">
                                 <div className="privacy-label">Ulubione obiekty<small>Znajomi widzą Twoje polubione korty</small></div>
-                                <label className="toggle-wrap"><input type="checkbox" checked={showFavourites} onChange={e => handlePrivacyToggle('showFavourites', e.target.checked)} /><span className="toggle-slider"></span></label>
+                                <label className="toggle-wrap"><input type="checkbox" checked={showFav} onChange={e=>togglePrivacy('showFavourites',e.target.checked)}/><span className="toggle-slider"></span></label>
                             </div>
                             <div className="privacy-row">
-                                <div className="privacy-label">Historia gier<small>Znajomi widzą gdzie ostatnio grałeś</small></div>
-                                <label className="toggle-wrap"><input type="checkbox" checked={showHistory} onChange={e => handlePrivacyToggle('showHistory', e.target.checked)} /><span className="toggle-slider"></span></label>
+                                <div className="privacy-label">Historia aktywności<small>Znajomi widzą gdzie ostatnio grałeś</small></div>
+                                <label className="toggle-wrap"><input type="checkbox" checked={showHistory} onChange={e=>togglePrivacy('showHistory',e.target.checked)}/><span className="toggle-slider"></span></label>
                             </div>
                         </div>
                     </>)}
-
-                    {profileTab === 'history' && (
-                        <div className="profile-card">
-                            <h4 style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                                <span><i className="fas fa-history" style={{color:'var(--primary)',marginRight:6}}></i> Moje gry</span>
-                                <button className="btn-add-small" style={{width:'auto',padding:'5px 12px',marginTop:0}} onClick={() => setShowAddPlayed(!showAddPlayed)}>
-                                    <i className="fas fa-plus"></i> Dodaj
-                                </button>
-                            </h4>
-
-                            {showAddPlayed && (
-                                <div className="add-played-form">
-                                    <label>Dyscyplina *</label>
-                                    <div className="sport-selector">
-                                        <button type="button" className={`sport-option ${playedSport==='tenis'?'selected-tenis':''}`} onClick={() => setPlayedSport('tenis')}>🎾 Tenis</button>
-                                        <button type="button" className={`sport-option ${playedSport==='padel'?'selected-padel':''}`} onClick={() => setPlayedSport('padel')}>🏓 Padel</button>
-                                    </div>
-
-                                    <label>Obiekt *</label>
-                                    <select value={selectedCourt} onChange={e => setSelectedCourt(e.target.value)}>
-                                        {DATA.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
-                                    </select>
-
-                                    <label>Data *</label>
-                                    <input type="date" value={playedDate} onChange={e => setPlayedDate(e.target.value)} />
-
-                                    {playedSport === 'tenis' && (<>
-                                        <label>Z kim grałem? <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
-                                        <div className="opponent-select-wrap">
-                                            <select value={playedOpponentUid} onChange={e => setPlayedOpponentUid(e.target.value)} disabled={loadingFriends}>
-                                                <option value="">— nie wybrano —</option>
-                                                {loadingFriends && <option disabled>Ładowanie znajomych...</option>}
-                                                {friendsList.map(f => <option key={f.uid} value={f.uid}>{f.name}</option>)}
-                                            </select>
-                                        </div>
-                                        {!loadingFriends && friendsList.length === 0 && <div className="no-friends-note">Dodaj znajomych, aby ich tu wybrać.</div>}
-                                    </>)}
-
-                                    {playedSport === 'padel' && (<>
-                                        <label>Gracze (do 3 osób) <span style={{fontWeight:400,color:'#aaa'}}>(opcjonalnie)</span></label>
-                                        {[0, 1, 2].map(idx => {
-                                            const otherSelected = padelOpponents.filter((_, i) => i !== idx).filter(Boolean);
-                                            return (
-                                                <div key={idx} className="opponent-select-wrap" style={{marginBottom: idx < 2 ? 6 : 0}}>
-                                                    <select value={padelOpponents[idx]} onChange={e => setPadelOpp(idx, e.target.value)}>
-                                                        <option value="">— Gracz {idx + 1} —</option>
-                                                        {friendsList.filter(f => !otherSelected.includes(f.uid)).map(f => <option key={f.uid} value={f.uid}>{f.name}</option>)}
-                                                    </select>
-                                                </div>
-                                            );
-                                        })}
-                                        {!loadingFriends && friendsList.length === 0 && <div className="no-friends-note">Dodaj znajomych, aby ich tu wybrać.</div>}
-                                    </>)}
-
-                                    <label>Wynik <span style={{fontWeight:400,color:'#aaa'}}>(np. 6:3)</span></label>
-                                    <input type="text" placeholder="np. 6:3" value={playedScore} onChange={e => setPlayedScore(e.target.value)} />
-
-                                    <label>Rezultat</label>
-                                    <select value={playedResult} onChange={e => setPlayedResult(e.target.value)}>
-                                        <option value="">— nie podawaj —</option>
-                                        <option value="W">🏆 Wygrana</option>
-                                        <option value="L">❌ Przegrana</option>
-                                        <option value="D">🤝 Remis</option>
-                                    </select>
-
-                                    <button className="btn-add-small" onClick={addPlayedEntry} disabled={saving}>
-                                        {saving ? 'Zapisywanie...' : '✔ Zapisz grę'}
-                                    </button>
-                                </div>
-                            )}
-
-                            {allEntries.length === 0 && !showAddPlayed && (
-                                <div className="section-empty">Brak wpisów — dodaj gdzie ostatnio grałeś!</div>
-                            )}
-                            {allEntries.map(({ e, i, own }) => renderEntry(e, i, own))}
-                        </div>
-                    )}
-
-                    {profileTab === 'edit' && (
-                        <div className="profile-card">
-                            <h4><i className="fas fa-pen" style={{color:'var(--primary)',marginRight:6}}></i> Edytuj profil</h4>
-                            <div className="form-group">
-                                <label>Imię wyświetlane</label>
-                                <input type="text" value={editName} onChange={e => setEditName(e.target.value)} />
-                            </div>
-                            <button className="btn-apply" style={{marginTop:0}} onClick={saveEditName} disabled={editSaving}>{editSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}</button>
-                            {editMsg && <div className={editMsg.startsWith('✅') ? 'auth-success' : 'auth-error'} style={{marginTop:10}}>{editMsg}</div>}
-                        </div>
-                    )}
 
                     <button className="btn-logout" onClick={handleLogout}><i className="fas fa-sign-out-alt"></i> Wyloguj się</button>
                 </div>
@@ -937,258 +881,103 @@
         );
     }
 
-    /* ─────────────────────────── FAVOURITES ────────────────────────── */
+    /* ─── FAVOURITES ─── */
     function FavouritesScreen({ user, favourites, onToggleFav }) {
-        const favItems = DATA.filter(item => favourites.includes(item.id));
-        if (!user) {
-            return (
-                <div className="lock-banner" style={{marginTop:20}}>
-                    <i className="fas fa-lock"></i>
-                    <p>Ta sekcja jest dostępna tylko dla zalogowanych użytkowników.</p>
-                    <button className="btn-apply" style={{marginTop:0}} onClick={() => window.__setView('auth')}>Zaloguj się</button>
-                </div>
-            );
-        }
-        return (
-            <div className="container">
-                <h4>Moje ulubione ({favItems.length})</h4>
-                {favItems.length === 0
-                    ? <div style={{background:'white',borderRadius:12,padding:20,textAlign:'center',color:'#aaa',boxShadow:'0 4px 10px rgba(0,0,0,0.08)'}}>Brak ulubionych</div>
-                    : favItems.map(item => (
-                        <div key={item.id} className="fav-card">
-                            <img src={item.img} alt={item.name} />
-                            <div className="fav-card-info"><h5>{item.name}</h5><span>{item.surface} · {item.courts} kortów</span></div>
-                            <button className="btn-fav-remove" onClick={() => onToggleFav(item.id)}><i className="fas fa-heart" style={{color:'#e74c3c'}}></i></button>
-                        </div>
-                    ))
-                }
-            </div>
-        );
+        const favItems=DATA.filter(item=>favourites.includes(item.id));
+        if(!user)return(<div className="lock-banner" style={{marginTop:20}}><i className="fas fa-lock"></i><p>Ta sekcja jest dostępna tylko dla zalogowanych.</p><button className="btn-apply" style={{marginTop:0}} onClick={()=>window.__setView('auth')}>Zaloguj się</button></div>);
+        return(<div className="container"><h4>Moje ulubione ({favItems.length})</h4>{favItems.length===0?<div style={{background:'white',borderRadius:12,padding:20,textAlign:'center',color:'#aaa'}}>Brak ulubionych</div>:favItems.map(item=>(<div key={item.id} className="fav-card"><img src={item.img} alt={item.name}/><div className="fav-card-info"><h5>{item.name}</h5><span>{item.surface} · {item.courts} kortów</span></div><button className="btn-fav-remove" onClick={()=>onToggleFav(item.id)}><i className="fas fa-heart" style={{color:'var(--danger)'}}></i></button></div>))}</div>);
     }
 
-    /* ─────────────────────────── FRIENDS ───────────────────────────── */
+    /* ─── FRIENDS ─── */
     function FriendsScreen({ user }) {
-        const fb = window.__firebase;
-        const [subTab, setSubTab] = useState('friends');
-        const [searchQuery, setSearchQuery] = useState('');
-        const [searchResults, setSearchResults] = useState([]);
-        const [searching, setSearching] = useState(false);
-        const [searchError, setSearchError] = useState('');
-        const [friends, setFriends] = useState([]);
-        const [friendsData, setFriendsData] = useState([]);
-        const [loadingFriends, setLoadingFriends] = useState(true);
-
-        useEffect(() => {
-            if (!user) return;
-            fb.getDoc(fb.doc(fb.db, 'users', user.uid)).then(snap => {
-                const friendUids = snap.exists() ? (snap.data().friends || []) : [];
-                setFriends(friendUids);
-                if (friendUids.length === 0) { setLoadingFriends(false); return; }
-                Promise.all(friendUids.map(uid => fb.getDoc(fb.doc(fb.db, 'users', uid))))
-                    .then(snaps => {
-                        setFriendsData(snaps.filter(s => s.exists()).map(s => ({ uid: s.id, ...s.data() })));
-                        setLoadingFriends(false);
-                    });
-            });
-        }, [user?.uid]);
-
-        const handleSearch = async () => {
-            setSearchError('');
-            if (searchQuery.trim().length < 2) return setSearchError('Wpisz min. 2 znaki.');
-            setSearching(true);
-            try {
-                const snap = await fb.getDocs(fb.collection(fb.db, 'users'));
-                const term = searchQuery.trim().toLowerCase();
-                const results = snap.docs.map(d => ({ uid: d.id, ...d.data() }))
-                    .filter(u => u.uid !== user.uid && ((u.name||'').toLowerCase().includes(term) || (u.email||'').toLowerCase().includes(term)));
-                setSearchResults(results);
-                if (results.length === 0) setSearchError('Nie znaleziono użytkownika.');
-            } catch(e) { setSearchError('Błąd wyszukiwania.'); }
-            setSearching(false);
-        };
-
-        const addFriend = async (friendUid) => {
-            const newFriends = [...friends, friendUid];
-            setFriends(newFriends);
-            await fb.setDoc(fb.doc(fb.db, 'users', user.uid), { friends: newFriends }, { merge: true });
-            const snap = await fb.getDoc(fb.doc(fb.db, 'users', friendUid));
-            if (snap.exists()) setFriendsData(prev => [...prev, { uid: snap.id, ...snap.data() }]);
-        };
-
-        const removeFriend = async (friendUid) => {
-            const newFriends = friends.filter(id => id !== friendUid);
-            setFriends(newFriends);
-            setFriendsData(prev => prev.filter(f => f.uid !== friendUid));
-            await fb.setDoc(fb.doc(fb.db, 'users', user.uid), { friends: newFriends }, { merge: true });
-        };
-
-        if (!user) return <div className="lock-banner"><i className="fas fa-lock"></i><p>Zaloguj się aby zobaczyć znajomych</p></div>;
-
-        return (
-            <div className="container">
-                <div className="tabs-mini">
-                    <button className={`tab-mini ${subTab==='friends'?'active':''}`} onClick={() => setSubTab('friends')}>Znajomi ({friends.length})</button>
-                    <button className={`tab-mini ${subTab==='search'?'active':''}`} onClick={() => setSubTab('search')}>Szukaj</button>
-                </div>
-                {subTab === 'search' && (
-                    <div>
-                        <div className="friends-search-bar">
-                            <input type="text" placeholder="Imię lub email..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-                            <button className="btn-search" onClick={handleSearch} disabled={searching}>{searching ? '...' : 'Szukaj'}</button>
-                        </div>
-                        {searchError && <div className="section-empty">{searchError}</div>}
-                        {searchResults.map(result => (
-                            <div key={result.uid} className="search-result-card">
-                                <div className="friend-card-header">
-                                    <div className="friend-avatar">{(result.name||'?').charAt(0).toUpperCase()}</div>
-                                    <div className="friend-info"><h5>{result.name}</h5><span>{result.email}</span></div>
-                                    {friends.includes(result.uid) ? <button className="btn-remove-friend">✔ Dodano</button> : <button className="btn-add-friend" onClick={() => addFriend(result.uid)}>+ Dodaj</button>}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {subTab === 'friends' && (
-                    <div>
-                        {loadingFriends && <div className="section-empty">Ładowanie...</div>}
-                        {!loadingFriends && friendsData.length === 0 && <div className="section-empty">Nie masz jeszcze znajomych. Znajdź ich w zakładce Szukaj!</div>}
-                        {friendsData.map(friend => {
-                            const canSeeFav = friend.privacy?.showFavourites !== false;
-                            const favItems = canSeeFav ? DATA.filter(d => (friend.favourites||[]).includes(d.id)) : [];
-                            return (
-                                <div key={friend.uid} className="friend-card">
-                                    <div className="friend-card-header">
-                                        <div className="friend-avatar">{(friend.name||'?').charAt(0).toUpperCase()}</div>
-                                        <div className="friend-info"><h5>{friend.name}</h5><span>{favItems.length} ulubionych</span></div>
-                                        <button className="btn-remove-friend" onClick={() => removeFriend(friend.uid)}>Usuń</button>
-                                    </div>
-                                    {favItems.length > 0 && <div className="friend-fav-list">{favItems.map(item => <span key={item.id} className="friend-fav-tag">🎾 {item.name}</span>)}</div>}
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
-        );
+        const fb=window.__firebase;
+        const [subTab,setSubTab]=useState('friends');
+        const [sq,setSq]=useState(''); const [results,setResults]=useState([]); const [searching,setSearching]=useState(false); const [sErr,setSErr]=useState('');
+        const [friends,setFriends]=useState([]); const [friendsData,setFriendsData]=useState([]); const [loading,setLoading]=useState(true);
+        useEffect(()=>{if(!user)return;fb.getDoc(fb.doc(fb.db,'users',user.uid)).then(snap=>{const uids=snap.exists()?(snap.data().friends||[]):[];setFriends(uids);if(!uids.length){setLoading(false);return;}Promise.all(uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)))).then(snaps=>{setFriendsData(snaps.filter(s=>s.exists()).map(s=>({uid:s.id,...s.data()})));setLoading(false);});});},[user?.uid]);
+        const search=async()=>{setSErr('');if(sq.trim().length<2)return setSErr('Wpisz min. 2 znaki.');setSearching(true);try{const snap=await fb.getDocs(fb.collection(fb.db,'users'));const t=sq.trim().toLowerCase();const r=snap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.uid!==user.uid&&((u.name||'').toLowerCase().includes(t)||(u.email||'').toLowerCase().includes(t)));setResults(r);if(!r.length)setSErr('Nie znaleziono.');}catch(e){setSErr('Błąd wyszukiwania.');}setSearching(false);};
+        const addFriend=async(uid)=>{const nf=[...friends,uid];setFriends(nf);await fb.setDoc(fb.doc(fb.db,'users',user.uid),{friends:nf},{merge:true});const s=await fb.getDoc(fb.doc(fb.db,'users',uid));if(s.exists())setFriendsData(p=>[...p,{uid:s.id,...s.data()}]);};
+        const removeFriend=async(uid)=>{const nf=friends.filter(id=>id!==uid);setFriends(nf);setFriendsData(p=>p.filter(f=>f.uid!==uid));await fb.setDoc(fb.doc(fb.db,'users',user.uid),{friends:nf},{merge:true});};
+        if(!user)return<div className="lock-banner"><i className="fas fa-lock"></i><p>Zaloguj się aby zobaczyć znajomych</p></div>;
+        return(<div className="container">
+            <div className="tabs-mini"><button className={`tab-mini ${subTab==='friends'?'active':''}`} onClick={()=>setSubTab('friends')}>Znajomi ({friends.length})</button><button className={`tab-mini ${subTab==='search'?'active':''}`} onClick={()=>setSubTab('search')}>Szukaj</button></div>
+            {subTab==='search'&&(<div><div className="friends-search-bar"><input type="text" placeholder="Imię lub email..." value={sq} onChange={e=>setSq(e.target.value)}/><button className="btn-search" onClick={search} disabled={searching}>{searching?'...':'Szukaj'}</button></div>{sErr&&<div className="section-empty">{sErr}</div>}{results.map(r=>(<div key={r.uid} className="search-result-card"><div className="friend-card-header"><div className="friend-avatar">{(r.name||'?').charAt(0).toUpperCase()}</div><div className="friend-info"><h5>{r.name}</h5><span>{r.email}</span></div>{friends.includes(r.uid)?<button className="btn-remove-friend">✔ Dodano</button>:<button className="btn-add-friend" onClick={()=>addFriend(r.uid)}>+ Dodaj</button>}</div></div>))}</div>)}
+            {subTab==='friends'&&(<div>{loading&&<div className="section-empty">Ładowanie...</div>}{!loading&&!friendsData.length&&<div className="section-empty">Brak znajomych. Znajdź ich w zakładce Szukaj!</div>}{friendsData.map(f=>{const favI=f.privacy?.showFavourites!==false?DATA.filter(d=>(f.favourites||[]).includes(d.id)):[];return(<div key={f.uid} className="friend-card"><div className="friend-card-header"><div className="friend-avatar">{(f.name||'?').charAt(0).toUpperCase()}</div><div className="friend-info"><h5>{f.name}</h5><span>{favI.length} ulubionych</span></div><button className="btn-remove-friend" onClick={()=>removeFriend(f.uid)}>Usuń</button></div>{favI.length>0&&<div className="friend-fav-list" style={{marginTop:8}}>{favI.map(it=><span key={it.id} className="friend-fav-tag">🎾 {it.name}</span>)}</div>}</div>);})}</div>)}
+        </div>);
     }
 
-    /* ─────────────────────────── APP ROOT ──────────────────────────── */
+    /* ─── APP ─── */
     function App() {
-        const [view, setView] = useState('home');
-        const [leftMenu, setLeftMenu] = useState(false);
-        const [filterPanel, setFilterPanel] = useState(false);
-        const [filtered, setFiltered] = useState(DATA);
-        const [mapItem, setMapItem] = useState(null);
-        const [user, setUser] = useState(undefined);
-        const [favourites, setFavourites] = useState([]);
-        const [f, setF] = useState({ surface: 'all' });
+        const [view,setView]=useState('home');
+        const [leftMenu,setLeftMenu]=useState(false);
+        const [filterPanel,setFilterPanel]=useState(false);
+        const [filtered,setFiltered]=useState(DATA);
+        const [mapItem,setMapItem]=useState(null);
+        const [user,setUser]=useState(undefined);
+        const [favourites,setFavourites]=useState([]);
+        const [surf,setSurf]=useState('all');
+        window.__setView=setView;
 
-        window.__setView = setView;
+        useEffect(()=>{const iv=setInterval(()=>{if(window.__firebase){clearInterval(iv);window.__firebase.onAuthStateChanged(window.__firebase.auth,u=>{setUser(u||null);if(u){window.__firebase.getDoc(window.__firebase.doc(window.__firebase.db,'users',u.uid)).then(s=>{if(s.exists())setFavourites(s.data().favourites||[]);});}else setFavourites([]);});}},100);},[]);
 
-        useEffect(() => {
-            const interval = setInterval(() => {
-                if (window.__firebase) {
-                    clearInterval(interval);
-                    window.__firebase.onAuthStateChanged(window.__firebase.auth, u => {
-                        setUser(u || null);
-                        if (u) {
-                            window.__firebase.getDoc(window.__firebase.doc(window.__firebase.db, 'users', u.uid))
-                                .then(snap => { if (snap.exists()) setFavourites(snap.data().favourites || []); });
-                        } else { setFavourites([]); }
-                    });
-                }
-            }, 100);
-        }, []);
+        const toggleFav=async(id)=>{if(!user){setView('auth');return;}const fb=window.__firebase;const nf=favourites.includes(id)?favourites.filter(x=>x!==id):[...favourites,id];setFavourites(nf);await fb.setDoc(fb.doc(fb.db,'users',user.uid),{favourites:nf},{merge:true});};
+        const applyFilters=()=>{setFiltered(DATA.filter(it=>surf==='all'||it.surface===surf));setFilterPanel(false);};
+        const initials=user?.displayName?.charAt(0).toUpperCase()||user?.email?.charAt(0).toUpperCase()||null;
 
-        const toggleFav = async (itemId) => {
-            if (!user) { setView('auth'); return; }
-            const fb = window.__firebase;
-            const isFav = favourites.includes(itemId);
-            const newFavs = isFav ? favourites.filter(id => id !== itemId) : [...favourites, itemId];
-            setFavourites(newFavs);
-            await fb.setDoc(fb.doc(fb.db, 'users', user.uid), { favourites: newFavs }, { merge: true });
-        };
+        return(<div>
+            <div className={`overlay ${(leftMenu||filterPanel)?'show':''}`} onClick={()=>{setLeftMenu(false);setFilterPanel(false);}}></div>
+            {mapItem&&<MapModal item={mapItem} onClose={()=>setMapItem(null)}/>}
 
-        const applyFilters = () => {
-            setFiltered(DATA.filter(item => f.surface === 'all' || item.surface === f.surface));
-            setFilterPanel(false);
-        };
-
-        const initials = user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || null;
-
-        return (
-            <div>
-                <div className={`overlay ${(leftMenu||filterPanel)?'show':''}`} onClick={() => { setLeftMenu(false); setFilterPanel(false); }}></div>
-                {mapItem && <MapModal item={mapItem} onClose={() => setMapItem(null)} />}
-
-                <div className={`side-panel panel-left ${leftMenu?'open':''}`}>
-                    <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView('home'); setLeftMenu(false); }}>Główna</a>
-                    <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView('search'); setLeftMenu(false); }}>Szukaj</a>
-                    <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView('favourites'); setLeftMenu(false); }}>Ulubione</a>
-                    {user && <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView('friends'); setLeftMenu(false); }}>Znajomi</a>}
-                    <a href="#" style={{color:'white',display:'block',padding:'15px 0'}} onClick={() => { setView(user ? 'profile' : 'auth'); setLeftMenu(false); }}>Konto</a>
-                </div>
-
-                <div className={`side-panel panel-right ${filterPanel?'open':''}`}>
-                    <h3>Filtry</h3>
-                    <div className="filter-item"><label>Nawierzchnia</label>
-                        <select value={f.surface} onChange={e => setF({...f,surface:e.target.value})}>
-                            <option value="all">Wszystkie</option><option value="ziemna">Ziemna</option><option value="twarda">Twarda</option><option value="dywan">Dywan</option>
-                        </select>
-                    </div>
-                    <button className="btn-apply" onClick={applyFilters}>ZASTOSUJ</button>
-                </div>
-
-                <nav className="top-nav">
-                    <div onClick={() => setLeftMenu(true)}><i className="fas fa-bars"></i></div>
-                    <div style={{fontWeight:700}}>ACTIVO</div>
-                    <div className="nav-user">
-                        {user === undefined ? <i className="fas fa-spinner fa-spin"></i>
-                            : user ? <div className="nav-avatar" onClick={() => setView('profile')}>{initials}</div>
-                            : <span onClick={() => setView('auth')}>Zaloguj</span>}
-                    </div>
-                </nav>
-
-                {view === 'home' && (
-                    <div className="container">
-                        <div className="hero-card"><h2>Znajdź swój kort 🎾</h2><p>Najlepsza wyszukiwarka w Twoim mieście.</p><button className="btn-apply" onClick={() => setView('search')}>Szukaj teraz</button></div>
-                    </div>
-                )}
-                {view === 'search' && (
-                    <div className="container">
-                        <button className="btn-more" onClick={() => setFilterPanel(true)}>Filtruj</button>
-                        {filtered.map(item => (
-                            <div key={item.id} className="card">
-                                <img src={item.img} alt={item.name} />
-                                <div className="card-body">
-                                    <h4>{item.name} <span className="courts-badge">{item.courts}</span></h4>
-                                    <div className="card-actions">
-                                        <button className="btn-map" onClick={() => setMapItem(item)}>Mapa</button>
-                                        <button className="btn-heart" onClick={() => toggleFav(item.id)}>{favourites.includes(item.id) ? '❤️' : '🤍'}</button>
-                                        <button className="btn-reserve" onClick={() => user ? alert('Zarezerwowano') : setView('auth')}>Rezerwuj</button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {view === 'auth' && <AuthScreen />}
-                {view === 'profile' && (user ? <ProfileScreen user={user} /> : <AuthScreen />)}
-                {view === 'favourites' && <FavouritesScreen user={user} favourites={favourites} onToggleFav={toggleFav} />}
-                {view === 'friends' && <FriendsScreen user={user} />}
-
-                <nav className="bottom-nav">
-                    <div className={`bottom-nav-item ${view==='home'?'active':''}`} onClick={() => setView('home')}><i className="fas fa-home"></i>Główna</div>
-                    <div className={`bottom-nav-item ${view==='search'?'active':''}`} onClick={() => setView('search')}><i className="fas fa-search"></i>Szukaj</div>
-                    <div className={`bottom-nav-item ${view==='favourites'?'active':''}`} onClick={() => setView('favourites')}><i className="fas fa-heart"></i>Ulubione</div>
-                    <div className={`bottom-nav-item ${view==='auth'||view==='profile'?'active':''}`} onClick={() => setView(user ? 'profile' : 'auth')}><i className="fas fa-user"></i>Konto</div>
-                </nav>
+            <div className={`side-panel panel-left ${leftMenu?'open':''}`}>
+                {['home','search','favourites',...(user?['friends']:[]),...(user?['profile']:['auth'])].map(v=>(<a key={v} href="#" style={{color:'white',display:'block',padding:'14px 0'}} onClick={()=>{setView(v);setLeftMenu(false);}}>{v==='home'?'Główna':v==='search'?'Szukaj':v==='favourites'?'Ulubione':v==='friends'?'Znajomi':'Konto'}</a>))}
             </div>
-        );
+
+            <div className={`side-panel panel-right ${filterPanel?'open':''}`} style={{padding:'60px 20px 20px'}}>
+                <h3>Filtry</h3>
+                <div className="filter-item"><label>Nawierzchnia</label><select value={surf} onChange={e=>setSurf(e.target.value)}><option value="all">Wszystkie</option><option value="ziemna">Ziemna</option><option value="twarda">Twarda</option><option value="dywan">Dywan</option></select></div>
+                <button className="btn-apply" onClick={applyFilters}>ZASTOSUJ</button>
+            </div>
+
+            <nav className="top-nav">
+                <div onClick={()=>setLeftMenu(true)}><i className="fas fa-bars" style={{fontSize:'1.1em',cursor:'pointer'}}></i></div>
+                <div style={{fontWeight:700}}>ACTIVO</div>
+                <div>{user===undefined?<i className="fas fa-spinner fa-spin"></i>:user?<div className="nav-avatar" onClick={()=>setView('profile')}>{initials}</div>:<span style={{cursor:'pointer',fontSize:'0.9em'}} onClick={()=>setView('auth')}>Zaloguj</span>}</div>
+            </nav>
+
+            {view==='home'&&<div className="container"><div className="hero-card"><h2>Znajdź swój kort 🎾</h2><p>Najlepsza wyszukiwarka w Twoim mieście.</p><button className="btn-apply" onClick={()=>setView('search')}>Szukaj teraz</button></div></div>}
+
+            {view==='search'&&<div className="container">
+                <button className="btn-more" onClick={()=>setFilterPanel(true)}>Filtruj</button>
+                {filtered.map(item=>(
+                    <div key={item.id} className="card">
+                        <img src={item.img} alt={item.name}/>
+                        <div className="card-body">
+                            <h4>{item.name}<span className="courts-badge">{item.courts}</span></h4>
+                            <div className="card-actions">
+                                <button className="btn-map" onClick={()=>setMapItem(item)}>Mapa</button>
+                                <button className="btn-heart" onClick={()=>toggleFav(item.id)}>{favourites.includes(item.id)?'❤️':'🤍'}</button>
+                                <button className="btn-reserve" onClick={()=>user?alert('Zarezerwowano'):setView('auth')}>Rezerwuj</button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>}
+
+            {view==='auth'&&<AuthScreen/>}
+            {view==='profile'&&(user?<ProfileScreen user={user}/>:<AuthScreen/>)}
+            {view==='favourites'&&<FavouritesScreen user={user} favourites={favourites} onToggleFav={toggleFav}/>}
+            {view==='friends'&&<FriendsScreen user={user}/>}
+
+            <nav className="bottom-nav">
+                <div className={`bottom-nav-item ${view==='home'?'active':''}`} onClick={()=>setView('home')}><i className="fas fa-home"></i>Główna</div>
+                <div className={`bottom-nav-item ${view==='search'?'active':''}`} onClick={()=>setView('search')}><i className="fas fa-search"></i>Szukaj</div>
+                <div className={`bottom-nav-item ${view==='favourites'?'active':''}`} onClick={()=>setView('favourites')}><i className="fas fa-heart"></i>Ulubione</div>
+                <div className={`bottom-nav-item ${(view==='profile'||view==='auth')?'active':''}`} onClick={()=>setView(user?'profile':'auth')}><i className="fas fa-user"></i>Konto</div>
+            </nav>
+        </div>);
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 
 </body>
