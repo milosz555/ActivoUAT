@@ -396,35 +396,39 @@
     const DATA = [
         {
             id:1, name:"Park Tenisowy Olimpia", address:"ul. Warmińska 1, Poznań", lat:52.4064, lng:16.9252,
-            img:"https://images.unsplash.com/photo-1595435064212-3629224444e1?w=600",
+            img:"https://images.unsplash.com/photo-1499462823458-b4d2cfab36cc?w=600",
             courts:{ maczka:5, twarda:5, padel:0 },
             parking:true, rental:true, trainers:true, shop:true,
             website:"https://parktenisowy.pl",
+            bookingUrl:"https://player.playmore.pl/reservation/85/courts",
             desc:"Największy ośrodek tenisowy w Wielkopolsce, zlokalizowany w Lasku Golęcińskim. Kompleks oferuje korty indoor i outdoor, studio treningu personalnego, fizjoterapię oraz sklep Wilson i Lacoste. Organizator międzynarodowego turnieju Enea Poznań Open (ATP). Dostępny jest także pickleball i badminton."
         },
         {
             id:2, name:"Posir Rataje", address:"ul. Łukaszewicza 34, Poznań", lat:52.3980, lng:16.9640,
-            img:"https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600",
+            img:"https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600",
             courts:{ maczka:5, twarda:0, padel:4 },
             parking:true, rental:true, trainers:true, shop:false,
             website:null,
+            bookingUrl:null,
             desc:"Miejski obiekt sportowy zarządzany przez Poznańskie Ośrodki Sportu i Rekreacji. Oferuje 5 kortów tenisowych na mączce oraz 4 kryte korty do padla. Dostępne wypożyczenie sprzętu i zajęcia z trenerem."
         },
         {
             id:3, name:"FairPlayce", address:"ul. Ratajczaka 10, Poznań", lat:52.4068, lng:16.9299,
-            img:"https://images.unsplash.com/photo-1622279457486-62dcc4a4bd13?w=600",
+            img:"https://images.unsplash.com/photo-1617280947817-2333d1c1ef86?w=600",
             courts:{ maczka:0, twarda:4, padel:0 },
             parking:false, rental:false, trainers:false, shop:false,
             website:null,
+            bookingUrl:null,
             desc:"Obiekt z kortami na twardej nawierzchni w centrum Poznania. Doskonała lokalizacja dla szybkiej gry po pracy lub na przerwie."
         },
         {
             id:4, name:"Kortowo", address:"ul. Bułgarska 67, Poznań", lat:52.3901, lng:16.8902,
-            img:"https://images.unsplash.com/photo-1544333346-64e4fe18274b?w=600",
+            img:"https://images.unsplash.com/photo-1531315396756-905d68d21b56?w=600",
             courts:{ maczka:0, twarda:0, padel:0, dywan:8 },
-            parking:true, rental:false, trainers:false, shop:true,
-            website:null,
-            desc:"Obiekt z kortami krytymi na dywanie, czynny przez cały rok niezależnie od pogody. Sklep z akcesoriami tenisowymi na miejscu."
+            parking:true, rental:true, trainers:true, shop:true,
+            website:"https://www.kortowo.com.pl",
+            bookingUrl:"https://www.kortowo.com.pl/tenis/rezerwacja/",
+            desc:"Kompleks hotelowo-sportowy z 8 krytymi kortami tenisowymi na dywanie, czynny przez cały rok niezależnie od pogody. Na miejscu hotel***, restauracja, sklep tenisowy oraz wypożyczalnia sprzętu. Zajęcia z trenerami dostępne przez cały rok."
         },
         {
             id:5, name:"Centrum PLEK", address:"ul. Margonińska 25, Poznań (Smochowice)", lat:52.3934, lng:16.8278,
@@ -432,14 +436,16 @@
             courts:{ maczka:0, twarda:0, padel:10 },
             parking:true, rental:true, trainers:true, shop:false,
             website:"https://centrumplek.pl",
+            bookingUrl:"https://playtomic.io/plek-poznan/56e1531e-e108-42af-b877-834a53381efa?q=PADEL",
             desc:"Jedyny w Poznaniu całoroczny, zadaszony obiekt sportowy z 10 profesjonalnymi kortami do padla spełniającymi międzynarodowe standardy. Honoruje karty Multisport, PZU Sport, Medicover i FitProfit. Rezerwacja przez aplikację Playtomic."
         },
         {
             id:6, name:"InterPadel Poznań", address:"ul. Wołczyńska 18, Poznań (Fabianowo)", lat:52.3756, lng:16.8412,
-            img:"https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600",
+            img:"https://images.unsplash.com/photo-1545809074-59472b3f5ecc?w=600",
             courts:{ maczka:0, twarda:0, padel:9 },
             parking:true, rental:true, trainers:true, shop:true,
             website:"https://interpadel.pl/interpadel-poznan/",
+            bookingUrl:"https://playtomic.com/clubs/interpadel-poznan",
             desc:"Największy ośrodek do gry w padla pod halą w Wielkopolsce — 9 profesjonalnych kortów (8 deblowych + 1 singlowy) w hali o wysokości 11 metrów. Strefa Lounge, ProShop z rakietami HEAD, Babolat i OXDOG. Otwarty 5:00–1:00, rezerwacja przez Playtomic."
         },
     ];
@@ -498,9 +504,11 @@
                             ))}
                         </div>
                         <div style={{display:'flex',gap:9}}>
-                            <button className="btn-map-card" style={{flex:1}} onClick={()=>{onMap(item);onClose();}}><i className="fas fa-map-marker-alt" style={{marginRight:5}}></i>Mapa</button>
                             {item.website && <a href={item.website} target="_blank" rel="noopener noreferrer" className="btn-map-card" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:6,textDecoration:'none'}}><i className="fas fa-external-link-alt"></i>Strona</a>}
-                            <button className="btn-reserve-card" style={{flex:1}} onClick={onReserve}>Rezerwuj</button>
+                            {item.bookingUrl
+                                ? <a href={item.bookingUrl} target="_blank" rel="noopener noreferrer" className="btn-reserve-card" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:6,textDecoration:'none'}}>Rezerwuj</a>
+                                : <button className="btn-reserve-card" style={{flex:1,opacity:0.45,cursor:'not-allowed'}} disabled>Brak rezerwacji online</button>
+                            }
                         </div>
                     </div>
                 </div>
@@ -1093,9 +1101,11 @@
                                                 ))}
                                             </div>
                                             <div className="card-actions">
-                                                <button className="btn-map-card" onClick={()=>setMapItem(item)}><i className="fas fa-map-marker-alt" style={{marginRight:5}}></i>Mapa</button>
                                                 <button className="btn-heart" onClick={()=>toggleFav(item.id)}>{favs.includes(item.id)?'❤️':'🤍'}</button>
-                                                <button className="btn-reserve-card" onClick={()=>user?alert('Zarezerwowano'):setView('auth')}>Rezerwuj</button>
+                                                {item.bookingUrl
+                                                    ? <a href={item.bookingUrl} target="_blank" rel="noopener noreferrer" className="btn-reserve-card" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',textDecoration:'none'}}>Rezerwuj</a>
+                                                    : <button className="btn-reserve-card" style={{flex:1,opacity:0.4,cursor:'not-allowed'}} disabled>Brak online</button>
+                                                }
                                             </div>
                                         </div>
                                     </div>
