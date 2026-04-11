@@ -394,10 +394,54 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     const DATA = [
-        { id:1, name:"Olimpia", courts:10, address:"ul. Warmińska 1, Poznań", lat:52.4064, lng:16.9252, surface:"ziemna", img:"https://images.unsplash.com/photo-1595435064212-3629224444e1?w=600" },
-        { id:2, name:"Posir Rataje", courts:5, address:"ul. Łukaszewicza 34, Poznań", lat:52.3980, lng:16.9640, surface:"ziemna", img:"https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600" },
-        { id:3, name:"FairPlayce", courts:4, address:"ul. Ratajczaka 10, Poznań", lat:52.4068, lng:16.9299, surface:"twarda", img:"https://images.unsplash.com/photo-1622279457486-62dcc4a4bd13?w=600" },
-        { id:4, name:"Kortowo", courts:8, address:"ul. Bułgarska 67, Poznań", lat:52.3901, lng:16.8902, surface:"dywan", img:"https://images.unsplash.com/photo-1544333346-64e4fe18274b?w=600" }
+        {
+            id:1, name:"Park Tenisowy Olimpia", address:"ul. Warmińska 1, Poznań", lat:52.4064, lng:16.9252,
+            img:"https://images.unsplash.com/photo-1595435064212-3629224444e1?w=600",
+            courts:{ maczka:5, twarda:5, padel:0 },
+            parking:true, rental:true, trainers:true, shop:true,
+            website:"https://parktenisowy.pl",
+            desc:"Największy ośrodek tenisowy w Wielkopolsce, zlokalizowany w Lasku Golęcińskim. Kompleks oferuje korty indoor i outdoor, studio treningu personalnego, fizjoterapię oraz sklep Wilson i Lacoste. Organizator międzynarodowego turnieju Enea Poznań Open (ATP). Dostępny jest także pickleball i badminton."
+        },
+        {
+            id:2, name:"Posir Rataje", address:"ul. Łukaszewicza 34, Poznań", lat:52.3980, lng:16.9640,
+            img:"https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600",
+            courts:{ maczka:5, twarda:0, padel:4 },
+            parking:true, rental:true, trainers:true, shop:false,
+            website:null,
+            desc:"Miejski obiekt sportowy zarządzany przez Poznańskie Ośrodki Sportu i Rekreacji. Oferuje 5 kortów tenisowych na mączce oraz 4 kryte korty do padla. Dostępne wypożyczenie sprzętu i zajęcia z trenerem."
+        },
+        {
+            id:3, name:"FairPlayce", address:"ul. Ratajczaka 10, Poznań", lat:52.4068, lng:16.9299,
+            img:"https://images.unsplash.com/photo-1622279457486-62dcc4a4bd13?w=600",
+            courts:{ maczka:0, twarda:4, padel:0 },
+            parking:false, rental:false, trainers:false, shop:false,
+            website:null,
+            desc:"Obiekt z kortami na twardej nawierzchni w centrum Poznania. Doskonała lokalizacja dla szybkiej gry po pracy lub na przerwie."
+        },
+        {
+            id:4, name:"Kortowo", address:"ul. Bułgarska 67, Poznań", lat:52.3901, lng:16.8902,
+            img:"https://images.unsplash.com/photo-1544333346-64e4fe18274b?w=600",
+            courts:{ maczka:0, twarda:0, padel:0, dywan:8 },
+            parking:true, rental:false, trainers:false, shop:true,
+            website:null,
+            desc:"Obiekt z kortami krytymi na dywanie, czynny przez cały rok niezależnie od pogody. Sklep z akcesoriami tenisowymi na miejscu."
+        },
+        {
+            id:5, name:"Centrum PLEK", address:"ul. Margonińska 25, Poznań (Smochowice)", lat:52.3934, lng:16.8278,
+            img:"https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=600",
+            courts:{ maczka:0, twarda:0, padel:10 },
+            parking:true, rental:true, trainers:true, shop:false,
+            website:"https://centrumplek.pl",
+            desc:"Jedyny w Poznaniu całoroczny, zadaszony obiekt sportowy z 10 profesjonalnymi kortami do padla spełniającymi międzynarodowe standardy. Honoruje karty Multisport, PZU Sport, Medicover i FitProfit. Rezerwacja przez aplikację Playtomic."
+        },
+        {
+            id:6, name:"InterPadel Poznań", address:"ul. Wołczyńska 18, Poznań (Fabianowo)", lat:52.3756, lng:16.8412,
+            img:"https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600",
+            courts:{ maczka:0, twarda:0, padel:9 },
+            parking:true, rental:true, trainers:true, shop:true,
+            website:"https://interpadel.pl/interpadel-poznan/",
+            desc:"Największy ośrodek do gry w padla pod halą w Wielkopolsce — 9 profesjonalnych kortów (8 deblowych + 1 singlowy) w hali o wysokości 11 metrów. Strefa Lounge, ProShop z rakietami HEAD, Babolat i OXDOG. Otwarty 5:00–1:00, rezerwacja przez Playtomic."
+        },
     ];
     const SE = { tenis:'🎾', padel:'🏓' };
     const SL = { tenis:'Tenis', padel:'Padel' };
@@ -407,6 +451,62 @@
     function getWeekKey(ds) { const d=new Date(ds); d.setHours(0,0,0,0); const day=d.getDay()||7; d.setDate(d.getDate()-day+1); return d.toISOString().split('T')[0]; }
     function weekLabel(k) { const d=new Date(k); return `${d.getDate()}.${d.getMonth()+1}`; }
     function allPlayers(e) { return e.sport==='padel'?(e.padelOpponents||[]):(e.opponent?[e.opponent]:[]); }
+    function totalCourts(c) { return (c.maczka||0)+(c.twarda||0)+(c.padel||0)+(c.dywan||0); }
+
+    /* ── VENUE SHEET ── */
+    function VenueSheet({ item, onClose, onMap, onFav, isFav, onReserve }) {
+        const tc = totalCourts(item.courts);
+        const pills = [];
+        if (item.courts.maczka)  pills.push({ label:`${item.courts.maczka} mączka`, color:'#b5893a' });
+        if (item.courts.twarda)  pills.push({ label:`${item.courts.twarda} twarda`, color:'#4a9eff' });
+        if (item.courts.padel)   pills.push({ label:`${item.courts.padel} padel`, color:'var(--accent2)' });
+        if (item.courts.dywan)   pills.push({ label:`${item.courts.dywan} dywan`, color:'#a78bfa' });
+        return (
+            <div className="sheet-bg" onClick={e=>e.target===e.currentTarget&&onClose()}>
+                <div className="sheet" style={{maxHeight:'88vh'}}>
+                    <div style={{position:'relative'}}>
+                        <img src={item.img} alt={item.name} style={{width:'100%',height:180,objectFit:'cover',display:'block'}}/>
+                        <button className="btn-close" onClick={onClose} style={{position:'absolute',top:10,right:12,background:'rgba(0,0,0,0.55)',borderRadius:'50%',width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'1em'}}>✕</button>
+                        <button onClick={()=>onFav(item.id)} style={{position:'absolute',top:10,right:52,background:'rgba(0,0,0,0.55)',borderRadius:'50%',width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',border:'none',cursor:'pointer',fontSize:'1.1em'}}>{isFav?'❤️':'🤍'}</button>
+                    </div>
+                    <div className="sheet-body">
+                        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,marginBottom:12}}>
+                            <div>
+                                <h2 style={{fontSize:'1.1em',fontWeight:700,color:'var(--t1)',margin:'0 0 3px'}}>{item.name}</h2>
+                                <div style={{fontSize:'0.78em',color:'var(--t2)',display:'flex',alignItems:'center',gap:5}}>
+                                    <i className="fas fa-map-marker-alt" style={{color:'var(--accent)',fontSize:'0.9em'}}></i>{item.address}
+                                </div>
+                            </div>
+                            <div style={{textAlign:'right',flexShrink:0}}>
+                                <div style={{fontSize:'1.6em',fontWeight:700,color:'var(--accent)',fontFamily:'var(--mono)',lineHeight:1}}>{tc}</div>
+                                <div style={{fontSize:'0.62em',color:'var(--t2)',textTransform:'uppercase',letterSpacing:'0.04em',marginTop:2}}>kortów</div>
+                            </div>
+                        </div>
+                        <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:14}}>
+                            {pills.map(p=>(
+                                <span key={p.label} style={{background:`${p.color}18`,color:p.color,border:`1px solid ${p.color}35`,padding:'3px 10px',borderRadius:20,fontSize:'0.75em',fontWeight:700}}>{p.label}</span>
+                            ))}
+                        </div>
+                        {item.desc && <p style={{fontSize:'0.83em',color:'var(--t2)',lineHeight:1.6,marginBottom:14}}>{item.desc}</p>}
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px 12px',marginBottom:16}}>
+                            {[{icon:'fa-parking',label:'Parking',val:item.parking},{icon:'fa-racquet',label:'Wypożyczalnia',val:item.rental},{icon:'fa-user-tie',label:'Trenerzy',val:item.trainers},{icon:'fa-store',label:'Sklep',val:item.shop}].map(a=>(
+                                <div key={a.label} style={{display:'flex',alignItems:'center',gap:7,fontSize:'0.8em',color:a.val?'var(--t1)':'var(--t2)'}}>
+                                    <i className={`fas ${a.icon}`} style={{width:14,textAlign:'center',color:a.val?'var(--accent)':'var(--border)'}}></i>
+                                    {a.label}
+                                    <span style={{marginLeft:'auto',fontSize:'0.85em',fontWeight:600,color:a.val?'var(--win)':'var(--t2)'}}>{a.val?'✔':'—'}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{display:'flex',gap:9}}>
+                            <button className="btn-map-card" style={{flex:1}} onClick={()=>{onMap(item);onClose();}}><i className="fas fa-map-marker-alt" style={{marginRight:5}}></i>Mapa</button>
+                            {item.website && <a href={item.website} target="_blank" rel="noopener noreferrer" className="btn-map-card" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:6,textDecoration:'none'}}><i className="fas fa-external-link-alt"></i>Strona</a>}
+                            <button className="btn-reserve-card" style={{flex:1}} onClick={onReserve}>Rezerwuj</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     /* ── BAR CHART ── */
     function BarChart({ data }) {
@@ -838,7 +938,7 @@
     function FavouritesScreen({ user, favourites, onToggleFav }) {
         const favItems=DATA.filter(item=>favourites.includes(item.id));
         if(!user)return(<div className="lock-banner"><i className="fas fa-lock"></i><p>Ta sekcja jest dostępna tylko dla zalogowanych.</p><button className="btn-primary" onClick={()=>window.__setView('auth')}>Zaloguj się</button></div>);
-        return(<div className="page"><h2 className="page-title">Ulubione</h2>{favItems.length===0?<div className="empty">Brak ulubionych — polub korty w zakładce Szukaj!</div>:favItems.map(item=>(<div key={item.id} className="fav-row"><img src={item.img} alt={item.name}/><div className="fav-info"><h5>{item.name}</h5><span>{item.surface} · {item.courts} kortów</span></div><button className="btn-icon" onClick={()=>onToggleFav(item.id)}><i className="fas fa-heart" style={{color:'var(--danger)'}}></i></button></div>))}</div>);
+        return(<div className="page"><h2 className="page-title">Ulubione</h2>{favItems.length===0?<div className="empty">Brak ulubionych — polub korty w zakładce Szukaj!</div>:favItems.map(item=>(<div key={item.id} className="fav-row"><img src={item.img} alt={item.name}/><div className="fav-info"><h5>{item.name}</h5><span>{totalCourts(item.courts)} kortów</span></div><button className="btn-icon" onClick={()=>onToggleFav(item.id)}><i className="fas fa-heart" style={{color:'var(--danger)'}}></i></button></div>))}</div>);
     }
 
     /* ── FRIENDS ── */
@@ -867,13 +967,24 @@
         const [filterOpen,setFilterOpen]=useState(false);
         const [filtered,setFiltered]=useState(DATA);
         const [mapItem,setMapItem]=useState(null);
+        const [venueItem,setVenueItem]=useState(null);
         const [user,setUser]=useState(undefined);
         const [favs,setFavs]=useState([]);
         const [surf,setSurf]=useState('all');
         window.__setView=setView;
         useEffect(()=>{const iv=setInterval(()=>{if(window.__firebase){clearInterval(iv);window.__firebase.onAuthStateChanged(window.__firebase.auth,u=>{setUser(u||null);if(u){window.__firebase.getDoc(window.__firebase.doc(window.__firebase.db,'users',u.uid)).then(s=>{if(s.exists())setFavs(s.data().favourites||[]);});}else setFavs([]);});}},100);},[]);
         const toggleFav=async(id)=>{if(!user){setView('auth');return;}const fb=window.__firebase;const nf=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];setFavs(nf);await fb.setDoc(fb.doc(fb.db,'users',user.uid),{favourites:nf},{merge:true});};
-        const applyFilters=()=>{setFiltered(DATA.filter(it=>surf==='all'||it.surface===surf));setFilterOpen(false);};
+        const applyFilters=()=>{
+            setFiltered(DATA.filter(it=>{
+                if(surf==='all') return true;
+                if(surf==='ziemna') return (it.courts.maczka||0)>0;
+                if(surf==='twarda') return (it.courts.twarda||0)>0;
+                if(surf==='dywan')  return (it.courts.dywan||0)>0;
+                if(surf==='padel')  return (it.courts.padel||0)>0;
+                return true;
+            }));
+            setFilterOpen(false);
+        };
         const initials=user?.displayName?.charAt(0).toUpperCase()||user?.email?.charAt(0).toUpperCase()||null;
         const NAV_ITEMS=[
             {v:'home',icon:'fa-home',label:'Główna'},
@@ -933,13 +1044,15 @@
                             <h3 style={{margin:0,color:'var(--t1)',fontSize:'1em',fontWeight:700}}>Filtry</h3>
                             <button className="btn-close" onClick={()=>setFilterOpen(false)}>✕</button>
                         </div>
-                        <label className="field-label">Nawierzchnia</label>
-                        <select value={surf} onChange={e=>setSurf(e.target.value)}><option value="all">Wszystkie</option><option value="ziemna">Ziemna</option><option value="twarda">Twarda</option><option value="dywan">Dywan</option></select>
+                        <label className="field-label">Nawierzchnia / typ</label>
+                        <select value={surf} onChange={e=>setSurf(e.target.value)}><option value="all">Wszystkie</option><option value="ziemna">Mączka (ziemna)</option><option value="twarda">Twarda</option><option value="dywan">Dywan</option><option value="padel">Padel</option></select>
                         <button className="btn-primary" onClick={applyFilters}>Zastosuj</button>
                     </div>
 
                     {/* Map modal */}
                     {mapItem&&<MapModal item={mapItem} onClose={()=>setMapItem(null)}/>}
+                    {/* Venue detail sheet */}
+                    {venueItem&&<VenueSheet item={venueItem} isFav={favs.includes(venueItem.id)} onClose={()=>setVenueItem(null)} onMap={setMapItem} onFav={toggleFav} onReserve={()=>user?alert('Zarezerwowano'):setView('auth')}/>}
 
                     {/* Views */}
                     {view==='home'&&(
@@ -957,19 +1070,37 @@
                                 <h2 className="page-title" style={{margin:0}}>Korty</h2>
                                 <button className="btn-ghost" onClick={()=>setFilterOpen(true)}><i className="fas fa-sliders-h" style={{marginRight:6}}></i>Filtry</button>
                             </div>
-                            {filtered.map(item=>(
-                                <div key={item.id} className="card">
-                                    <img className="card-img" src={item.img} alt={item.name}/>
-                                    <div className="card-body">
-                                        <h4>{item.name}<span className="courts-badge">{item.courts}</span></h4>
-                                        <div className="card-actions">
-                                            <button className="btn-map-card" onClick={()=>setMapItem(item)}><i className="fas fa-map-marker-alt" style={{marginRight:5}}></i>Mapa</button>
-                                            <button className="btn-heart" onClick={()=>toggleFav(item.id)}>{favs.includes(item.id)?'❤️':'🤍'}</button>
-                                            <button className="btn-reserve-card" onClick={()=>user?alert('Zarezerwowano'):setView('auth')}>Rezerwuj</button>
+                            {filtered.map(item=>{
+                                const tc = totalCourts(item.courts);
+                                const pills = [];
+                                if (item.courts.maczka) pills.push({ label:`${item.courts.maczka} mączka`, color:'#b5893a' });
+                                if (item.courts.twarda) pills.push({ label:`${item.courts.twarda} twarda`, color:'#4a9eff' });
+                                if (item.courts.padel)  pills.push({ label:`${item.courts.padel} padel`, color:'var(--accent2)' });
+                                if (item.courts.dywan)  pills.push({ label:`${item.courts.dywan} dywan`, color:'#a78bfa' });
+                                return (
+                                    <div key={item.id} className="card">
+                                        <img className="card-img" src={item.img} alt={item.name}/>
+                                        <div className="card-body">
+                                            <h4 style={{marginBottom:6}}>
+                                                <button onClick={()=>setVenueItem(item)} style={{background:'none',border:'none',padding:0,color:'var(--t1)',fontWeight:700,fontFamily:'var(--font)',fontSize:'inherit',cursor:'pointer',textAlign:'left',textDecoration:'underline',textDecorationColor:'var(--border)',textUnderlineOffset:3}}>
+                                                    {item.name}
+                                                </button>
+                                                <span className="courts-badge">{tc}</span>
+                                            </h4>
+                                            <div style={{display:'flex',flexWrap:'wrap',gap:5,marginBottom:10}}>
+                                                {pills.map(p=>(
+                                                    <span key={p.label} style={{background:`${p.color}18`,color:p.color,border:`1px solid ${p.color}35`,padding:'2px 8px',borderRadius:20,fontSize:'0.7em',fontWeight:700}}>{p.label}</span>
+                                                ))}
+                                            </div>
+                                            <div className="card-actions">
+                                                <button className="btn-map-card" onClick={()=>setMapItem(item)}><i className="fas fa-map-marker-alt" style={{marginRight:5}}></i>Mapa</button>
+                                                <button className="btn-heart" onClick={()=>toggleFav(item.id)}>{favs.includes(item.id)?'❤️':'🤍'}</button>
+                                                <button className="btn-reserve-card" onClick={()=>user?alert('Zarezerwowano'):setView('auth')}>Rezerwuj</button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                     {view==='auth'&&<AuthScreen/>}
