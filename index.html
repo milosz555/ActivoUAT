@@ -154,7 +154,7 @@
 
     /* ── CARDS ── */
     .card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; }
-    .card-img { width: 100%; height: 160px; object-fit: cover; display: block; }
+
     .card-body { padding: 14px; }
     .card-body h4 { font-size: 0.97em; color: var(--t1); margin-bottom: 10px; }
     .card-actions { display: flex; gap: 9px; }
@@ -297,7 +297,6 @@
 
     /* ── FAVOURITES ── */
     .fav-row { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); display: flex; align-items: center; gap: 12px; padding: 11px; margin-bottom: 11px; }
-    .fav-row img { width: 54px; height: 54px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
     .fav-info { flex: 1; min-width: 0; }
     .fav-info h5 { font-size: 0.88em; color: var(--t1); margin-bottom: 2px; }
     .fav-info span { font-size: 0.74em; color: var(--t2); }
@@ -396,16 +395,14 @@
     const DATA = [
         {
             id:1, name:"Park Tenisowy Olimpia", address:"ul. Warmińska 1, Poznań", lat:52.4064, lng:16.9252,
-            img:"https://images.unsplash.com/photo-1499462823458-b4d2cfab36cc?w=600",
-            courts:{ maczka:5, twarda:5, padel:0 },
+            courts:{ maczka:7, twarda:3, padel:0 },
             parking:true, rental:true, trainers:true, shop:true,
             website:"https://parktenisowy.pl",
             bookingUrl:"https://player.playmore.pl/reservation/85/courts",
             desc:"Największy ośrodek tenisowy w Wielkopolsce, zlokalizowany w Lasku Golęcińskim. Kompleks oferuje korty indoor i outdoor, studio treningu personalnego, fizjoterapię oraz sklep Wilson i Lacoste. Organizator międzynarodowego turnieju Enea Poznań Open (ATP). Dostępny jest także pickleball i badminton."
         },
         {
-            id:2, name:"Posir Rataje", address:"ul. Łukaszewicza 34, Poznań", lat:52.3980, lng:16.9640,
-            img:"https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600",
+            id:2, name:"Posir Rataje", address:"Os. Piastowskie 106A, Poznań", lat:52.3980, lng:16.9640,
             courts:{ maczka:5, twarda:0, padel:4 },
             parking:true, rental:true, trainers:true, shop:false,
             website:null,
@@ -413,17 +410,15 @@
             desc:"Miejski obiekt sportowy zarządzany przez Poznańskie Ośrodki Sportu i Rekreacji. Oferuje 5 kortów tenisowych na mączce oraz 4 kryte korty do padla. Dostępne wypożyczenie sprzętu i zajęcia z trenerem."
         },
         {
-            id:3, name:"FairPlayce", address:"ul. Ratajczaka 10, Poznań", lat:52.4068, lng:16.9299,
-            img:"https://images.unsplash.com/photo-1617280947817-2333d1c1ef86?w=600",
-            courts:{ maczka:0, twarda:4, padel:0 },
+            id:3, name:"FairPlayce", address:"ul. Bożydara 10, Poznań", lat:52.4068, lng:16.9299,
+            courts:{ maczka:0, twarda:4, padel:0, dywan:4 },
             parking:false, rental:false, trainers:false, shop:false,
             website:null,
             bookingUrl:null,
-            desc:"Obiekt z kortami na twardej nawierzchni w centrum Poznania. Doskonała lokalizacja dla szybkiej gry po pracy lub na przerwie."
+            desc:"Obiekt z kortami na twardej nawierzchni i dywanie w Poznaniu. Doskonała lokalizacja dla szybkiej gry po pracy lub na przerwie."
         },
         {
-            id:4, name:"Kortowo", address:"ul. Bułgarska 67, Poznań", lat:52.3901, lng:16.8902,
-            img:"https://images.unsplash.com/photo-1531315396756-905d68d21b56?w=600",
+            id:4, name:"Kortowo", address:"Kortowo 62, Poznań", lat:52.3901, lng:16.8902,
             courts:{ maczka:7, twarda:0, padel:0, dywan:0 },
             courtsDetail:"3 zewnętrzne + 4 kryte",
             parking:true, rental:true, trainers:true, shop:true,
@@ -433,7 +428,6 @@
         },
         {
             id:5, name:"Centrum PLEK", address:"ul. Margonińska 25, Poznań (Smochowice)", lat:52.3934, lng:16.8278,
-            img:"https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=600",
             courts:{ maczka:0, twarda:0, padel:10 },
             parking:true, rental:true, trainers:true, shop:false,
             website:"https://centrumplek.pl",
@@ -442,7 +436,6 @@
         },
         {
             id:6, name:"InterPadel Poznań", address:"ul. Wołczyńska 18, Poznań (Fabianowo)", lat:52.3756, lng:16.8412,
-            img:"https://images.unsplash.com/photo-1545809074-59472b3f5ecc?w=600",
             courts:{ maczka:0, twarda:0, padel:9 },
             parking:true, rental:true, trainers:true, shop:true,
             website:"https://interpadel.pl/interpadel-poznan/",
@@ -949,7 +942,7 @@
     function FavouritesScreen({ user, favourites, onToggleFav }) {
         const favItems=DATA.filter(item=>favourites.includes(item.id));
         if(!user)return(<div className="lock-banner"><i className="fas fa-lock"></i><p>Ta sekcja jest dostępna tylko dla zalogowanych.</p><button className="btn-primary" onClick={()=>window.__setView('auth')}>Zaloguj się</button></div>);
-        return(<div className="page"><h2 className="page-title">Ulubione</h2>{favItems.length===0?<div className="empty">Brak ulubionych — polub korty w zakładce Szukaj!</div>:favItems.map(item=>(<div key={item.id} className="fav-row"><img src={item.img} alt={item.name}/><div className="fav-info"><h5>{item.name}</h5><span>{totalCourts(item.courts)} kortów</span></div><button className="btn-icon" onClick={()=>onToggleFav(item.id)}><i className="fas fa-heart" style={{color:'var(--danger)'}}></i></button></div>))}</div>);
+        return(<div className="page"><h2 className="page-title">Ulubione</h2>{favItems.length===0?<div className="empty">Brak ulubionych — polub korty w zakładce Szukaj!</div>:favItems.map(item=>(<div key={item.id} className="fav-row"><div className="fav-info"><h5>{item.name}</h5><span>{totalCourts(item.courts)} kortów</span></div><button className="btn-icon" onClick={()=>onToggleFav(item.id)}><i className="fas fa-heart" style={{color:'var(--danger)'}}></i></button></div>))}</div>);
     }
 
     /* ── FRIENDS ── */
