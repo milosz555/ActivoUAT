@@ -1095,9 +1095,38 @@
                         <div className="page" style={{paddingTop:20}}>
                             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
                                 <h2 className="page-title" style={{margin:0}}>Korty</h2>
-                                <button className="btn-ghost" onClick={()=>setFilterOpen(true)}><i className="fas fa-sliders-h" style={{marginRight:6}}></i>Filtry</button>
+                                <div style={{display:'flex',gap:8}}>
+                                    {/* List/Map toggle */}
+                                    <div style={{display:'flex',background:'var(--s2)',border:'1px solid var(--border)',borderRadius:9,padding:3,gap:3}}>
+                                        <button onClick={()=>setSearchView('list')} style={{padding:'6px 12px',borderRadius:7,border:'none',fontFamily:'var(--font)',fontSize:'0.78em',fontWeight:600,cursor:'pointer',background:searchView==='list'?'var(--s1)':'transparent',color:searchView==='list'?'var(--accent)':'var(--t2)',transition:'all 0.18s'}}>
+                                            <i className="fas fa-list" style={{marginRight:5}}></i>Lista
+                                        </button>
+                                        <button onClick={()=>setSearchView('map')} style={{padding:'6px 12px',borderRadius:7,border:'none',fontFamily:'var(--font)',fontSize:'0.78em',fontWeight:600,cursor:'pointer',background:searchView==='map'?'var(--s1)':'transparent',color:searchView==='map'?'var(--accent)':'var(--t2)',transition:'all 0.18s'}}>
+                                            <i className="fas fa-map" style={{marginRight:5}}></i>Mapa
+                                        </button>
+                                    </div>
+                                    <button className="btn-ghost" onClick={()=>setFilterOpen(true)}><i className="fas fa-sliders-h" style={{marginRight:6}}></i>Filtry</button>
+                                </div>
                             </div>
-                            {filtered.map(item=>{
+
+                            {/* MAP VIEW */}
+                            {searchView==='map'&&(
+                                <div style={{borderRadius:'var(--radius)',overflow:'hidden',border:'1px solid var(--border)',marginBottom:14}}>
+                                    <iframe
+                                        title="Mapa kortów — Poznań"
+                                        width="100%"
+                                        height="460"
+                                        style={{display:'block',border:'none'}}
+                                        loading="lazy"
+                                        allowFullScreen
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=Park+Tenisowy+Olimpia,+Warminska+1,+Poznan&zoom=13&language=pl"
+                                    ></iframe>
+                                </div>
+                            )}
+
+                            {/* LIST VIEW */}
+                            {searchView==='list'&&filtered.map(item=>{
                                 const tc = totalCourts(item.courts);
                                 const pills = [];
                                 if (item.courts.maczka) pills.push({ label:`${item.courts.maczka} mączka`, color:'#b5893a' });
