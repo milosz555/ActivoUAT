@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-
 <html lang="pl">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <title>Activo</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -13,1173 +12,294 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* ═══════════════════════════════════════
-           DESIGN TOKENS — dark court aesthetic
-           Background:  #0d0d0f  (near-black)
-           Surface-1:   #141418  (cards)
-           Surface-2:   #1c1c22  (elevated)
-           Border:      #27272f
-           Accent:      #b5ff4d  (electric lime)
-           Accent2:     #f97316  (padel orange)
-           Text-1:      #f0f0f0
-           Text-2:      #8c8c99
-           Danger:      #f43f5e
-        ═══════════════════════════════════════ */
         :root {
-            --bg:       #0d0d0f;
-            --s1:       #141418;
-            --s2:       #1c1c22;
-            --border:   #27272f;
-            --accent:   #b5ff4d;
-            --accent2:  #f97316;
-            --t1:       #f0f0f0;
-            --t2:       #8c8c99;
-            --danger:   #f43f5e;
-            --win:      #4ade80;
-            --radius:   12px;
-            --font:     'DM Sans', sans-serif;
-            --mono:     'DM Mono', monospace;
+            --bg: #0d0d0f; --s1: #141418; --s2: #1c1c22; --border: #27272f;
+            --accent: #b5ff4d; --accent2: #f97316; --t1: #f0f0f0; --t2: #8c8c99;
+            --danger: #f43f5e; --win: #4ade80; --radius: 12px;
+            --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { color-scheme: dark; }
-        body { font-family: var(--font); background: var(--bg); color: var(--t1); overflow-x: hidden; min-height: 100vh; }
+        body { font-family: var(--font); background: var(--bg); color: var(--t1); min-height: 100vh; -webkit-text-size-adjust: 100%; }
 
-```
-    /* scrollbar */
-    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: var(--s1); } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        /* FIX: Zapobieganie przybliżaniu na iOS (font-size musi być min 16px) */
+        input, select, textarea, .combobox { 
+            font-size: 16px !important; 
+            font-family: var(--font); background: var(--s2); color: var(--t1); 
+            border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px; width: 100%; 
+        }
 
-    /* ── DESKTOP WRAPPER ── */
-    .app-shell {
-        display: flex;
-        min-height: 100vh;
-    }
-    /* Desktop sidebar nav */
-    .desktop-nav {
-        display: none;
-        position: fixed;
-        top: 0; left: 0; bottom: 0;
-        width: 220px;
-        background: var(--s1);
-        border-right: 1px solid var(--border);
-        padding: 28px 16px;
-        flex-direction: column;
-        gap: 4px;
-        z-index: 200;
-    }
-    .desktop-nav .logo { font-size: 1.2em; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 28px; padding: 0 8px; }
-    .desk-nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: var(--radius); font-size: 0.9em; font-weight: 500; color: var(--t2); cursor: pointer; text-decoration: none; transition: background 0.15s, color 0.15s; border: none; background: none; font-family: var(--font); width: 100%; }
-    .desk-nav-item i { width: 18px; text-align: center; font-size: 0.95em; }
-    .desk-nav-item:hover { background: var(--s2); color: var(--t1); }
-    .desk-nav-item.active { background: var(--accent); color: #0d0d0f; font-weight: 700; }
-    .desk-nav-item.active i { color: #0d0d0f; }
-    .desk-nav-spacer { flex: 1; }
-    .desk-user-block { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 8px; }
-    .desk-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em; color: #0d0d0f; flex-shrink: 0; cursor: pointer; }
-
-    /* Content area */
-    .content-area {
-        flex: 1;
-        min-width: 0;
-    }
-
-    /* ── MOBILE TOP NAV ── */
-    .top-nav {
-        background: var(--s1);
-        border-bottom: 1px solid var(--border);
-        padding: 0 16px;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-    .top-nav .logo { font-size: 1.05em; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; }
-    .top-nav .nav-right { display: flex; align-items: center; gap: 12px; }
-    .hamburger { background: none; border: none; color: var(--t1); font-size: 1.2em; cursor: pointer; padding: 6px; line-height: 1; flex-shrink: 0; }
-    .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.82em; color: #0d0d0f; cursor: pointer; flex-shrink: 0; }
-
-    /* ── MOBILE BOTTOM NAV ── */
-    .bottom-nav {
-        position: fixed; bottom: 0; left: 0; right: 0;
-        background: var(--s1);
-        border-top: 1px solid var(--border);
-        display: flex;
-        z-index: 100;
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-    .bottom-nav-item { flex: 1; padding: 10px 5px; text-align: center; cursor: pointer; font-size: 0.6em; color: var(--t2); transition: color 0.15s; border: none; background: none; font-family: var(--font); }
-    .bottom-nav-item i { display: block; font-size: 1.45em; margin-bottom: 3px; }
-    .bottom-nav-item.active { color: var(--accent); }
-
-    /* ── DRAWER / OVERLAY ── */
-    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: none; backdrop-filter: blur(2px); }
-    .drawer-overlay.show { display: block; }
-    .drawer { position: fixed; top: 0; left: -260px; bottom: 0; width: 260px; background: var(--s1); border-right: 1px solid var(--border); z-index: 400; padding: 60px 16px 24px; transition: left 0.25s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; gap: 4px; }
-    .drawer.open { left: 0; }
-    .drawer .logo { font-size: 1.1em; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 20px; padding: 0 8px; }
-    .drawer-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: var(--radius); font-size: 0.92em; font-weight: 500; color: var(--t2); cursor: pointer; border: none; background: none; font-family: var(--font); width: 100%; text-align: left; }
-    .drawer-item i { width: 18px; text-align: center; }
-    .drawer-item:hover, .drawer-item.active { background: var(--s2); color: var(--t1); }
-
-    /* Filter panel */
-    .filter-panel { position: fixed; top: 0; right: -280px; bottom: 0; width: 280px; background: var(--s1); border-left: 1px solid var(--border); z-index: 400; padding: 60px 20px 24px; transition: right 0.25s cubic-bezier(.4,0,.2,1); }
-    .filter-panel.open { right: 0; }
-    .filter-panel h3 { color: var(--t1); font-size: 1em; margin-bottom: 20px; }
-
-    /* ── PAGE CONTAINER ── */
-    .page { padding: 20px 16px 90px; max-width: 680px; margin: 0 auto; }
-    .page-title { font-size: 1.15em; font-weight: 700; color: var(--t1); margin-bottom: 18px; }
-
-    /* ── INPUTS ── */
-    input, select, textarea { font-family: var(--font); font-size: 15px; background: var(--s2); color: var(--t1); border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px; width: 100%; transition: border-color 0.15s; }
-    input:focus, select:focus { outline: none; border-color: var(--accent); }
-    input::placeholder { color: var(--t2); }
-    select option { background: var(--s2); }
-    label.field-label { display: block; font-size: 0.76em; font-weight: 600; color: var(--t2); margin-bottom: 5px; margin-top: 12px; letter-spacing: 0.02em; text-transform: uppercase; }
-    label.field-label:first-child { margin-top: 0; }
-
-    /* ── BUTTONS ── */
-    .btn-primary { background: var(--accent); color: #0d0d0f; border: none; padding: 13px 20px; border-radius: 9px; font-weight: 700; font-family: var(--font); font-size: 0.9em; cursor: pointer; width: 100%; transition: opacity 0.15s; }
-    .btn-primary:hover { opacity: 0.88; }
-    .btn-primary:disabled { opacity: 0.45; }
-    .btn-ghost { background: var(--s2); color: var(--t1); border: 1px solid var(--border); padding: 11px 16px; border-radius: 9px; font-weight: 600; font-family: var(--font); font-size: 0.85em; cursor: pointer; }
-    .btn-ghost:hover { border-color: var(--t2); }
-    .btn-danger { background: rgba(244,63,94,0.12); color: var(--danger); border: 1px solid rgba(244,63,94,0.25); padding: 12px; width: 100%; border-radius: 9px; font-weight: 700; font-family: var(--font); font-size: 0.88em; cursor: pointer; margin-top: 9px; }
-    .btn-close { background: none; border: none; color: var(--t2); font-size: 1.3em; cursor: pointer; padding: 4px; line-height: 1; }
-    .btn-close:hover { color: var(--t1); }
-    .btn-icon { background: none; border: none; color: var(--t2); font-size: 0.95em; cursor: pointer; padding: 6px; line-height: 1; transition: color 0.15s; }
-    .btn-icon:hover { color: var(--t1); }
-
-    /* ── CARDS ── */
-    .card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; }
-
-    .card-body { padding: 14px; }
-    .card-body h4 { font-size: 0.97em; color: var(--t1); margin-bottom: 10px; }
-    .card-actions { display: flex; gap: 9px; }
-    .btn-map-card { background: var(--s2); color: var(--t1); border: 1px solid var(--border); padding: 9px; flex: 1; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.83em; font-family: var(--font); transition: border-color 0.15s; }
-    .btn-map-card:hover { border-color: var(--t2); }
-    .btn-reserve-card { background: var(--accent); color: #0d0d0f; border: none; padding: 9px; flex: 1; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.83em; font-family: var(--font); }
-    .btn-heart { background: none; border: none; font-size: 1.2em; cursor: pointer; padding: 4px 8px; line-height: 1; }
-    .courts-badge { display: inline-block; background: rgba(181,255,77,0.12); color: var(--accent); font-size: 0.72em; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-left: 7px; font-family: var(--mono); }
-
-    /* ── SECTION LABEL ── */
-    .sect-label { font-size: 0.68em; font-weight: 700; color: var(--t2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
-
-    /* ── PROFILE HEADER ── */
-    .profile-hero { background: var(--s1); border-bottom: 1px solid var(--border); padding: 28px 20px 20px; }
-    .profile-hero-inner { max-width: 680px; margin: 0 auto; display: flex; align-items: center; gap: 18px; }
-    .profile-avatar-lg { width: 64px; height: 64px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.6em; font-weight: 700; color: #0d0d0f; flex-shrink: 0; }
-    .profile-hero-info { flex: 1; min-width: 0; }
-    .profile-hero-info h2 { font-size: 1.1em; font-weight: 700; color: var(--t1); }
-    .profile-hero-info p { font-size: 0.78em; color: var(--t2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .btn-edit-prof { background: var(--s2); border: 1px solid var(--border); color: var(--t2); padding: 6px 13px; border-radius: 20px; font-size: 0.75em; font-weight: 600; font-family: var(--font); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-    .btn-edit-prof:hover { color: var(--t1); }
-
-    /* ── PROFILE TABS ── */
-    .profile-tabs { background: var(--s1); border-bottom: 1px solid var(--border); display: flex; position: sticky; top: 56px; z-index: 50; }
-    .profile-tab { flex: 1; padding: 13px 5px 11px; text-align: center; font-size: 0.7em; font-weight: 600; color: var(--t2); border: none; background: none; font-family: var(--font); cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.15s; }
-    .profile-tab i { display: block; font-size: 1.2em; margin-bottom: 3px; }
-    .profile-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-    /* ── SURFACE CARD ── */
-    .surf-card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
-    .surf-card h4 { font-size: 0.88em; font-weight: 600; color: var(--t1); display: flex; align-items: center; gap: 7px; margin-bottom: 13px; }
-    .surf-card h4 .card-action { margin-left: auto; }
-    .row-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 0.83em; }
-    .row-item:last-child { border-bottom: none; }
-    .row-item .lbl { color: var(--t2); }
-    .row-item .val { font-weight: 600; color: var(--t1); }
-
-    /* ── STATS ROW ── */
-    .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-    .stat-box { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 8px; text-align: center; }
-    .stat-num { font-size: 1.7em; font-weight: 700; color: var(--accent); font-family: var(--mono); line-height: 1; }
-    .stat-lbl { font-size: 0.62em; color: var(--t2); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-
-    /* ── CHART ── */
-    .chart-toggle { display: flex; background: var(--s2); border-radius: 8px; padding: 3px; margin-bottom: 14px; border: 1px solid var(--border); }
-    .chart-toggle-btn { flex: 1; padding: 7px; text-align: center; font-family: var(--font); font-size: 0.78em; font-weight: 600; cursor: pointer; border: none; background: none; color: var(--t2); border-radius: 6px; transition: all 0.18s; }
-    .chart-toggle-btn.active { background: var(--s1); color: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
-    .chart-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
-    .chart-empty { font-size: 0.82em; color: var(--t2); text-align: center; padding: 20px 0; }
-
-    /* ── STATS DETAIL BUTTON ── */
-    .btn-stats-detail { display: flex; align-items: center; justify-content: space-between; background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 16px; width: 100%; font-family: var(--font); font-size: 0.86em; font-weight: 600; color: var(--t1); cursor: pointer; margin-bottom: 14px; transition: border-color 0.15s; }
-    .btn-stats-detail:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-stats-detail .chevron { color: var(--t2); }
-
-    /* ── ACTIVITY ENTRY ── */
-    .act-entry { padding: 11px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-    .act-entry:last-child { border-bottom: none; }
-    .act-left { flex: 1; min-width: 0; }
-    .act-title { font-size: 0.85em; font-weight: 600; color: var(--t1); display: flex; flex-wrap: wrap; align-items: center; gap: 5px; line-height: 1.5; }
-    .act-date { font-size: 0.74em; color: var(--t2); margin-top: 2px; }
-    .act-details { font-size: 0.73em; color: var(--t2); margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .act-details span { display: flex; align-items: center; gap: 3px; }
-
-    /* ── BADGES ── */
-    .badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; font-size: 0.72em; font-weight: 700; }
-    .badge-tenis { background: rgba(181,255,77,0.1); color: var(--accent); border: 1px solid rgba(181,255,77,0.2); }
-    .badge-padel { background: rgba(249,115,22,0.12); color: var(--accent2); border: 1px solid rgba(249,115,22,0.2); }
-    .badge-W { background: rgba(74,222,128,0.1); color: var(--win); border: 1px solid rgba(74,222,128,0.2); }
-    .badge-L { background: rgba(244,63,94,0.1); color: var(--danger); border: 1px solid rgba(244,63,94,0.2); }
-    .badge-D { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
-    .badge-shared { background: rgba(167,139,250,0.1); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); font-size: 0.68em; }
-
-    /* ── ADD FORM ── */
-    .add-form { background: var(--s2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-top: 12px; }
-    .sport-selector { display: flex; gap: 8px; }
-    .sport-opt { flex: 1; padding: 10px 5px; border: 1.5px solid var(--border); border-radius: 9px; background: var(--s1); font-family: var(--font); font-size: 0.85em; font-weight: 600; cursor: pointer; text-align: center; color: var(--t2); transition: all 0.18s; }
-    .sport-opt.sel-t { border-color: var(--accent); background: rgba(181,255,77,0.08); color: var(--accent); }
-    .sport-opt.sel-p { border-color: var(--accent2); background: rgba(249,115,22,0.08); color: var(--accent2); }
-    .opp-wrap { position: relative; }
-    .opp-wrap select { appearance: none; -webkit-appearance: none; padding-right: 34px; }
-    .opp-wrap::after { content: '\f107'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--t2); pointer-events: none; font-size: 0.88em; }
-    .hint-text { font-size: 0.74em; color: var(--t2); text-align: center; padding: 5px 0; font-style: italic; }
-
-    /* ── STATS SHEET ── */
-    .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 500; display: flex; align-items: flex-end; backdrop-filter: blur(3px); }
-    .sheet { background: var(--s1); width: 100%; border-radius: 20px 20px 0 0; max-height: 92vh; overflow-y: auto; border-top: 1px solid var(--border); }
-    .sheet-header { padding: 18px 18px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--s1); z-index: 10; }
-    .sheet-header h3 { font-size: 0.97em; font-weight: 700; color: var(--t1); }
-    .sheet-body { padding: 16px; }
-    .stats-sheet-bg { background: var(--bg); }
-    .stats-sect-title { font-size: 0.67em; font-weight: 700; color: var(--t2); text-transform: uppercase; letter-spacing: 0.07em; margin: 16px 0 8px; }
-    .stats-sect-title:first-child { margin-top: 0; }
-    .win-row { display: flex; justify-content: space-around; align-items: center; padding: 10px 0; }
-    .win-stat { text-align: center; }
-    .win-stat .wnum { font-size: 1.7em; font-weight: 700; font-family: var(--mono); line-height: 1; }
-    .win-stat .wlbl { font-size: 0.66em; color: var(--t2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 3px; }
-    .win-sep { width: 1px; height: 38px; background: var(--border); }
-    .sport-split { display: flex; gap: 10px; margin-bottom: 14px; }
-    .sport-split-box { flex: 1; background: var(--s2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
-    .sport-split-num { font-size: 1.4em; font-weight: 700; font-family: var(--mono); line-height: 1; }
-    .sport-split-lbl { font-size: 0.67em; color: var(--t2); margin-top: 3px; font-weight: 600; }
-    .partner-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-    .partner-row:last-child { border-bottom: none; }
-    .p-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--s2); border: 1px solid var(--border); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em; flex-shrink: 0; }
-    .p-info { flex: 1; }
-    .p-name { font-size: 0.85em; font-weight: 600; color: var(--t1); }
-    .p-games { font-size: 0.74em; color: var(--t2); margin-top: 1px; }
-    .p-bar-wrap { width: 54px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-    .p-bar { height: 100%; background: var(--accent); border-radius: 2px; }
-    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 0.84em; }
-    .stat-row:last-child { border-bottom: none; }
-    .stat-row .s-lbl { color: var(--t2); }
-    .stat-row .s-val { font-weight: 700; color: var(--t1); font-family: var(--mono); }
-
-    /* ── EDIT SHEET ── */
-    .edit-label { display: block; font-size: 0.74em; font-weight: 600; color: var(--t2); margin-bottom: 5px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.02em; }
-    .edit-label:first-of-type { margin-top: 0; }
-    .readonly-note { font-size: 0.76em; color: var(--t2); font-style: italic; margin-top: 5px; }
-
-    /* ── CONFIRM ── */
-    .confirm-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 700; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
-    .confirm-box { background: var(--s1); border: 1px solid var(--border); border-radius: 18px; padding: 28px 22px 22px; width: 100%; max-width: 320px; text-align: center; }
-    .confirm-box .ci { font-size: 2.2em; margin-bottom: 12px; display: block; }
-    .confirm-box h4 { color: var(--t1); font-size: 1em; margin-bottom: 7px; }
-    .confirm-box p { color: var(--t2); font-size: 0.83em; line-height: 1.55; margin-bottom: 20px; }
-    .confirm-btns { display: flex; gap: 10px; }
-    .btn-cc { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--s2); font-family: var(--font); font-weight: 600; font-size: 0.86em; cursor: pointer; color: var(--t1); }
-    .btn-cd { flex: 1; padding: 12px; border: none; border-radius: 9px; background: var(--danger); color: white; font-family: var(--font); font-weight: 700; font-size: 0.86em; cursor: pointer; }
-
-    /* ── AUTH ── */
-    .auth-tabs-row { display: flex; background: var(--s2); border-radius: 10px; padding: 3px; margin-bottom: 18px; border: 1px solid var(--border); }
-    .auth-tab-btn { flex: 1; padding: 9px; text-align: center; font-weight: 600; font-size: 0.87em; cursor: pointer; color: var(--t2); border: none; background: none; font-family: var(--font); border-radius: 8px; transition: all 0.18s; }
-    .auth-tab-btn.active { background: var(--s1); color: var(--accent); }
-    .auth-card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 18px; }
-    .auth-card h2 { font-size: 1.15em; color: var(--t1); margin-bottom: 4px; }
-    .auth-card .subtitle { color: var(--t2); font-size: 0.82em; margin-bottom: 20px; }
-    .auth-error { background: rgba(244,63,94,0.1); color: var(--danger); border: 1px solid rgba(244,63,94,0.2); padding: 10px 13px; border-radius: 8px; font-size: 0.82em; margin-top: 10px; }
-    .auth-success { background: rgba(74,222,128,0.1); color: var(--win); border: 1px solid rgba(74,222,128,0.2); padding: 10px 13px; border-radius: 8px; font-size: 0.82em; margin-top: 10px; }
-
-    /* ── FAVOURITES ── */
-    .fav-row { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); display: flex; align-items: center; gap: 12px; padding: 11px; margin-bottom: 11px; }
-    .fav-info { flex: 1; min-width: 0; }
-    .fav-info h5 { font-size: 0.88em; color: var(--t1); margin-bottom: 2px; }
-    .fav-info span { font-size: 0.74em; color: var(--t2); }
-
-    /* ── FRIENDS ── */
-    .tabs-seg { display: flex; background: var(--s2); border-radius: 9px; padding: 3px; margin-bottom: 16px; border: 1px solid var(--border); }
-    .tab-seg-btn { flex: 1; padding: 8px; text-align: center; border-radius: 7px; font-size: 0.82em; font-weight: 600; cursor: pointer; border: none; background: none; color: var(--t2); font-family: var(--font); transition: all 0.18s; }
-    .tab-seg-btn.active { background: var(--s1); color: var(--accent); }
-    .friend-row { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; margin-bottom: 10px; }
-    .friend-row-hdr { display: flex; align-items: center; gap: 12px; }
-    .f-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--s2); border: 1px solid var(--border); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1em; flex-shrink: 0; }
-    .f-info { flex: 1; }
-    .f-info h5 { font-size: 0.9em; color: var(--t1); margin-bottom: 1px; }
-    .f-info span { font-size: 0.74em; color: var(--t2); }
-    .search-bar { display: flex; gap: 9px; margin-bottom: 14px; }
-    .search-bar input { flex: 1; }
-    .btn-search { background: var(--accent); color: #0d0d0f; border: none; padding: 11px 16px; border-radius: 9px; font-family: var(--font); font-weight: 700; font-size: 0.84em; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-    .result-card { background: var(--s2); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px; margin-bottom: 10px; }
-    .btn-add-f { background: var(--accent); color: #0d0d0f; border: none; padding: 6px 13px; border-radius: 20px; font-family: var(--font); font-size: 0.77em; font-weight: 700; cursor: pointer; white-space: nowrap; }
-    .btn-rem-f { background: var(--s2); color: var(--t2); border: 1px solid var(--border); padding: 6px 13px; border-radius: 20px; font-family: var(--font); font-size: 0.77em; font-weight: 600; cursor: pointer; white-space: nowrap; }
-    .fav-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-    .fav-tag { background: rgba(181,255,77,0.07); color: var(--accent); border: 1px solid rgba(181,255,77,0.15); font-size: 0.7em; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
-
-    /* ── MAP ── */
-    .map-sheet { background: var(--s1); }
-    #map-container { width: 100%; height: 260px; border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
-    .map-info-row { display: flex; align-items: center; gap: 9px; font-size: 0.84em; color: var(--t2); margin-bottom: 8px; }
-    .map-info-row i { color: var(--accent); width: 16px; }
-
-    /* ── HERO ── */
-    .hero-section { background: linear-gradient(135deg, #13131a 0%, #0d1a0d 100%); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 20px; margin-bottom: 16px; position: relative; overflow: hidden; }
-    .hero-section::before { content: ''; position: absolute; top: -40px; right: -40px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(181,255,77,0.08) 0%, transparent 70%); border-radius: 50%; }
-    .hero-section h2 { font-size: 1.25em; font-weight: 700; color: var(--t1); margin-bottom: 7px; }
-    .hero-section p { color: var(--t2); font-size: 0.84em; margin-bottom: 16px; }
-
-    /* ── LOCK BANNER ── */
-    .lock-banner { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 20px; text-align: center; margin: 20px; }
-    .lock-banner i { font-size: 1.8em; color: var(--t2); margin-bottom: 12px; display: block; }
-    .lock-banner p { color: var(--t2); font-size: 0.88em; margin-bottom: 16px; }
-
-    /* ── PRIVACY TOGGLE ── */
-    .priv-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); }
-    .priv-row:last-child { border-bottom: none; }
-    .priv-label { font-size: 0.86em; color: var(--t1); }
-    .priv-label small { display: block; color: var(--t2); font-size: 0.8em; margin-top: 1px; }
-    .toggle-wrap { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
-    .toggle-wrap input { opacity: 0; width: 0; height: 0; }
-    .toggle-track { position: absolute; inset: 0; background: var(--s2); border: 1px solid var(--border); border-radius: 24px; cursor: pointer; transition: 0.25s; }
-    .toggle-track::before { content: ''; position: absolute; width: 17px; height: 17px; left: 3px; top: 3px; background: var(--t2); border-radius: 50%; transition: 0.25s; }
-    .toggle-wrap input:checked + .toggle-track { background: var(--accent); border-color: var(--accent); }
-    .toggle-wrap input:checked + .toggle-track::before { transform: translateX(20px); background: #0d0d0f; }
-
-    /* ── EMPTY ── */
-    .empty { color: var(--t2); font-size: 0.84em; text-align: center; padding: 24px 0; }
-
-    /* ── FILTER PANEL INSIDE ── */
-    .filter-panel-inner { padding: 0; }
-
-    /* ── DESKTOP RESPONSIVE ── */
-    @media (min-width: 768px) {
-        .desktop-nav { display: flex; }
-        .top-nav { display: none; }
-        .bottom-nav { display: none; }
-        .drawer { display: none; }
-        .drawer-overlay { display: none !important; }
-        .content-area { margin-left: 220px; }
-        .page { padding: 28px 28px 40px; }
-        .profile-tabs { top: 0; }
-        .sheet { max-width: 560px; margin: 0 auto; border-radius: 20px; }
-        .sheet-bg { align-items: center; }
-        .confirm-bg { padding: 0; }
-    }
-    @media (min-width: 1100px) {
-        .desktop-nav { width: 240px; }
-        .content-area { margin-left: 240px; }
-        .page { max-width: 780px; }
-    }
-</style>
-```
-
+        .app-shell { display: flex; min-height: 100vh; }
+        .desktop-nav { display: none; position: fixed; top: 0; left: 0; bottom: 0; width: 220px; background: var(--s1); border-right: 1px solid var(--border); padding: 28px 16px; flex-direction: column; gap: 4px; z-index: 200; }
+        .desk-nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: var(--radius); font-size: 0.9em; font-weight: 500; color: var(--t2); cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+        .desk-nav-item.active { background: var(--accent); color: #0d0d0f; font-weight: 700; }
+        .content-area { flex: 1; min-width: 0; }
+        .top-nav { background: var(--s1); border-bottom: 1px solid var(--border); padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.1em; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--s1); border-top: 1px solid var(--border); display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-nav-item { flex: 1; padding: 10px 5px; text-align: center; color: var(--t2); border: none; background: none; font-size: 0.6em; }
+        .bottom-nav-item i { display: block; font-size: 1.5em; margin-bottom: 3px; }
+        .bottom-nav-item.active { color: var(--accent); }
+        .page { padding: 20px 16px 100px; max-width: 680px; margin: 0 auto; }
+        .card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 12px; }
+        .btn-primary { background: var(--accent); color: #0d0d0f; border: none; padding: 13px; border-radius: 9px; font-weight: 700; width: 100%; cursor: pointer; }
+        .field-label { display: block; font-size: 0.75em; font-weight: 600; color: var(--t2); margin: 12px 0 5px; text-transform: uppercase; }
+        .sport-selector { display: flex; gap: 8px; margin-bottom: 10px; }
+        .sport-opt { flex: 1; padding: 10px; border: 1.5px solid var(--border); border-radius: 9px; background: var(--s1); color: var(--t2); font-weight: 600; cursor: pointer; }
+        .sport-opt.sel-t { border-color: var(--accent); color: var(--accent); }
+        .sport-opt.sel-p { border-color: var(--accent2); color: var(--accent2); }
+        .act-entry { padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .badge { padding: 2px 8px; border-radius: 10px; font-size: 0.7em; font-weight: 700; margin-right: 5px; }
+        .badge-tenis { background: rgba(181,255,77,0.1); color: var(--accent); }
+        .badge-padel { background: rgba(249,115,22,0.1); color: var(--accent2); }
+        .img-preview { width: 100%; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border); }
+        .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 500; display: flex; align-items: flex-end; backdrop-filter: blur(4px); }
+        .sheet { background: var(--s1); width: 100%; border-radius: 20px 20px 0 0; max-height: 90vh; overflow-y: auto; padding: 20px; }
+        @media (min-width: 768px) {
+            .desktop-nav { display: flex; } .top-nav, .bottom-nav { display: none; }
+            .content-area { margin-left: 220px; }
+        }
+    </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
     const app = initializeApp({ apiKey:"AIzaSyAz01TWvm83M8OUYDevXmo1vt7q64zcbR8", authDomain:"activo-2ccb5.firebaseapp.com", projectId:"activo-2ccb5", storageBucket:"activo-2ccb5.firebasestorage.app", messagingSenderId:"158201159420", appId:"1:158201159420:web:b2fdf18e9f7741fd0f0179" });
-    window.__firebase = { auth: getAuth(app), db: getFirestore(app), createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, doc, setDoc, getDoc, serverTimestamp, collection, getDocs };
+    window.__firebase = { auth: getAuth(app), db: getFirestore(app), onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, doc, setDoc, getDoc, collection, getDocs, serverTimestamp };
 </script>
 
 <script type="text/babel">
-    const { useState, useEffect, useRef, useMemo } = React;
+    const { useState, useEffect, useMemo } = React;
 
     const DATA = [
-        {
-            id:1, name:"Park Tenisowy Olimpia", address:"ul. Warmińska 1, Poznań", lat:52.4064, lng:16.9252,
-            courts:{ maczka:7, twarda:3, padel:0 },
-            parking:true, rental:true, trainers:true, shop:true,
-            website:"https://parktenisowy.pl",
-            bookingUrl:"https://player.playmore.pl/reservation/85/courts",
-            desc:"Największy ośrodek tenisowy w Wielkopolsce, zlokalizowany w Lasku Golęcińskim. Kompleks oferuje korty indoor i outdoor, studio treningu personalnego, fizjoterapię oraz sklep Wilson i Lacoste. Organizator międzynarodowego turnieju Enea Poznań Open (ATP). Dostępny jest także pickleball i badminton."
-        },
-        {
-            id:2, name:"Posir Rataje", address:"Os. Piastowskie 106A, Poznań", lat:52.3980, lng:16.9640,
-            courts:{ maczka:5, twarda:0, padel:4 },
-            parking:true, rental:true, trainers:true, shop:false,
-            website:null,
-            bookingUrl:null,
-            desc:"Miejski obiekt sportowy zarządzany przez Poznańskie Ośrodki Sportu i Rekreacji. Oferuje 5 kortów tenisowych na mączce oraz 4 kryte korty do padla. Dostępne wypożyczenie sprzętu i zajęcia z trenerem."
-        },
-        {
-            id:3, name:"FairPlayce", address:"ul. Bożydara 10, Poznań", lat:52.4068, lng:16.9299,
-            courts:{ maczka:0, twarda:4, padel:0, dywan:4 },
-            parking:false, rental:false, trainers:false, shop:false,
-            website:null,
-            bookingUrl:null,
-            desc:"Obiekt z kortami na twardej nawierzchni i dywanie w Poznaniu. Doskonała lokalizacja dla szybkiej gry po pracy lub na przerwie."
-        },
-        {
-            id:4, name:"Kortowo", address:"Kortowo 62, Poznań", lat:52.3901, lng:16.8902,
-            courts:{ maczka:7, twarda:0, padel:0, dywan:0 },
-            courtsDetail:"3 zewnętrzne + 4 kryte",
-            parking:true, rental:true, trainers:true, shop:true,
-            website:"https://www.kortowo.com.pl",
-            bookingUrl:"https://player.playmore.pl/reservation/71/courts",
-            desc:"Kompleks hotelowo-sportowy z 7 kortami tenisowymi na mączce (3 zewnętrzne + 4 kryte), czynny przez cały rok niezależnie od pogody. Na miejscu hotel***, restauracja, sklep tenisowy oraz wypożyczalnia sprzętu. Zajęcia z trenerami dostępne przez cały rok."
-        },
-        {
-            id:5, name:"Centrum PLEK", address:"ul. Margonińska 25, Poznań (Smochowice)", lat:52.3934, lng:16.8278,
-            courts:{ maczka:0, twarda:0, padel:10 },
-            parking:true, rental:true, trainers:true, shop:false,
-            website:"https://centrumplek.pl",
-            bookingUrl:"https://playtomic.io/plek-poznan/56e1531e-e108-42af-b877-834a53381efa?q=PADEL",
-            desc:"Jedyny w Poznaniu całoroczny, zadaszony obiekt sportowy z 10 profesjonalnymi kortami do padla spełniającymi międzynarodowe standardy. Honoruje karty Multisport, PZU Sport, Medicover i FitProfit. Rezerwacja przez aplikację Playtomic."
-        },
-        {
-            id:6, name:"InterPadel Poznań", address:"ul. Wołczyńska 18, Poznań (Fabianowo)", lat:52.3756, lng:16.8412,
-            courts:{ maczka:0, twarda:0, padel:9 },
-            parking:true, rental:true, trainers:true, shop:true,
-            website:"https://interpadel.pl/interpadel-poznan/",
-            bookingUrl:"https://playtomic.com/clubs/interpadel-poznan",
-            desc:"Największy ośrodek do gry w padla pod halą w Wielkopolsce — 9 profesjonalnych kortów (8 deblowych + 1 singlowy) w hali o wysokości 11 metrów. Strefa Lounge, ProShop z rakietami HEAD, Babolat i OXDOG. Otwarty 5:00–1:00, rezerwacja przez Playtomic."
-        },
+        { id:1, name:"Park Tenisowy Olimpia", address:"ul. Warmińska 1, Poznań" },
+        { id:2, name:"Posir Rataje", address:"Os. Piastowskie 106A, Poznań" },
+        { id:3, name:"FairPlayce", address:"ul. Bożydara 10, Poznań" },
+        { id:4, name:"Kortowo", address:"Kortowo 62, Poznań" },
+        { id:5, name:"Centrum PLEK", address:"ul. Margonińska 25, Poznań" },
+        { id:6, name:"InterPadel Poznań", address:"ul. Wołczyńska 18, Poznań" }
     ];
-    const SE = { tenis:'🎾', padel:'🏓' };
-    const SL = { tenis:'Tenis', padel:'Padel' };
-    const RL = { W:'Wygrana', L:'Przegrana', D:'Remis' };
-    const PM = ['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'];
 
-    function getWeekKey(ds) { const d=new Date(ds); d.setHours(0,0,0,0); const day=d.getDay()||7; d.setDate(d.getDate()-day+1); return d.toISOString().split('T')[0]; }
-    function weekLabel(k) { const d=new Date(k); return `${d.getDate()}.${d.getMonth()+1}`; }
-    function allPlayers(e) { return e.sport==='padel'?(e.padelOpponents||[]):(e.opponent?[e.opponent]:[]); }
-    function totalCourts(c) { return (c.maczka||0)+(c.twarda||0)+(c.padel||0)+(c.dywan||0); }
-
-    /* ── VENUE SHEET ── */
-    function VenueSheet({ item, onClose, onMap, onFav, isFav, onReserve }) {
-        const tc = totalCourts(item.courts);
-        const pills = [];
-        if (item.courts.maczka)  pills.push({ label:`${item.courts.maczka} mączka`, color:'#b5893a' });
-        if (item.courts.twarda)  pills.push({ label:`${item.courts.twarda} twarda`, color:'#4a9eff' });
-        if (item.courts.padel)   pills.push({ label:`${item.courts.padel} padel`, color:'var(--accent2)' });
-        if (item.courts.dywan)   pills.push({ label:`${item.courts.dywan} dywan`, color:'#a78bfa' });
-        return (
-            <div className="sheet-bg" onClick={e=>e.target===e.currentTarget&&onClose()}>
-                <div className="sheet" style={{maxHeight:'88vh'}}>
-                    <div className="sheet-header">
-                        <h3>{item.name}</h3>
-                        <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                            <button onClick={()=>onFav(item.id)} style={{background:'none',border:'none',cursor:'pointer',fontSize:'1.2em',padding:'2px 4px'}}>{isFav?'❤️':'🤍'}</button>
-                            <button className="btn-close" onClick={onClose}>✕</button>
-                        </div>
-                    </div>
-                    <div className="sheet-body">
-                        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,marginBottom:12}}>
-                            <div>
-                                <div style={{fontSize:'0.78em',color:'var(--t2)',display:'flex',alignItems:'center',gap:5}}>
-                                    <i className="fas fa-map-marker-alt" style={{color:'var(--accent)',fontSize:'0.9em'}}></i>{item.address}
-                                </div>
-                            </div>
-                            <div style={{textAlign:'right',flexShrink:0}}>
-                                <div style={{fontSize:'1.6em',fontWeight:700,color:'var(--accent)',fontFamily:'var(--mono)',lineHeight:1}}>{tc}</div>
-                                <div style={{fontSize:'0.62em',color:'var(--t2)',textTransform:'uppercase',letterSpacing:'0.04em',marginTop:2}}>kortów</div>
-                            </div>
-                        </div>
-                        <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom: item.courtsDetail ? 6 : 14}}>
-                            {pills.map(p=>(
-                                <span key={p.label} style={{background:`${p.color}18`,color:p.color,border:`1px solid ${p.color}35`,padding:'3px 10px',borderRadius:20,fontSize:'0.75em',fontWeight:700}}>{p.label}</span>
-                            ))}
-                        </div>
-                        {item.courtsDetail && <div style={{fontSize:'0.75em',color:'var(--t2)',marginBottom:14}}>{item.courtsDetail}</div>}
-                        {item.desc && <p style={{fontSize:'0.83em',color:'var(--t2)',lineHeight:1.6,marginBottom:14}}>{item.desc}</p>}
-                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px 12px',marginBottom:16}}>
-                            {[{icon:'fa-parking',label:'Parking',val:item.parking},{icon:'fa-racquet',label:'Wypożyczalnia',val:item.rental},{icon:'fa-user-tie',label:'Trenerzy',val:item.trainers},{icon:'fa-store',label:'Sklep',val:item.shop}].map(a=>(
-                                <div key={a.label} style={{display:'flex',alignItems:'center',gap:7,fontSize:'0.8em',color:a.val?'var(--t1)':'var(--t2)'}}>
-                                    <i className={`fas ${a.icon}`} style={{width:14,textAlign:'center',color:a.val?'var(--accent)':'var(--border)'}}></i>
-                                    {a.label}
-                                    <span style={{marginLeft:'auto',fontSize:'0.85em',fontWeight:600,color:a.val?'var(--win)':'var(--t2)'}}>{a.val?'✔':'—'}</span>
-                                </div>
-                            ))}
-                        </div>
-                        <div style={{display:'flex',gap:9}}>
-                            {item.website && <a href={item.website} target="_blank" rel="noopener noreferrer" className="btn-map-card" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:6,textDecoration:'none'}}><i className="fas fa-external-link-alt"></i>Strona</a>}
-                            {item.bookingUrl
-                                ? <a href={item.bookingUrl} target="_blank" rel="noopener noreferrer" className="btn-reserve-card" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:6,textDecoration:'none'}}>Rezerwuj</a>
-                                : <button className="btn-reserve-card" style={{flex:1,opacity:0.45,cursor:'not-allowed'}} disabled>Brak rezerwacji online</button>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    /* ── BAR CHART ── */
-    function BarChart({ data }) {
-        if (!data.length) return <div className="chart-empty">Brak danych</div>;
-        const BW=26, G=8, H=120, PL=28, PB=24, PT=12;
-        const maxV = Math.max(1,...data.map(d=>d.tenis+d.padel));
-        const cW = BW*2+G;
-        const tW = PL + data.length*(cW+8)+8;
-        const toY = v => PT+(H-PB-PT)*(1-v/maxV);
-        const bH = v => Math.max(2,(H-PB-PT)*(v/maxV));
-        const yticks = [0,Math.round(maxV/2),maxV].filter((v,i,a)=>a.indexOf(v)===i);
-        return (
-            <div className="chart-wrap">
-                <svg width={tW} height={H} style={{display:'block',minWidth:tW}}>
-                    {yticks.map(t=>(
-                        <g key={t}>
-                            <line x1={PL-4} x2={tW} y1={toY(t)} y2={toY(t)} stroke="#27272f" strokeWidth="1"/>
-                            <text x={PL-6} y={toY(t)+4} textAnchor="end" fontSize="9" fill="#8c8c99">{t}</text>
-                        </g>
-                    ))}
-                    {data.map((d,i)=>{
-                        const x0=PL+i*(cW+8), cx=x0+cW/2;
-                        return (<g key={i}>
-                            {d.tenis>0?<rect x={x0} y={toY(d.tenis)} width={BW} height={bH(d.tenis)} rx="4" fill="#b5ff4d" fillOpacity="0.85"/>:<rect x={x0} y={H-PB-2} width={BW} height={2} rx="1" fill="#27272f"/>}
-                            {d.padel>0?<rect x={x0+BW+G/2} y={toY(d.padel)} width={BW} height={bH(d.padel)} rx="4" fill="#f97316" fillOpacity="0.85"/>:<rect x={x0+BW+G/2} y={H-PB-2} width={BW} height={2} rx="1" fill="#27272f"/>}
-                            <text x={cx} y={H-5} textAnchor="middle" fontSize="9.5" fill="#8c8c99">{d.label}</text>
-                        </g>);
-                    })}
-                    <rect x={PL} y={3} width={8} height={8} rx="2" fill="#b5ff4d" fillOpacity="0.85"/>
-                    <text x={PL+11} y={10} fontSize="8.5" fill="#8c8c99">Tenis</text>
-                    <rect x={PL+48} y={3} width={8} height={8} rx="2" fill="#f97316" fillOpacity="0.85"/>
-                    <text x={PL+59} y={10} fontSize="8.5" fill="#8c8c99">Padel</text>
-                </svg>
-            </div>
-        );
-    }
-
-    /* ── STATS SHEET ── */
-    function StatsSheet({ allEntries, onClose }) {
-        const games=allEntries.map(x=>x.e);
-        const wins=games.filter(g=>g.result==='W').length, losses=games.filter(g=>g.result==='L').length, draws=games.filter(g=>g.result==='D').length;
-        const withR=games.filter(g=>g.result).length;
-        const winRate=withR?Math.round(wins/withR*100):null;
-        const tC=games.filter(g=>g.sport==='tenis').length, pC=games.filter(g=>g.sport==='padel').length;
-        const now=new Date();
-        const perMonth=Array.from({length:6},(_,i)=>{
-            const d=new Date(now.getFullYear(),now.getMonth()-(5-i),1);
-            const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-            const g=games.filter(x=>x.date&&x.date.startsWith(key));
-            return {label:PM[d.getMonth()],tenis:g.filter(x=>x.sport==='tenis').length,padel:g.filter(x=>x.sport==='padel').length};
-        });
-        const pc={}; games.forEach(g=>allPlayers(g).forEach(p=>{if(p)pc[p]=(pc[p]||0)+1;}));
-        const partners=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,8);
-        const maxPG=partners[0]?.[1]||1;
-        const cc={}; games.forEach(g=>{if(g.court)cc[g.court]=(cc[g.court]||0)+1;});
-        const courts=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,5);
-        return (
-            <div className="sheet-bg" onClick={e=>e.target===e.currentTarget&&onClose()}>
-                <div className="sheet stats-sheet-bg">
-                    <div className="sheet-header">
-                        <h3><i className="fas fa-chart-bar" style={{marginRight:8,color:'var(--accent)'}}></i>Szczegółowe statystyki</h3>
-                        <button className="btn-close" onClick={onClose}>✕</button>
-                    </div>
-                    <div className="sheet-body">
-                        <div className="stats-sect-title">Wyniki</div>
-                        <div className="surf-card">
-                            <div className="win-row">
-                                <div className="win-stat"><div className="wnum" style={{color:'var(--win)'}}>{wins}</div><div className="wlbl">Wygrane</div></div>
-                                <div className="win-sep"/>
-                                <div className="win-stat"><div className="wnum" style={{color:winRate>=50?'var(--win)':winRate!==null?'var(--danger)':'var(--t2)'}}>{winRate!==null?`${winRate}%`:'—'}</div><div className="wlbl">% wygranych</div></div>
-                                <div className="win-sep"/>
-                                <div className="win-stat"><div className="wnum" style={{color:'var(--danger)'}}>{losses}</div><div className="wlbl">Przegrane</div></div>
-                            </div>
-                            {draws>0&&<div style={{textAlign:'center',fontSize:'0.8em',color:'#fbbf24',marginTop:6}}>🤝 Remisy: {draws}</div>}
-                        </div>
-                        <div className="stats-sect-title">Dyscypliny</div>
-                        <div className="sport-split">
-                            <div className="sport-split-box"><div className="sport-split-num" style={{color:'var(--accent)'}}>🎾 {tC}</div><div className="sport-split-lbl">gier tenisa</div></div>
-                            <div className="sport-split-box"><div className="sport-split-num" style={{color:'var(--accent2)'}}>🏓 {pC}</div><div className="sport-split-lbl">gier padla</div></div>
-                        </div>
-                        <div className="stats-sect-title">Aktywność — ostatnie 6 miesięcy</div>
-                        <div className="surf-card"><BarChart data={perMonth}/></div>
-                        {partners.length>0&&<>
-                            <div className="stats-sect-title">Najczęstsi partnerzy</div>
-                            <div className="surf-card">{partners.map(([n,c])=>(
-                                <div key={n} className="partner-row">
-                                    <div className="p-avatar">{n.charAt(0).toUpperCase()}</div>
-                                    <div className="p-info"><div className="p-name">{n}</div><div className="p-games">{c} {c===1?'gra':'gier'}</div></div>
-                                    <div className="p-bar-wrap"><div className="p-bar" style={{width:`${Math.round(c/maxPG*100)}%`}}/></div>
-                                </div>
-                            ))}</div>
-                        </>}
-                        {courts.length>0&&<>
-                            <div className="stats-sect-title">Najczęstsze obiekty</div>
-                            <div className="surf-card">{courts.map(([n,c])=>(
-                                <div key={n} className="stat-row"><span className="s-lbl">🎾 {n}</span><span className="s-val">{c}×</span></div>
-                            ))}</div>
-                        </>}
-                        {games.length===0&&<div className="empty">Brak aktywności do wyświetlenia.</div>}
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    /* ── CONFIRM ── */
-    function ConfirmPopup({ onConfirm, onCancel }) {
-        return (
-            <div className="confirm-bg">
-                <div className="confirm-box">
-                    <span className="ci">🗑️</span>
-                    <h4>Usuń aktywność?</h4>
-                    <p>Tego działania nie można cofnąć. Wpis zostanie trwale usunięty.</p>
-                    <div className="confirm-btns">
-                        <button className="btn-cc" onClick={onCancel}>Anuluj</button>
-                        <button className="btn-cd" onClick={onConfirm}>Usuń</button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    /* ── EDIT SHEET ── */
-    function EditSheet({ entry, isOwner, friendsList, onSave, onDelete, onClose }) {
-        const [court,setCourt]=useState(entry.court||DATA[0].name);
-        const [date,setDate]=useState(entry.date||new Date().toISOString().split('T')[0]);
-        const [sport,setSport]=useState(entry.sport||'tenis');
-        const [score,setScore]=useState(entry.score||'');
-        const [result,setResult]=useState(entry.result||'');
-        const [oppUid,setOppUid]=useState(entry.opponentUid||'');
-        const [pOpps,setPOpps]=useState(entry.padelOpponentUids?[...entry.padelOpponentUids,'','',''].slice(0,3):['','','']);
-        const [showC,setShowC]=useState(false);
-        const [saving,setSaving]=useState(false);
-        const setPO=(i,v)=>{const c=[...pOpps];c[i]=v;setPOpps(c);};
-        const handleSave=async()=>{
-            setSaving(true);
-            let oN='',pN=[],pU=[];
-            if(sport==='tenis'){oN=oppUid?(friendsList.find(f=>f.uid===oppUid)?.name||''):'';}
-            else{pU=pOpps.filter(Boolean);pN=pU.map(uid=>friendsList.find(f=>f.uid===uid)?.name||uid);}
-            const u={...entry,court,date,sport,score,result,...(sport==='tenis'?{opponent:oN,opponentUid:oppUid}:{padelOpponents:pN,padelOpponentUids:pU})};
-            if(sport==='tenis'){delete u.padelOpponents;delete u.padelOpponentUids;}else{delete u.opponent;delete u.opponentUid;}
-            await onSave(u); setSaving(false);
-        };
-        return (
-            <>
-                {showC&&<ConfirmPopup onConfirm={()=>{setShowC(false);onDelete();}} onCancel={()=>setShowC(false)}/>}
-                <div className="sheet-bg" onClick={e=>e.target===e.currentTarget&&onClose()}>
-                    <div className="sheet">
-                        <div className="sheet-header">
-                            <h3>{isOwner?'Edytuj aktywność':'Twój wynik'}</h3>
-                            <button className="btn-close" onClick={onClose}>✕</button>
-                        </div>
-                        <div className="sheet-body">
-                            {isOwner?(<>
-                                <label className="edit-label">Dyscyplina</label>
-                                <div className="sport-selector">
-                                    <button type="button" className={`sport-opt ${sport==='tenis'?'sel-t':''}`} onClick={()=>setSport('tenis')}>🎾 Tenis</button>
-                                    <button type="button" className={`sport-opt ${sport==='padel'?'sel-p':''}`} onClick={()=>setSport('padel')}>🏓 Padel</button>
-                                </div>
-                                <label className="edit-label">Obiekt</label>
-                                <select value={court} onChange={e=>setCourt(e.target.value)}>{DATA.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}</select>
-                                <label className="edit-label">Data</label>
-                                <input type="date" value={date} onChange={e=>setDate(e.target.value)}/>
-                                {sport==='tenis'&&<>
-                                    <label className="edit-label">Przeciwnik <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
-                                    <div className="opp-wrap"><select value={oppUid} onChange={e=>setOppUid(e.target.value)}><option value="">— nie wybrano —</option>{friendsList.map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>
-                                </>}
-                                {sport==='padel'&&<>
-                                    <label className="edit-label">Gracze (do 3) <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
-                                    {[0,1,2].map(i=>{const o=pOpps.filter((_,j)=>j!==i).filter(Boolean);return(<div key={i} className="opp-wrap" style={{marginBottom:i<2?7:0}}><select value={pOpps[i]} onChange={e=>setPO(i,e.target.value)}><option value="">— Gracz {i+1} —</option>{friendsList.filter(f=>!o.includes(f.uid)).map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>);})}
-                                </>}
-                            </>):(
-                                <>
-                                    <div style={{fontSize:'0.88em',color:'var(--t1)',padding:'8px 0'}}>{SE[entry.sport]} {SL[entry.sport]} · {entry.court} · {new Date(entry.date).toLocaleDateString('pl-PL')}</div>
-                                    <p className="readonly-note"><i className="fas fa-lock" style={{marginRight:5}}></i>Szczegóły może edytować tylko twórca gry.</p>
-                                </>
-                            )}
-                            <label className="edit-label">Wynik <span style={{textTransform:'none',fontWeight:400}}>(np. 6:3)</span></label>
-                            <input type="text" placeholder="np. 6:3" value={score} onChange={e=>setScore(e.target.value)}/>
-                            <label className="edit-label">Rezultat</label>
-                            <select value={result} onChange={e=>setResult(e.target.value)}>
-                                <option value="">— nie podawaj —</option>
-                                <option value="W">🏆 Wygrana</option>
-                                <option value="L">❌ Przegrana</option>
-                                <option value="D">🤝 Remis</option>
-                            </select>
-                            <button className="btn-primary" style={{marginTop:16}} onClick={handleSave} disabled={saving}>{saving?'Zapisywanie...':'✔ Zapisz zmiany'}</button>
-                            {isOwner&&<button className="btn-danger" onClick={()=>setShowC(true)}><i className="fas fa-trash-alt"></i> Usuń aktywność</button>}
-                        </div>
-                    </div>
-                </div>
-            </>
-        );
-    }
-
-    /* ── AUTH ── */
-    function translateError(c){const m={'auth/email-already-in-use':'Ten e-mail jest już zarejestrowany.','auth/invalid-email':'Nieprawidłowy e-mail.','auth/weak-password':'Hasło min. 6 znaków.','auth/user-not-found':'Nie znaleziono konta.','auth/wrong-password':'Złe hasło.','auth/invalid-credential':'Nieprawidłowy e-mail lub hasło.','auth/too-many-requests':'Zbyt wiele prób.'};return m[c]||'Wystąpił błąd.';}
-    function AuthScreen() {
-        const [tab,setTab]=useState('login');
-        const [name,setName]=useState('');const [email,setEmail]=useState('');const [pwd,setPwd]=useState('');
-        const [err,setErr]=useState('');const [ok,setOk]=useState('');const [loading,setLoading]=useState(false);
-        const fb=window.__firebase;
-        const reg=async()=>{setErr('');setOk('');if(!name.trim())return setErr('Podaj imię.');if(!email.trim())return setErr('Podaj e-mail.');if(pwd.length<6)return setErr('Hasło min. 6 znaków.');setLoading(true);try{const c=await fb.createUserWithEmailAndPassword(fb.auth,email.trim(),pwd);await fb.updateProfile(c.user,{displayName:name.trim()});await fb.setDoc(fb.doc(fb.db,'users',c.user.uid),{uid:c.user.uid,name:name.trim(),email:email.trim().toLowerCase(),createdAt:fb.serverTimestamp(),role:'user'});await fb.signOut(fb.auth);setOk('Konto utworzone! Zaloguj się.');setTab('login');setName('');setPwd('');}catch(e){setErr(translateError(e.code));}setLoading(false);};
-        const login=async()=>{setErr('');setOk('');if(!email.trim())return setErr('Podaj e-mail.');if(!pwd.trim())return setErr('Podaj hasło.');setLoading(true);try{await fb.signInWithEmailAndPassword(fb.auth,email.trim().toLowerCase(),pwd);}catch(e){setErr(translateError(e.code));}setLoading(false);};
-        return (
-            <div className="page" style={{paddingTop:28}}>
-                <div className="auth-tabs-row">
-                    <button className={`auth-tab-btn ${tab==='login'?'active':''}`} onClick={()=>{setTab('login');setErr('');setOk('');}}>Logowanie</button>
-                    <button className={`auth-tab-btn ${tab==='register'?'active':''}`} onClick={()=>{setTab('register');setErr('');setOk('');}}>Rejestracja</button>
-                </div>
-                <div className="auth-card">
-                    {tab==='login'?<><h2>Witaj z powrotem 👋</h2><p className="subtitle">Zaloguj się aby korzystać z Activo.</p></>:<><h2>Utwórz konto 🎾</h2><p className="subtitle">Dołącz do Activo i śledź aktywności.</p></>}
-                    {tab==='register'&&<div style={{marginBottom:14}}><label className="field-label">Imię</label><input type="text" placeholder="np. Kamil" value={name} onChange={e=>setName(e.target.value)}/></div>}
-                    <div style={{marginBottom:14}}><label className="field-label">E-mail</label><input type="email" placeholder="twoj@email.pl" value={email} onChange={e=>setEmail(e.target.value)}/></div>
-                    <div style={{marginBottom:4}}><label className="field-label">Hasło {tab==='register'&&<span style={{fontWeight:400,textTransform:'none'}}>(min. 6 znaków)</span>}</label><input type="password" placeholder="••••••••" value={pwd} onChange={e=>setPwd(e.target.value)} onKeyDown={e=>e.key==='Enter'&&(tab==='login'?login():reg())}/></div>
-                    {err&&<div className="auth-error"><i className="fas fa-exclamation-circle" style={{marginRight:6}}></i>{err}</div>}
-                    {ok&&<div className="auth-success"><i className="fas fa-check-circle" style={{marginRight:6}}></i>{ok}</div>}
-                    <button className="btn-primary" style={{marginTop:16}} onClick={tab==='login'?login:reg} disabled={loading}>{loading?'Proszę czekać...':tab==='login'?'Zaloguj się':'Zarejestruj się'}</button>
-                </div>
-            </div>
-        );
-    }
-
-    /* ── MAP MODAL ── */
-    function MapModal({ item, onClose }) {
-        const mr=useRef(null),mi=useRef(null);
-        useEffect(()=>{if(!mr.current||mi.current)return;const m=L.map(mr.current).setView([item.lat,item.lng],15);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(m);L.marker([item.lat,item.lng],{icon:L.divIcon({html:`<div style="background:#b5ff4d;color:#0d0d0f;padding:5px 11px;border-radius:20px;font-family:DM Sans;font-weight:700;font-size:12px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,0.5)">🎾 ${item.name}</div>`,className:'',iconAnchor:[0,0]})}).addTo(m);mi.current=m;return()=>{m.remove();mi.current=null;};},[item]);
-        return(
-            <div className="sheet-bg" onClick={e=>e.target===e.currentTarget&&onClose()}>
-                <div className="sheet map-sheet">
-                    <div className="sheet-header"><h3>{item.name}</h3><button className="btn-close" onClick={onClose}>✕</button></div>
-                    <div className="sheet-body">
-                        <div id="map-container" ref={mr}></div>
-                        <div className="map-info-row"><i className="fas fa-map-marker-alt"></i>{item.address}</div>
-                        <div className="map-info-row"><i className="fas fa-layer-group"></i>Nawierzchnia: {item.surface}</div>
-                        <button className="btn-primary" style={{marginTop:12}} onClick={()=>window.open(`http://maps.google.com/?q=${item.lat},${item.lng}`,'_blank')}><i className="fas fa-external-link-alt"></i> Otwórz w Google Maps</button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    /* ── PROFILE SCREEN ── */
-    function ProfileScreen({ user }) {
-        const fb=window.__firebase;
-        const [pTab,setPTab]=useState('activity');
-        const [playedList,setPlayedList]=useState([]);
-        const [sharedGames,setSharedGames]=useState([]);
-        const [showAdd,setShowAdd]=useState(false);
-        const [showStats,setShowStats]=useState(false);
-        const [editE,setEditE]=useState(null);
-        const [chartMode,setChartMode]=useState('month');
-        const [court,setCourt]=useState(DATA[0].name);
-        const [date,setDate]=useState(new Date().toISOString().split('T')[0]);
-        const [sport,setSport]=useState('tenis');
-        const [oppUid,setOppUid]=useState('');
-        const [pOpps,setPOpps]=useState(['','','']);
-        const [score,setScore]=useState('');
-        const [result,setResult]=useState('');
-        const [saving,setSaving]=useState(false);
-        const [fList,setFList]=useState([]);
-        const [eName,setEName]=useState(user.displayName||'');
-        const [eSaving,setESaving]=useState(false);
-        const [eMsg,setEMsg]=useState('');
-        const [showFav,setShowFav]=useState(true);
-        const [showHist,setShowHist]=useState(true);
-        const uRef=fb.doc(fb.db,'users',user.uid);
-        useEffect(()=>{fb.getDoc(uRef).then(snap=>{if(!snap.exists())return;const d=snap.data();setPlayedList(d.playedHistory||[]);setSharedGames(d.sharedGames||[]);if(d.privacy){setShowFav(d.privacy.showFavourites!==false);setShowHist(d.privacy.showHistory!==false);}const uids=d.friends||[];if(uids.length)Promise.all(uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)))).then(ss=>setFList(ss.filter(s=>s.exists()).map(s=>({uid:s.id,name:s.data().name||s.data().email||s.id}))));});},[user.uid]);
-        const setPO=(i,v)=>{const c=[...pOpps];c[i]=v;setPOpps(c);};
-        const allEntries=useMemo(()=>[...playedList.map((e,i)=>({e,i,own:true})),...sharedGames.map((e,i)=>({e,i,own:false}))].sort((a,b)=>new Date(b.e.date)-new Date(a.e.date)),[playedList,sharedGames]);
-        const chartData=useMemo(()=>{
-            const now=new Date();
-            if(chartMode==='month'){return Array.from({length:6},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-(5-i),1);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;const g=allEntries.filter(x=>x.e.date&&x.e.date.startsWith(key));return{label:PM[d.getMonth()],tenis:g.filter(x=>x.e.sport==='tenis').length,padel:g.filter(x=>x.e.sport==='padel').length};});}
-            return Array.from({length:8},(_,i)=>{const d=new Date(now);d.setDate(d.getDate()-7*(7-i));const wk=getWeekKey(d.toISOString().split('T')[0]);const we=new Date(wk);we.setDate(we.getDate()+6);const g=allEntries.filter(x=>{if(!x.e.date)return false;const xd=new Date(x.e.date);return xd>=new Date(wk)&&xd<=we;});return{label:weekLabel(wk),tenis:g.filter(x=>x.e.sport==='tenis').length,padel:g.filter(x=>x.e.sport==='padel').length};});
-        },[allEntries,chartMode]);
-        const total=allEntries.length;
-        const nowKey=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
-        const thisMonth=allEntries.filter(x=>x.e.date&&x.e.date.startsWith(nowKey)).length;
-        const wins=allEntries.filter(x=>x.e.result==='W').length;
-        const addEntry=async()=>{setSaving(true);const gid=`game_${Date.now()}_${user.uid}`;let oN='',pN=[],pU=[];if(sport==='tenis'){oN=oppUid?(fList.find(f=>f.uid===oppUid)?.name||''):'';}else{pU=pOpps.filter(Boolean);pN=pU.map(uid=>fList.find(f=>f.uid===uid)?.name||uid);}const entry={gameId:gid,ownerUid:user.uid,court,date,sport,addedAt:new Date().toISOString(),...(sport==='tenis'?(oN?{opponent:oN,opponentUid:oppUid}:{}):{padelOpponents:pN,padelOpponentUids:pU}),...(score.trim()&&{score:score.trim()}),...(result&&{result})};const nl=[entry,...playedList].slice(0,50);await fb.setDoc(uRef,{playedHistory:nl},{merge:true});setPlayedList(nl);const pUids=sport==='tenis'?(oppUid?[oppUid]:[]):pU;const oName=user.displayName||user.email||'Ktoś';for(const uid of pUids){const pRef=fb.doc(fb.db,'users',uid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:[{...entry,sharedWith:uid,ownerName:oName},...ex].slice(0,50)},{merge:true});}}setShowAdd(false);setOppUid('');setPOpps(['','','']);setScore('');setResult('');setSport('tenis');setSaving(false);};
-        const saveOwn=async(upd)=>{const nl=playedList.map((e,i)=>i===editE.idx?upd:e);await fb.setDoc(uRef,{playedHistory:nl},{merge:true});setPlayedList(nl);const pU=upd.padelOpponentUids?upd.padelOpponentUids:upd.opponentUid?[upd.opponentUid]:[];for(const uid of pU){const pRef=fb.doc(fb.db,'users',uid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:ex.map(e=>e.gameId===upd.gameId?{...upd,sharedWith:uid,ownerName:user.displayName||user.email}:e)},{merge:true});}}setEditE(null);};
-        const saveShared=async(upd)=>{const nl=sharedGames.map((e,i)=>i===editE.idx?upd:e);await fb.setDoc(uRef,{sharedGames:nl},{merge:true});setSharedGames(nl);setEditE(null);};
-        const delOwn=async()=>{const nl=playedList.filter((_,i)=>i!==editE.idx);await fb.setDoc(uRef,{playedHistory:nl},{merge:true});setPlayedList(nl);setEditE(null);};
-        const logout=async()=>fb.signOut(fb.auth);
-        const saveName=async()=>{if(!eName.trim())return setEMsg('Imię nie może być puste.');setESaving(true);try{await fb.updateProfile(fb.auth.currentUser,{displayName:eName.trim()});await fb.setDoc(uRef,{name:eName.trim()},{merge:true});setEMsg('✅ Zaktualizowano!');}catch(e){setEMsg('Błąd zapisu.');}setESaving(false);};
-        const savePriv=async(k,v)=>fb.setDoc(uRef,{privacy:{showFavourites:showFav,showHistory:showHist,[k]:v}},{merge:true});
-        const togPriv=(k,v)=>{if(k==='showFavourites')setShowFav(v);if(k==='showHistory')setShowHist(v);savePriv(k,v);};
-        const initials=(user.displayName||user.email||'U').charAt(0).toUpperCase();
-        const joinDate=user.metadata?.creationTime?new Date(user.metadata.creationTime).toLocaleDateString('pl-PL',{year:'numeric',month:'long'}):'—';
-        const renderEntry=(entry,idx,isOwn)=>{
-            const players=allPlayers(entry);
-            return(
-                <div key={`${isOwn?'o':'s'}-${idx}`} className="act-entry">
-                    <div className="act-left">
-                        <div className="act-title">
-                            <span className={`badge badge-${entry.sport||'tenis'}`}>{SE[entry.sport||'tenis']} {SL[entry.sport||'tenis']}</span>
-                            <span>{entry.court}</span>
-                            {entry.result&&<span className={`badge badge-${entry.result}`}>{RL[entry.result]}</span>}
-                            {!isOwn&&<span className="badge badge-shared"><i className="fas fa-share-alt"></i> {entry.ownerName}</span>}
-                        </div>
-                        <div className="act-date">{new Date(entry.date).toLocaleDateString('pl-PL',{day:'numeric',month:'short',year:'numeric'})}</div>
-                        {(players.length>0||entry.score)&&<div className="act-details">
-                            {players.length>0&&<span><i className="fas fa-users"></i>{players.join(', ')}</span>}
-                            {entry.score&&<span><i className="fas fa-table-tennis"></i>{entry.score}</span>}
-                        </div>}
-                    </div>
-                    <button className="btn-icon" onClick={()=>setEditE({entry,idx,isOwner:isOwn})}><i className="fas fa-pen"></i></button>
-                </div>
-            );
-        };
-        return (
-            <div>
-                {editE&&<EditSheet entry={editE.entry} isOwner={editE.isOwner} friendsList={fList} onSave={editE.isOwner?saveOwn:saveShared} onDelete={delOwn} onClose={()=>setEditE(null)}/>}
-                {showStats&&<StatsSheet allEntries={allEntries} onClose={()=>setShowStats(false)}/>}
-                <div className="profile-hero">
-                    <div className="profile-hero-inner">
-                        <div className="profile-avatar-lg">{initials}</div>
-                        <div className="profile-hero-info">
-                            <h2>{user.displayName||'Użytkownik'}</h2>
-                            <p>{user.email}</p>
-                        </div>
-                        <button className="btn-edit-prof" onClick={()=>setPTab('settings')}><i className="fas fa-pen"></i> Edytuj</button>
-                    </div>
-                </div>
-                <div className="profile-tabs">
-                    <button className={`profile-tab ${pTab==='activity'?'active':''}`} onClick={()=>setPTab('activity')}><i className="fas fa-bolt"></i>Aktywności</button>
-                    <button className={`profile-tab ${pTab==='info'?'active':''}`} onClick={()=>setPTab('info')}><i className="fas fa-user"></i>Profil</button>
-                    <button className={`profile-tab ${pTab==='settings'?'active':''}`} onClick={()=>setPTab('settings')}><i className="fas fa-cog"></i>Ustawienia</button>
-                </div>
-                <div className="page" style={{paddingTop:20}}>
-                    {pTab==='activity'&&<>
-                        <div className="stats-row">
-                            <div className="stat-box"><div className="stat-num">{total}</div><div className="stat-lbl">Wszystkich</div></div>
-                            <div className="stat-box"><div className="stat-num">{thisMonth}</div><div className="stat-lbl">Ten miesiąc</div></div>
-                            <div className="stat-box"><div className="stat-num" style={{color:'var(--win)'}}>{wins}</div><div className="stat-lbl">Wygranych</div></div>
-                        </div>
-                        <div className="surf-card">
-                            <h4><i className="fas fa-chart-bar" style={{color:'var(--accent)'}}></i> Aktywność
-                                <span className="card-action">
-                                    <div className="chart-toggle" style={{margin:0,marginLeft:'auto'}}>
-                                        <button className={`chart-toggle-btn ${chartMode==='month'?'active':''}`} onClick={()=>setChartMode('month')}>Miesiące</button>
-                                        <button className={`chart-toggle-btn ${chartMode==='week'?'active':''}`} onClick={()=>setChartMode('week')}>Tygodnie</button>
-                                    </div>
-                                </span>
-                            </h4>
-                            <BarChart data={chartData}/>
-                        </div>
-                        <button className="btn-stats-detail" onClick={()=>setShowStats(true)}>
-                            <span><i className="fas fa-chart-pie" style={{marginRight:8,color:'var(--accent)'}}></i>Szczegółowe statystyki</span>
-                            <i className="fas fa-chevron-right chevron"></i>
-                        </button>
-                        <div className="surf-card">
-                            <h4>
-                                <i className="fas fa-bolt" style={{color:'var(--accent)'}}></i> Moje aktywności
-                                <button className="card-action" style={{background:'var(--accent)',color:'#0d0d0f',border:'none',padding:'5px 12px',borderRadius:7,fontFamily:'var(--font)',fontSize:'0.78em',fontWeight:700,cursor:'pointer'}} onClick={()=>setShowAdd(!showAdd)}>
-                                    <i className="fas fa-plus"></i> Dodaj
-                                </button>
-                            </h4>
-                            {showAdd&&<div className="add-form">
-                                <label className="field-label">Dyscyplina *</label>
-                                <div className="sport-selector">
-                                    <button type="button" className={`sport-opt ${sport==='tenis'?'sel-t':''}`} onClick={()=>setSport('tenis')}>🎾 Tenis</button>
-                                    <button type="button" className={`sport-opt ${sport==='padel'?'sel-p':''}`} onClick={()=>setSport('padel')}>🏓 Padel</button>
-                                </div>
-                                <label className="field-label">Obiekt *</label>
-                                <select value={court} onChange={e=>setCourt(e.target.value)}>{DATA.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}</select>
-                                <label className="field-label">Data *</label>
-                                <input type="date" value={date} onChange={e=>setDate(e.target.value)}/>
-                                {sport==='tenis'&&<>
-                                    <label className="field-label">Z kim grałem? <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
-                                    <div className="opp-wrap"><select value={oppUid} onChange={e=>setOppUid(e.target.value)}><option value="">— nie wybrano —</option>{fList.map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>
-                                    {fList.length===0&&<p className="hint-text">Dodaj znajomych, aby ich wybrać.</p>}
-                                </>}
-                                {sport==='padel'&&<>
-                                    <label className="field-label">Gracze (do 3) <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
-                                    {[0,1,2].map(i=>{const o=pOpps.filter((_,j)=>j!==i).filter(Boolean);return(<div key={i} className="opp-wrap" style={{marginBottom:i<2?7:0}}><select value={pOpps[i]} onChange={e=>setPO(i,e.target.value)}><option value="">— Gracz {i+1} —</option>{fList.filter(f=>!o.includes(f.uid)).map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>);})}
-                                    {fList.length===0&&<p className="hint-text">Dodaj znajomych, aby ich wybrać.</p>}
-                                </>}
-                                <label className="field-label">Wynik <span style={{textTransform:'none',fontWeight:400}}>(np. 6:3)</span></label>
-                                <input type="text" placeholder="np. 6:3" value={score} onChange={e=>setScore(e.target.value)}/>
-                                <label className="field-label">Rezultat</label>
-                                <select value={result} onChange={e=>setResult(e.target.value)}>
-                                    <option value="">— nie podawaj —</option>
-                                    <option value="W">🏆 Wygrana</option>
-                                    <option value="L">❌ Przegrana</option>
-                                    <option value="D">🤝 Remis</option>
-                                </select>
-                                <button className="btn-primary" style={{marginTop:14}} onClick={addEntry} disabled={saving}>{saving?'Zapisywanie...':'✔ Zapisz aktywność'}</button>
-                            </div>}
-                            {allEntries.length===0&&!showAdd&&<div className="empty">Brak aktywności — dodaj swoją pierwszą grę!</div>}
-                            {allEntries.map(({e,i,own})=>renderEntry(e,i,own))}
-                        </div>
-                    </>}
-                    {pTab==='info'&&<div className="surf-card">
-                        <h4><i className="fas fa-user" style={{color:'var(--accent)'}}></i> Dane konta</h4>
-                        <div className="row-item"><span className="lbl">Imię</span><span className="val">{user.displayName||'—'}</span></div>
-                        <div className="row-item"><span className="lbl">E-mail</span><span className="val" style={{fontSize:'0.9em'}}>{user.email}</span></div>
-                        <div className="row-item"><span className="lbl">Konto od</span><span className="val">{joinDate}</span></div>
-                        <div className="row-item"><span className="lbl">Aktywności</span><span className="val">{total}</span></div>
-                        <div className="row-item"><span className="lbl">Status</span><span className="val" style={{color:'var(--win)'}}>✔ Aktywny</span></div>
-                    </div>}
-                    {pTab==='settings'&&<>
-                        <div className="surf-card">
-                            <h4><i className="fas fa-pen" style={{color:'var(--accent)'}}></i> Edytuj profil</h4>
-                            <label className="field-label" style={{marginTop:0}}>Imię wyświetlane</label>
-                            <input type="text" value={eName} onChange={e=>setEName(e.target.value)}/>
-                            <button className="btn-primary" style={{marginTop:12}} onClick={saveName} disabled={eSaving}>{eSaving?'Zapisywanie...':'Zapisz zmiany'}</button>
-                            {eMsg&&<div className={eMsg.startsWith('✅')?'auth-success':'auth-error'} style={{marginTop:8}}>{eMsg}</div>}
-                        </div>
-                        <div className="surf-card">
-                            <h4><i className="fas fa-shield-alt" style={{color:'var(--accent)'}}></i> Prywatność</h4>
-                            <div className="priv-row">
-                                <div className="priv-label">Ulubione obiekty<small>Znajomi widzą Twoje polubione korty</small></div>
-                                <label className="toggle-wrap"><input type="checkbox" checked={showFav} onChange={e=>togPriv('showFavourites',e.target.checked)}/><span className="toggle-track"></span></label>
-                            </div>
-                            <div className="priv-row">
-                                <div className="priv-label">Historia aktywności<small>Znajomi widzą gdzie ostatnio grałeś</small></div>
-                                <label className="toggle-wrap"><input type="checkbox" checked={showHist} onChange={e=>togPriv('showHistory',e.target.checked)}/><span className="toggle-track"></span></label>
-                            </div>
-                        </div>
-                    </>}
-                    <button className="btn-danger" style={{marginTop:4}} onClick={logout}><i className="fas fa-sign-out-alt"></i> Wyloguj się</button>
-                </div>
-            </div>
-        );
-    }
-
-    /* ── FAVOURITES ── */
-    function FavouritesScreen({ user, favourites, onToggleFav }) {
-        const favItems=DATA.filter(item=>favourites.includes(item.id));
-        if(!user)return(<div className="lock-banner"><i className="fas fa-lock"></i><p>Ta sekcja jest dostępna tylko dla zalogowanych.</p><button className="btn-primary" onClick={()=>window.__setView('auth')}>Zaloguj się</button></div>);
-        return(<div className="page"><h2 className="page-title">Ulubione</h2>{favItems.length===0?<div className="empty">Brak ulubionych — polub korty w zakładce Szukaj!</div>:favItems.map(item=>(<div key={item.id} className="fav-row"><div className="fav-info"><h5>{item.name}</h5><span>{totalCourts(item.courts)} kortów</span></div><button className="btn-icon" onClick={()=>onToggleFav(item.id)}><i className="fas fa-heart" style={{color:'var(--danger)'}}></i></button></div>))}</div>);
-    }
-
-    /* ── FRIENDS ── */
-    function FriendsScreen({ user }) {
-        const fb=window.__firebase;
-        const [sub,setSub]=useState('friends');
-        const [sq,setSq]=useState('');const [res,setRes]=useState([]);const [searching,setSearching]=useState(false);const [sErr,setSErr]=useState('');
-        const [friends,setFriends]=useState([]);const [fData,setFData]=useState([]);const [loading,setLoading]=useState(true);
-        useEffect(()=>{if(!user)return;fb.getDoc(fb.doc(fb.db,'users',user.uid)).then(snap=>{const uids=snap.exists()?(snap.data().friends||[]):[];setFriends(uids);if(!uids.length){setLoading(false);return;}Promise.all(uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)))).then(ss=>{setFData(ss.filter(s=>s.exists()).map(s=>({uid:s.id,...s.data()})));setLoading(false);});});},[user?.uid]);
-        const search=async()=>{setSErr('');if(sq.trim().length<2)return setSErr('Wpisz min. 2 znaki.');setSearching(true);try{const snap=await fb.getDocs(fb.collection(fb.db,'users'));const t=sq.trim().toLowerCase();const r=snap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.uid!==user.uid&&((u.name||'').toLowerCase().includes(t)||(u.email||'').toLowerCase().includes(t)));setRes(r);if(!r.length)setSErr('Nie znaleziono.');}catch(e){setSErr('Błąd.');}setSearching(false);};
-        const addF=async(uid)=>{const nf=[...friends,uid];setFriends(nf);await fb.setDoc(fb.doc(fb.db,'users',user.uid),{friends:nf},{merge:true});const s=await fb.getDoc(fb.doc(fb.db,'users',uid));if(s.exists())setFData(p=>[...p,{uid:s.id,...s.data()}]);};
-        const remF=async(uid)=>{const nf=friends.filter(id=>id!==uid);setFriends(nf);setFData(p=>p.filter(f=>f.uid!==uid));await fb.setDoc(fb.doc(fb.db,'users',user.uid),{friends:nf},{merge:true});};
-        if(!user)return<div className="lock-banner"><i className="fas fa-lock"></i><p>Zaloguj się aby zobaczyć znajomych</p></div>;
-        return(<div className="page">
-            <h2 className="page-title">Znajomi</h2>
-            <div className="tabs-seg"><button className={`tab-seg-btn ${sub==='friends'?'active':''}`} onClick={()=>setSub('friends')}>Znajomi ({friends.length})</button><button className={`tab-seg-btn ${sub==='search'?'active':''}`} onClick={()=>setSub('search')}>Szukaj</button></div>
-            {sub==='search'&&<div><div className="search-bar"><input type="text" placeholder="Imię lub email..." value={sq} onChange={e=>setSq(e.target.value)}/><button className="btn-search" onClick={search} disabled={searching}>{searching?'...':'Szukaj'}</button></div>{sErr&&<div className="empty">{sErr}</div>}{res.map(r=>(<div key={r.uid} className="result-card"><div className="friend-row-hdr"><div className="f-avatar">{(r.name||'?').charAt(0).toUpperCase()}</div><div className="f-info"><h5>{r.name}</h5><span>{r.email}</span></div>{friends.includes(r.uid)?<button className="btn-rem-f">✔ Dodano</button>:<button className="btn-add-f" onClick={()=>addF(r.uid)}>+ Dodaj</button>}</div></div>))}</div>}
-            {sub==='friends'&&<div>{loading&&<div className="empty">Ładowanie...</div>}{!loading&&!fData.length&&<div className="empty">Brak znajomych. Znajdź ich w zakładce Szukaj!</div>}{fData.map(f=>{const fi=f.privacy?.showFavourites!==false?DATA.filter(d=>(f.favourites||[]).includes(d.id)):[];return(<div key={f.uid} className="friend-row"><div className="friend-row-hdr"><div className="f-avatar">{(f.name||'?').charAt(0).toUpperCase()}</div><div className="f-info"><h5>{f.name}</h5><span>{fi.length} ulubionych</span></div><button className="btn-rem-f" onClick={()=>remF(f.uid)}>Usuń</button></div>{fi.length>0&&<div className="fav-tags">{fi.map(it=><span key={it.id} className="fav-tag">🎾 {it.name}</span>)}</div>}</div>);})}</div>}
-        </div>);
-    }
-
-    /* ── APP ── */
     function App() {
-        const [view,setView]=useState('home');
-        const [drawer,setDrawer]=useState(false);
-        const [filterOpen,setFilterOpen]=useState(false);
-        const [filtered,setFiltered]=useState(DATA);
-        const [mapItem,setMapItem]=useState(null);
-        const [venueItem,setVenueItem]=useState(null);
-        const [searchView,setSearchView]=useState('list');
-        const [user,setUser]=useState(undefined);
-        const [favs,setFavs]=useState([]);
-        const [surf,setSurf]=useState('all');
-        const [fParking,setFParking]=useState(false);
-        const [fTrainers,setFTrainers]=useState(false);
-        const [fRental,setFRental]=useState(false);
-        const [fShop,setFShop]=useState(false);
-        window.__setView=setView;
-        useEffect(()=>{const iv=setInterval(()=>{if(window.__firebase){clearInterval(iv);window.__firebase.onAuthStateChanged(window.__firebase.auth,u=>{setUser(u||null);if(u){window.__firebase.getDoc(window.__firebase.doc(window.__firebase.db,'users',u.uid)).then(s=>{if(s.exists())setFavs(s.data().favourites||[]);});}else setFavs([]);});}},100);},[]);
-        const toggleFav=async(id)=>{if(!user){setView('auth');return;}const fb=window.__firebase;const nf=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];setFavs(nf);await fb.setDoc(fb.doc(fb.db,'users',user.uid),{favourites:nf},{merge:true});};
-        const applyFilters=()=>{
-            setFiltered(DATA.filter(it=>{
-                if(surf==='ziemna' && !((it.courts.maczka||0)>0)) return false;
-                if(surf==='twarda' && !((it.courts.twarda||0)>0)) return false;
-                if(surf==='dywan'  && !((it.courts.dywan||0)>0))  return false;
-                if(surf==='padel'  && !((it.courts.padel||0)>0))  return false;
-                if(fParking  && !it.parking)  return false;
-                if(fTrainers && !it.trainers) return false;
-                if(fRental   && !it.rental)   return false;
-                if(fShop     && !it.shop)     return false;
-                return true;
-            }));
-            setFilterOpen(false);
-        };
-        const initials=user?.displayName?.charAt(0).toUpperCase()||user?.email?.charAt(0).toUpperCase()||null;
-        const NAV_ITEMS=[
-            {v:'home',icon:'fa-home',label:'Główna'},
-            {v:'search',icon:'fa-search',label:'Szukaj'},
-            {v:'favourites',icon:'fa-heart',label:'Ulubione'},
-            ...(user?[{v:'friends',icon:'fa-users',label:'Znajomi'}]:[]),
-            {v: user?'profile':'auth', icon:'fa-user', label:'Konto'},
+        const [view, setView] = useState('home');
+        const [user, setUser] = useState(undefined);
+        const [favs, setFavs] = useState([]);
+        const fb = window.__firebase;
+
+        useEffect(() => {
+            fb.onAuthStateChanged(fb.auth, async (u) => {
+                setUser(u || null);
+                if (u) {
+                    const s = await fb.getDoc(fb.doc(fb.db, 'users', u.uid));
+                    if (s.exists()) setFavs(s.data().favourites || []);
+                }
+            });
+        }, []);
+
+        const navItems = [
+            { v: 'home', icon: 'fa-home', label: 'Start' },
+            { v: 'search', icon: 'fa-search', label: 'Szukaj' },
+            { v: 'profile', icon: 'fa-bolt', label: 'Aktywność' },
+            { v: 'friends', icon: 'fa-users', label: 'Znajomi' }
         ];
+
         return (
             <div className="app-shell">
-                {/* Desktop sidebar */}
                 <nav className="desktop-nav">
-                    <div className="logo">ACTIVO</div>
-                    {NAV_ITEMS.map(item=>(
-                        <button key={item.v} className={`desk-nav-item ${view===item.v||(item.v==='profile'&&view==='profile')||(item.v==='auth'&&view==='auth')?'active':''}`} onClick={()=>setView(item.v)}>
-                            <i className={`fas ${item.icon}`}></i>{item.label}
+                    <div className="logo" style={{padding:'0 12px 20px'}}>ACTIVO</div>
+                    {navItems.map(n => (
+                        <button key={n.v} className={`desk-nav-item ${view===n.v?'active':''}`} onClick={()=>setView(n.v)}>
+                            <i className={`fas ${n.icon}`}></i> {n.label}
                         </button>
                     ))}
-                    <div className="desk-nav-spacer"/>
-                    <div className="desk-user-block">
-                        {user===undefined?null:user?(
-                            <button className="desk-nav-item" onClick={()=>setView('profile')}>
-                                <div className="desk-avatar">{initials}</div>
-                                <span style={{fontSize:'0.85em',color:'var(--t1)',fontWeight:600}}>{user.displayName||'Konto'}</span>
-                            </button>
-                        ):(
-                            <button className="desk-nav-item" onClick={()=>setView('auth')}><i className="fas fa-sign-in-alt"></i>Zaloguj się</button>
-                        )}
-                    </div>
                 </nav>
 
                 <div className="content-area">
-                    {/* Mobile top nav */}
-                    <nav className="top-nav">
-                        <button className="hamburger" onClick={()=>setDrawer(true)}><i className="fas fa-bars"></i></button>
-                        <span className="logo">ACTIVO</span>
-                        <div className="nav-right">
-                            {user===undefined?<i className="fas fa-spinner fa-spin" style={{color:'var(--t2)'}}></i>:user?<div className="nav-avatar" onClick={()=>setView('profile')}>{initials}</div>:<span style={{cursor:'pointer',fontSize:'0.85em',color:'var(--accent)',fontWeight:600}} onClick={()=>setView('auth')}>Zaloguj</span>}
-                        </div>
-                    </nav>
+                    <nav className="top-nav"><div className="logo">ACTIVO</div></nav>
+                    
+                    {view === 'home' && <div className="page"><h2>Witaj w Activo 🎾</h2><p style={{color:'var(--t2)', marginTop:10}}>Twoje centrum dowodzenia na korcie.</p></div>}
+                    {view === 'search' && <SearchScreen favs={favs} toggleFav={(id) => {}} />}
+                    {view === 'profile' && (user ? <ProfileScreen user={user} /> : <AuthScreen />)}
+                    {view === 'friends' && <FriendsScreen user={user} />}
 
-                    {/* Mobile drawer */}
-                    <div className={`drawer-overlay ${drawer?'show':''}`} onClick={()=>setDrawer(false)}/>
-                    <div className={`drawer ${drawer?'open':''}`}>
-                        <div className="logo">ACTIVO</div>
-                        {NAV_ITEMS.map(item=>(
-                            <button key={item.v} className={`drawer-item ${view===item.v?'active':''}`} onClick={()=>{setView(item.v);setDrawer(false);}}>
-                                <i className={`fas ${item.icon}`} style={{width:18,textAlign:'center'}}></i>{item.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Filter panel */}
-                    <div className={`drawer-overlay ${filterOpen?'show':''}`} onClick={()=>setFilterOpen(false)}/>
-                    <div className={`filter-panel ${filterOpen?'open':''}`}>
-                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
-                            <h3 style={{margin:0,color:'var(--t1)',fontSize:'1em',fontWeight:700}}>Filtry</h3>
-                            <button className="btn-close" onClick={()=>setFilterOpen(false)}>✕</button>
-                        </div>
-                        <label className="field-label">Nawierzchnia / typ</label>
-                        <select value={surf} onChange={e=>setSurf(e.target.value)}><option value="all">Wszystkie</option><option value="ziemna">Mączka (ziemna)</option><option value="twarda">Twarda</option><option value="dywan">Dywan</option><option value="padel">Padel</option></select>
-                        <label className="field-label" style={{marginTop:18}}>Udogodnienia</label>
-                        {[
-                            {label:'Parking', state:fParking, set:setFParking},
-                            {label:'Trenerzy', state:fTrainers, set:setFTrainers},
-                            {label:'Wypożyczalnia sprzętu', state:fRental, set:setFRental},
-                            {label:'Sklep', state:fShop, set:setFShop},
-                        ].map(f=>(
-                            <div key={f.label} onClick={()=>f.set(!f.state)} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid var(--border)',cursor:'pointer'}}>
-                                <span style={{fontSize:'0.86em',color:'var(--t1)'}}>{f.label}</span>
-                                <label className="toggle-wrap" style={{pointerEvents:'none'}}>
-                                    <input type="checkbox" checked={f.state} readOnly/>
-                                    <span className="toggle-track"></span>
-                                </label>
-                            </div>
-                        ))}
-                        <button className="btn-primary" style={{marginTop:18}} onClick={applyFilters}>Zastosuj</button>
-                    </div>
-
-                    {/* Map modal */}
-                    {mapItem&&<MapModal item={mapItem} onClose={()=>setMapItem(null)}/>}
-                    {/* Venue detail sheet */}
-                    {venueItem&&<VenueSheet item={venueItem} isFav={favs.includes(venueItem.id)} onClose={()=>setVenueItem(null)} onMap={setMapItem} onFav={toggleFav} onReserve={()=>user?alert('Zarezerwowano'):setView('auth')}/>}
-
-                    {/* Views */}
-                    {view==='home'&&(
-                        <div className="page" style={{paddingTop:28}}>
-                            <div className="hero-section">
-                                <h2>Znajdź swój kort 🎾</h2>
-                                <p>Najlepsza wyszukiwarka kortów tenisowych i padelowych w Twoim mieście.</p>
-                                <button className="btn-primary" onClick={()=>setView('search')}>Szukaj kortów</button>
-                            </div>
-                        </div>
-                    )}
-                    {view==='search'&&(
-                        <div className="page" style={{paddingTop:20}}>
-                            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                                <h2 className="page-title" style={{margin:0}}>Korty</h2>
-                                <div style={{display:'flex',gap:8}}>
-                                    {/* List/Map toggle */}
-                                    <div style={{display:'flex',background:'var(--s2)',border:'1px solid var(--border)',borderRadius:9,padding:3,gap:3}}>
-                                        <button onClick={()=>setSearchView('list')} style={{padding:'6px 12px',borderRadius:7,border:'none',fontFamily:'var(--font)',fontSize:'0.78em',fontWeight:600,cursor:'pointer',background:searchView==='list'?'var(--s1)':'transparent',color:searchView==='list'?'var(--accent)':'var(--t2)',transition:'all 0.18s'}}>
-                                            <i className="fas fa-list" style={{marginRight:5}}></i>Lista
-                                        </button>
-                                        <button onClick={()=>setSearchView('map')} style={{padding:'6px 12px',borderRadius:7,border:'none',fontFamily:'var(--font)',fontSize:'0.78em',fontWeight:600,cursor:'pointer',background:searchView==='map'?'var(--s1)':'transparent',color:searchView==='map'?'var(--accent)':'var(--t2)',transition:'all 0.18s'}}>
-                                            <i className="fas fa-map" style={{marginRight:5}}></i>Mapa
-                                        </button>
-                                    </div>
-                                    <button className="btn-ghost" onClick={()=>setFilterOpen(true)}><i className="fas fa-sliders-h" style={{marginRight:6}}></i>Filtry</button>
-                                </div>
-                            </div>
-
-                            {/* MAP VIEW */}
-                            {searchView==='map'&&(
-                                <div style={{borderRadius:'var(--radius)',overflow:'hidden',border:'1px solid var(--border)',marginBottom:14}}>
-                                    <iframe
-                                        title="Mapa kortów — Poznań"
-                                        width="100%"
-                                        height="460"
-                                        style={{display:'block',border:'none'}}
-                                        loading="lazy"
-                                        allowFullScreen
-                                        referrerPolicy="no-referrer-when-downgrade"
-                                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=Park+Tenisowy+Olimpia,+Warminska+1,+Poznan&zoom=13&language=pl"
-                                    ></iframe>
-                                </div>
-                            )}
-
-                            {/* LIST VIEW */}
-                            {searchView==='list'&&filtered.map(item=>{
-                                const tc = totalCourts(item.courts);
-                                const pills = [];
-                                if (item.courts.maczka) pills.push({ label:`${item.courts.maczka} mączka`, color:'#b5893a' });
-                                if (item.courts.twarda) pills.push({ label:`${item.courts.twarda} twarda`, color:'#4a9eff' });
-                                if (item.courts.padel)  pills.push({ label:`${item.courts.padel} padel`, color:'var(--accent2)' });
-                                if (item.courts.dywan)  pills.push({ label:`${item.courts.dywan} dywan`, color:'#a78bfa' });
-                                return (
-                                    <div key={item.id} className="card">
-                                        <div className="card-body">
-                                            <h4 style={{marginBottom:6}}>
-                                                <button onClick={()=>setVenueItem(item)} style={{background:'none',border:'none',padding:0,color:'var(--t1)',fontWeight:700,fontFamily:'var(--font)',fontSize:'inherit',cursor:'pointer',textAlign:'left',textDecoration:'underline',textDecorationColor:'var(--border)',textUnderlineOffset:3}}>
-                                                    {item.name}
-                                                </button>
-                                                <span className="courts-badge">{tc}</span>
-                                            </h4>
-                                            <div style={{display:'flex',flexWrap:'wrap',gap:5,marginBottom:10}}>
-                                                {pills.map(p=>(
-                                                    <span key={p.label} style={{background:`${p.color}18`,color:p.color,border:`1px solid ${p.color}35`,padding:'2px 8px',borderRadius:20,fontSize:'0.7em',fontWeight:700}}>{p.label}</span>
-                                                ))}
-                                            </div>
-                                            <div className="card-actions">
-                                                <button className="btn-heart" onClick={()=>toggleFav(item.id)}>{favs.includes(item.id)?'❤️':'🤍'}</button>
-                                                {item.bookingUrl
-                                                    ? <a href={item.bookingUrl} target="_blank" rel="noopener noreferrer" className="btn-reserve-card" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',textDecoration:'none'}}>Rezerwuj</a>
-                                                    : <button className="btn-reserve-card" style={{flex:1,opacity:0.4,cursor:'not-allowed'}} disabled>Brak online</button>
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                    {view==='auth'&&<AuthScreen/>}
-                    {view==='profile'&&(user?<ProfileScreen user={user}/>:<AuthScreen/>)}
-                    {view==='favourites'&&<FavouritesScreen user={user} favourites={favs} onToggleFav={toggleFav}/>}
-                    {view==='friends'&&<FriendsScreen user={user}/>}
-
-                    {/* Mobile bottom nav */}
                     <nav className="bottom-nav">
-                        {NAV_ITEMS.map(item=>(
-                            <button key={item.v} className={`bottom-nav-item ${view===item.v?'active':''}`} onClick={()=>setView(item.v)}>
-                                <i className={`fas ${item.icon}`}></i>{item.label}
+                        {navItems.map(n => (
+                            <button key={n.v} className={`bottom-nav-item ${view===n.v?'active':''}`} onClick={()=>setView(n.v)}>
+                                <i className={`fas ${n.icon}`}></i> {n.label}
                             </button>
                         ))}
                     </nav>
                 </div>
             </div>
         );
+    }
+
+    function ProfileScreen({ user }) {
+        const fb = window.__firebase;
+        const [history, setHistory] = useState([]);
+        const [fList, setFList] = useState([]);
+        const [showAdd, setShowAdd] = useState(false);
+        const [saving, setSaving] = useState(false);
+
+        // Form state
+        const [sport, setSport] = useState('tenis');
+        const [court, setCourt] = useState('');
+        const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+        const [oppName, setOppName] = useState('');
+        const [oppUid, setOppUid] = useState('');
+        const [pPlayers, setPPlayers] = useState(['', '', '']); // Name or Uid
+        const [score, setScore] = useState('');
+        const [imgUrl, setImgUrl] = useState('');
+
+        useEffect(() => {
+            const loadData = async () => {
+                const s = await fb.getDoc(fb.doc(fb.db, 'users', user.uid));
+                if (s.exists()) {
+                    setHistory(s.data().playedHistory || []);
+                    const fUids = s.data().friends || [];
+                    const fSnaps = await Promise.all(fUids.map(id => fb.getDoc(fb.doc(fb.db, 'users', id))));
+                    setFList(fSnaps.map(fs => ({ uid: fs.id, name: fs.data().name })));
+                }
+            };
+            loadData();
+        }, [user.uid]);
+
+        const addGame = async () => {
+            setSaving(true);
+            const gameId = `g_${Date.now()}`;
+            const newEntry = {
+                gameId, sport, court, date, score, imgUrl,
+                ownerUid: user.uid,
+                addedAt: new Date().toISOString()
+            };
+
+            if (sport === 'tenis') {
+                newEntry.opponent = oppName;
+                newEntry.opponentUid = oppUid;
+            } else {
+                newEntry.padelPlayers = pPlayers.filter(p => p.trim() !== '');
+            }
+
+            const updatedHistory = [newEntry, ...history].slice(0, 50);
+            await fb.setDoc(fb.doc(fb.db, 'users', user.uid), { playedHistory: updatedHistory }, { merge: true });
+            
+            // Logic for notifying friends would go here (matching by UID)
+            
+            setHistory(updatedHistory);
+            setShowAdd(false);
+            setSaving(false);
+            setCourt(''); setOppName(''); setOppUid(''); setPPlayers(['','','']); setScore(''); setImgUrl('');
+        };
+
+        return (
+            <div className="page">
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20}}>
+                    <h3>Moja Aktywność</h3>
+                    <button className="btn-primary" style={{width:'auto', padding:'8px 16px'}} onClick={()=>setShowAdd(true)}>+ Dodaj grę</button>
+                </div>
+
+                {showAdd && (
+                    <div className="sheet-bg" onClick={(e)=>e.target===e.currentTarget && setShowAdd(false)}>
+                        <div className="sheet">
+                            <h4>Nowa rozgrywka</h4>
+                            <label className="field-label">Dyscyplina</label>
+                            <div className="sport-selector">
+                                <button className={`sport-opt ${sport==='tenis'?'sel-t':''}`} onClick={()=>setSport('tenis')}>Tenis</button>
+                                <button className={`sport-opt ${sport==='padel'?'sel-p':''}`} onClick={()=>setSport('padel')}>Padel</button>
+                            </div>
+
+                            <label className="field-label">Obiekt (wybierz lub wpisz)</label>
+                            <input list="courts-list" value={court} onChange={e=>setCourt(e.target.value)} placeholder="Nazwa klubu..." />
+                            <datalist id="courts-list">
+                                {DATA.map(d => <option key={d.id} value={d.name} />)}
+                            </datalist>
+
+                            <label className="field-label">Data</label>
+                            <input type="date" value={date} onChange={e=>setDate(e.target.value)} />
+
+                            {sport === 'tenis' ? (
+                                <>
+                                    <label className="field-label">Przeciwnik</label>
+                                    <input list="friends-list" value={oppName} onChange={e=>{
+                                        const f = fList.find(x => x.name === e.target.value);
+                                        setOppName(e.target.value);
+                                        setOppUid(f ? f.uid : '');
+                                    }} placeholder="Imię lub wybierz znajomego..." />
+                                </>
+                            ) : (
+                                <>
+                                    <label className="field-label">Pozostali gracze (max 3)</label>
+                                    {pPlayers.map((p, i) => (
+                                        <input key={i} list="friends-list" value={p} style={{marginBottom:5}}
+                                            onChange={e => {
+                                                const newP = [...pPlayers];
+                                                newP[i] = e.target.value;
+                                                setPPlayers(newP);
+                                            }} placeholder={`Gracz ${i+2}...`} />
+                                    ))}
+                                </>
+                            )}
+                            <datalist id="friends-list">
+                                {fList.map(f => <option key={f.uid} value={f.name} />)}
+                            </datalist>
+
+                            <label className="field-label">Wynik / Americano</label>
+                            <input type="text" value={score} onChange={e=>setScore(e.target.value)} placeholder="np. 6:4, 7:5 lub 24 pkt" />
+
+                            <label className="field-label">Link do zdjęcia (wyniki/tablica)</label>
+                            <input type="text" value={imgUrl} onChange={e=>setImgUrl(e.target.value)} placeholder="https://..." />
+
+                            <button className="btn-primary" style={{marginTop:20}} onClick={addGame} disabled={saving}>
+                                {saving ? 'Zapisywanie...' : 'Zapisz aktywność'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {history.length === 0 ? <p style={{color:'var(--t2)', textAlign:'center', marginTop:40}}>Brak zapisanych gier.</p> : history.map(h => (
+                    <div key={h.gameId} className="card">
+                        <div style={{display:'flex', justifyContent:'space-between'}}>
+                            <span className={`badge badge-${h.sport}`}>{h.sport.toUpperCase()}</span>
+                            <span style={{fontSize:'0.8em', color:'var(--t2)'}}>{h.date}</span>
+                        </div>
+                        <div style={{marginTop:10, fontWeight:700}}>{h.court}</div>
+                        <div style={{fontSize:'0.85em', color:'var(--t2)', marginTop:4}}>
+                            Z: {h.sport === 'tenis' ? (h.opponent || 'Nieznajomy') : (h.padelPlayers?.join(', ') || '—')}
+                        </div>
+                        {h.score && <div style={{marginTop:8, color:'var(--accent)', fontFamily:'var(--mono)', fontWeight:700}}>Wynik: {h.score}</div>}
+                        {h.imgUrl && <img src={h.imgUrl} className="img-preview" alt="Wynik" onError={(e)=>e.target.style.display='none'} />}
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    function SearchScreen({ favs }) {
+        return (
+            <div className="page">
+                <h3>Kluby w Twojej okolicy</h3>
+                {DATA.map(d => (
+                    <div key={d.id} className="card">
+                        <div style={{fontWeight:700}}>{d.name}</div>
+                        <div style={{fontSize:'0.8em', color:'var(--t2)'}}>{d.address}</div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    function FriendsScreen({ user }) {
+        return <div className="page"><h3>Znajomi</h3><p style={{color:'var(--t2)'}}>Funkcja zarządzania społecznością.</p></div>;
+    }
+
+    function AuthScreen() {
+        return <div className="page"><h3>Zaloguj się</h3><p>Aby śledzić swoje wyniki, musisz mieć konto.</p></div>;
     }
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
-
 </body>
 </html>
