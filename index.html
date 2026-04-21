@@ -845,8 +845,17 @@
             await fb.setDoc(uRef,{playedHistory:nl},{merge:true});
             setPlayedList(nl);
             const oName=user.displayName||user.email||'Ktoś';
+            // For tenis with a known opponent: flip result (W→L, L→W, D→D)
+            const flipResult = r => r==='W'?'L':r==='L'?'W':r;
             for(const uid of pUids){const pRef=fb.doc(fb.db,'users',uid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:[{...entry,sharedWith:uid,ownerName:oName},...ex].slice(0,50)},{merge:true});}}
-            if(sport==='tenis'&&oUid){const pRef=fb.doc(fb.db,'users',oUid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:[{...entry,sharedWith:oUid,ownerName:oName},...ex].slice(0,50)},{merge:true});}}
+            if(sport==='tenis'&&oUid){
+                const pRef=fb.doc(fb.db,'users',oUid);const ps=await fb.getDoc(pRef);
+                if(ps.exists()){
+                    const ex=ps.data().sharedGames||[];
+                    const oppEntry={...entry,sharedWith:oUid,ownerName:oName,...(result?{result:flipResult(result)}:{})};
+                    await fb.setDoc(pRef,{sharedGames:[oppEntry,...ex].slice(0,50)},{merge:true});
+                }
+            }
             setShowAdd(false);setOppUid('');setOppManual('');setPSlots([{uid:'',manual:''},{uid:'',manual:''},{uid:'',manual:''}]);setScore('');setResult('');setSport('tenis');setCourt(DATA[0].name);setCourtIsCustom(false);setCourtCustom('');setPhotoUrl('');setSaving(false);
         };
         const saveOwn=async(upd)=>{const nl=playedList.map((e,i)=>i===editE.idx?upd:e);await fb.setDoc(uRef,{playedHistory:nl},{merge:true});setPlayedList(nl);const pU=upd.padelOpponentUids?upd.padelOpponentUids:upd.opponentUid?[upd.opponentUid]:[];for(const uid of pU){const pRef=fb.doc(fb.db,'users',uid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:ex.map(e=>e.gameId===upd.gameId?{...upd,sharedWith:uid,ownerName:user.displayName||user.email}:e)},{merge:true});}}setEditE(null);};
@@ -1037,24 +1046,102 @@
     }
 
     /* ── FRIENDS ── */
+    /* ── FRIENDS ── */
     function FriendsScreen({ user }) {
         const fb=window.__firebase;
         const [sub,setSub]=useState('friends');
         const [sq,setSq]=useState('');const [res,setRes]=useState([]);const [searching,setSearching]=useState(false);const [sErr,setSErr]=useState('');
         const [friends,setFriends]=useState([]);const [fData,setFData]=useState([]);const [loading,setLoading]=useState(true);
+        const [openCard,setOpenCard]=useState(null);
+
         useEffect(()=>{if(!user)return;fb.getDoc(fb.doc(fb.db,'users',user.uid)).then(snap=>{const uids=snap.exists()?(snap.data().friends||[]):[];setFriends(uids);if(!uids.length){setLoading(false);return;}Promise.all(uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)))).then(ss=>{setFData(ss.filter(s=>s.exists()).map(s=>({uid:s.id,...s.data()})));setLoading(false);});});},[user?.uid]);
+
         const search=async()=>{setSErr('');if(sq.trim().length<2)return setSErr('Wpisz min. 2 znaki.');setSearching(true);try{const snap=await fb.getDocs(fb.collection(fb.db,'users'));const t=sq.trim().toLowerCase();const r=snap.docs.map(d=>({uid:d.id,...d.data()})).filter(u=>u.uid!==user.uid&&((u.name||'').toLowerCase().includes(t)||(u.email||'').toLowerCase().includes(t)));setRes(r);if(!r.length)setSErr('Nie znaleziono.');}catch(e){setSErr('Błąd.');}setSearching(false);};
         const addF=async(uid)=>{const nf=[...friends,uid];setFriends(nf);await fb.setDoc(fb.doc(fb.db,'users',user.uid),{friends:nf},{merge:true});const s=await fb.getDoc(fb.doc(fb.db,'users',uid));if(s.exists())setFData(p=>[...p,{uid:s.id,...s.data()}]);};
-        const remF=async(uid)=>{const nf=friends.filter(id=>id!==uid);setFriends(nf);setFData(p=>p.filter(f=>f.uid!==uid));await fb.setDoc(fb.doc(fb.db,'users',user.uid),{friends:nf},{merge:true});};
+        const remF=async(uid)=>{const nf=friends.filter(id=>id!==uid);setFriends(nf);setFData(p=>p.filter(f=>f.uid!==uid));if(openCard?.uid===uid)setOpenCard(null);await fb.setDoc(fb.doc(fb.db,'users',user.uid),{friends:nf},{merge:true});};
+
         if(!user)return<div className="lock-banner"><i className="fas fa-lock"></i><p>Zaloguj się aby zobaczyć znajomych</p></div>;
+
+        if(openCard){
+            const f=openCard;
+            const isMutual=(f.friends||[]).includes(user.uid);
+            const canSeeFav=isMutual&&f.privacy?.showFavourites!==false;
+            const canSeeHistory=isMutual&&f.privacy?.showHistory!==false;
+            const favItems=canSeeFav?DATA.filter(d=>(f.favourites||[]).includes(d.id)):[];
+            const history=canSeeHistory?(f.playedHistory||[]).slice(0,10):[];
+            const sharedWith=canSeeHistory?(f.sharedGames||[]).slice(0,5):[];
+            const allActivity=[...history,...sharedWith].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
+            const wins=allActivity.filter(e=>e.result==='W').length;
+            const total=allActivity.length;
+            return(
+                <div className="page">
+                    <button className="btn-ghost" style={{marginBottom:14,display:'flex',alignItems:'center',gap:8}} onClick={()=>setOpenCard(null)}>
+                        <i className="fas fa-arrow-left"></i> Znajomi
+                    </button>
+                    <div className="surf-card" style={{display:'flex',alignItems:'center',gap:14,marginBottom:14}}>
+                        <div className="f-avatar" style={{width:52,height:52,fontSize:'1.3em',flexShrink:0}}>{(f.name||'?').charAt(0).toUpperCase()}</div>
+                        <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:'1em',fontWeight:700,color:'var(--t1)'}}>{f.name||'—'}</div>
+                            <div style={{fontSize:'0.76em',color:'var(--t2)',marginTop:2,overflow:'hidden',textOverflow:'ellipsis'}}>{f.email}</div>
+                            {!isMutual&&<div style={{fontSize:'0.74em',color:'var(--accent2)',marginTop:4}}>⚠ Ta osoba nie ma Cię w znajomych — część danych jest ukryta.</div>}
+                        </div>
+                    </div>
+                    {isMutual&&<div className="stats-row" style={{marginBottom:14}}>
+                        <div className="stat-box"><div className="stat-num">{total}</div><div className="stat-lbl">Gier</div></div>
+                        <div className="stat-box"><div className="stat-num" style={{color:'var(--win)'}}>{wins}</div><div className="stat-lbl">Wygranych</div></div>
+                        <div className="stat-box"><div className="stat-num">{favItems.length}</div><div className="stat-lbl">Ulubionych</div></div>
+                    </div>}
+                    {canSeeFav&&favItems.length>0&&<div className="surf-card" style={{marginBottom:14}}>
+                        <h4><i className="fas fa-heart" style={{color:'var(--accent)'}}></i> Ulubione obiekty</h4>
+                        {favItems.map(it=><div key={it.id} className="row-item"><span className="lbl">🎾 {it.name}</span><span className="val" style={{fontSize:'0.78em'}}>{totalCourts(it.courts)} kortów</span></div>)}
+                    </div>}
+                    {canSeeHistory&&allActivity.length>0&&<div className="surf-card">
+                        <h4><i className="fas fa-bolt" style={{color:'var(--accent)'}}></i> Ostatnie aktywności</h4>
+                        {allActivity.map((e,i)=>(
+                            <div key={i} className="act-entry" style={{borderBottom:i<allActivity.length-1?'1px solid var(--border)':'none'}}>
+                                <div className="act-left">
+                                    <div className="act-title">
+                                        <span className={`badge badge-${e.sport||'tenis'}`}>{SE[e.sport||'tenis']} {SL[e.sport||'tenis']}</span>
+                                        <span>{e.court}</span>
+                                        {e.result&&<span className={`badge badge-${e.result}`}>{RL[e.result]}</span>}
+                                    </div>
+                                    <div className="act-date">{new Date(e.date).toLocaleDateString('pl-PL',{day:'numeric',month:'short',year:'numeric'})}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>}
+                    {isMutual&&!canSeeFav&&!canSeeHistory&&<div className="empty" style={{paddingTop:30}}>Ta osoba ukryła swoje aktywności i ulubione.</div>}
+                    {!isMutual&&<div className="empty" style={{paddingTop:20}}>Dodaj tę osobę do znajomych wzajemnie, aby zobaczyć jej profil.</div>}
+                    <button className="btn-danger" style={{marginTop:16}} onClick={()=>remF(f.uid)}><i className="fas fa-user-minus"></i> Usuń ze znajomych</button>
+                </div>
+            );
+        }
+
         return(<div className="page">
             <h2 className="page-title">Znajomi</h2>
             <div className="tabs-seg"><button className={`tab-seg-btn ${sub==='friends'?'active':''}`} onClick={()=>setSub('friends')}>Znajomi ({friends.length})</button><button className={`tab-seg-btn ${sub==='search'?'active':''}`} onClick={()=>setSub('search')}>Szukaj</button></div>
             {sub==='search'&&<div><div className="search-bar"><input type="text" placeholder="Imię lub email..." value={sq} onChange={e=>setSq(e.target.value)}/><button className="btn-search" onClick={search} disabled={searching}>{searching?'...':'Szukaj'}</button></div>{sErr&&<div className="empty">{sErr}</div>}{res.map(r=>(<div key={r.uid} className="result-card"><div className="friend-row-hdr"><div className="f-avatar">{(r.name||'?').charAt(0).toUpperCase()}</div><div className="f-info"><h5>{r.name}</h5><span>{r.email}</span></div>{friends.includes(r.uid)?<button className="btn-rem-f">✔ Dodano</button>:<button className="btn-add-f" onClick={()=>addF(r.uid)}>+ Dodaj</button>}</div></div>))}</div>}
-            {sub==='friends'&&<div>{loading&&<div className="empty">Ładowanie...</div>}{!loading&&!fData.length&&<div className="empty">Brak znajomych. Znajdź ich w zakładce Szukaj!</div>}{fData.map(f=>{const fi=f.privacy?.showFavourites!==false?DATA.filter(d=>(f.favourites||[]).includes(d.id)):[];return(<div key={f.uid} className="friend-row"><div className="friend-row-hdr"><div className="f-avatar">{(f.name||'?').charAt(0).toUpperCase()}</div><div className="f-info"><h5>{f.name}</h5><span>{fi.length} ulubionych</span></div><button className="btn-rem-f" onClick={()=>remF(f.uid)}>Usuń</button></div>{fi.length>0&&<div className="fav-tags">{fi.map(it=><span key={it.id} className="fav-tag">🎾 {it.name}</span>)}</div>}</div>);})}</div>}
+            {sub==='friends'&&<div>
+                {loading&&<div className="empty">Ładowanie...</div>}
+                {!loading&&!fData.length&&<div className="empty">Brak znajomych. Znajdź ich w zakładce Szukaj!</div>}
+                {fData.map(f=>{
+                    const isMutual=(f.friends||[]).includes(user.uid);
+                    const fi=f.privacy?.showFavourites!==false?DATA.filter(d=>(f.favourites||[]).includes(d.id)):[];
+                    return(<div key={f.uid} className="friend-row" style={{cursor:'pointer'}} onClick={()=>setOpenCard(f)}>
+                        <div className="friend-row-hdr">
+                            <div className="f-avatar">{(f.name||'?').charAt(0).toUpperCase()}</div>
+                            <div className="f-info">
+                                <h5>{f.name} {isMutual&&<span style={{fontSize:'0.68em',background:'rgba(181,255,77,0.1)',color:'var(--accent)',border:'1px solid rgba(181,255,77,0.2)',padding:'1px 6px',borderRadius:10,fontWeight:600,marginLeft:4}}>wzajemni</span>}</h5>
+                                <span>{fi.length} ulubionych · dotknij aby zobaczyć profil</span>
+                            </div>
+                            <i className="fas fa-chevron-right" style={{color:'var(--t2)',fontSize:'0.8em',flexShrink:0}}></i>
+                        </div>
+                        {fi.length>0&&<div className="fav-tags" style={{marginTop:8}} onClick={e=>e.stopPropagation()}>{fi.map(it=><span key={it.id} className="fav-tag">🎾 {it.name}</span>)}</div>}
+                    </div>);
+                })}
+            </div>}
         </div>);
     }
-
     /* ── APP ── */
     function App() {
         const [view,setView]=useState('home');
