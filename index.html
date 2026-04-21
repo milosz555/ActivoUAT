@@ -635,22 +635,31 @@
 
     /* ── EDIT SHEET ── */
     function EditSheet({ entry, isOwner, friendsList, onSave, onDelete, onClose }) {
-        const [court,setCourt]=useState(entry.court||DATA[0].name);
+        const isCustomCourt = entry.court ? !DATA.find(d=>d.name===entry.court) : false;
+        const [courtIsCustom,setCourtIsCustom]=useState(isCustomCourt);
+        const [court,setCourt]=useState(isCustomCourt?DATA[0].name:entry.court||DATA[0].name);
+        const [courtCustom,setCourtCustom]=useState(isCustomCourt?entry.court||'':'');
         const [date,setDate]=useState(entry.date||new Date().toISOString().split('T')[0]);
         const [sport,setSport]=useState(entry.sport||'tenis');
         const [score,setScore]=useState(entry.score||'');
         const [result,setResult]=useState(entry.result||'');
+        const [photoUrl,setPhotoUrl]=useState(entry.photoUrl||'');
         const [oppUid,setOppUid]=useState(entry.opponentUid||'');
-        const [pOpps,setPOpps]=useState(entry.padelOpponentUids?[...entry.padelOpponentUids,'','',''].slice(0,3):['','','']);
+        const [oppManual,setOppManual]=useState(entry.opponentUid?'':(entry.opponent||''));
+        const initPadelSlots=()=>{const names=entry.padelOpponents||[];const uids=entry.padelOpponentUids||[];return [0,1,2,3].map(i=>({uid:uids[i]||'',manual:uids[i]?'':(names[i]||'')}));};
+        const [pSlots,setPSlots]=useState(initPadelSlots);
         const [showC,setShowC]=useState(false);
         const [saving,setSaving]=useState(false);
-        const setPO=(i,v)=>{const c=[...pOpps];c[i]=v;setPOpps(c);};
+        const setPS=(i,field,val)=>{const c=[...pSlots];c[i]={...c[i],[field]:val};if(field==='uid')c[i].manual='';if(field==='manual')c[i].uid='';setPSlots(c);};
+        const finalCourt=courtIsCustom?courtCustom.trim():court;
         const handleSave=async()=>{
             setSaving(true);
-            let oN='',pN=[],pU=[];
-            if(sport==='tenis'){oN=oppUid?(friendsList.find(f=>f.uid===oppUid)?.name||''):'';}
-            else{pU=pOpps.filter(Boolean);pN=pU.map(uid=>friendsList.find(f=>f.uid===uid)?.name||uid);}
-            const u={...entry,court,date,sport,score,result,...(sport==='tenis'?{opponent:oN,opponentUid:oppUid}:{padelOpponents:pN,padelOpponentUids:pU})};
+            let oN='',oUid='',pNames=[],pUids=[];
+            if(sport==='tenis'){if(oppUid){oUid=oppUid;oN=friendsList.find(f=>f.uid===oppUid)?.name||'';}else if(oppManual.trim()){oN=oppManual.trim();}}
+            else{pSlots.forEach(s=>{if(s.uid){pUids.push(s.uid);pNames.push(friendsList.find(f=>f.uid===s.uid)?.name||s.uid);}else if(s.manual.trim()){pNames.push(s.manual.trim());}});}
+            const u={...entry,court:finalCourt||entry.court,date,sport,score,result,
+                ...(sport==='tenis'?(oN?{opponent:oN,...(oUid&&{opponentUid:oUid})}:{opponent:'',opponentUid:''}):{padelOpponents:pNames,padelOpponentUids:pUids}),
+                ...(photoUrl.trim()?{photoUrl:photoUrl.trim()}:{photoUrl:''})};
             if(sport==='tenis'){delete u.padelOpponents;delete u.padelOpponentUids;}else{delete u.opponent;delete u.opponentUid;}
             await onSave(u); setSaving(false);
         };
@@ -671,16 +680,24 @@
                                     <button type="button" className={`sport-opt ${sport==='padel'?'sel-p':''}`} onClick={()=>setSport('padel')}>🏓 Padel</button>
                                 </div>
                                 <label className="edit-label">Obiekt</label>
-                                <select value={court} onChange={e=>setCourt(e.target.value)}>{DATA.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}</select>
+                                <select value={courtIsCustom?'__custom__':court} onChange={e=>{if(e.target.value==='__custom__'){setCourtIsCustom(true);}else{setCourtIsCustom(false);setCourt(e.target.value);}}}>
+                                    {DATA.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}
+                                    <option value="__custom__">Inny obiekt…</option>
+                                </select>
+                                {courtIsCustom&&<input type="text" placeholder="Wpisz nazwę obiektu" value={courtCustom} onChange={e=>setCourtCustom(e.target.value)} style={{marginTop:6}}/>}
                                 <label className="edit-label">Data</label>
                                 <input type="date" value={date} onChange={e=>setDate(e.target.value)}/>
                                 {sport==='tenis'&&<>
                                     <label className="edit-label">Przeciwnik <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
-                                    <div className="opp-wrap"><select value={oppUid} onChange={e=>setOppUid(e.target.value)}><option value="">— nie wybrano —</option>{friendsList.map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>
+                                    <div className="opp-wrap"><select value={oppUid} onChange={e=>{setOppUid(e.target.value);if(e.target.value)setOppManual('');}}><option value="">— ze znajomych —</option>{friendsList.map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>
+                                    {!oppUid&&<input type="text" placeholder="lub wpisz imię ręcznie…" value={oppManual} onChange={e=>setOppManual(e.target.value)} style={{marginTop:6}}/>}
                                 </>}
                                 {sport==='padel'&&<>
-                                    <label className="edit-label">Gracze (do 3) <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
-                                    {[0,1,2].map(i=>{const o=pOpps.filter((_,j)=>j!==i).filter(Boolean);return(<div key={i} className="opp-wrap" style={{marginBottom:i<2?7:0}}><select value={pOpps[i]} onChange={e=>setPO(i,e.target.value)}><option value="">— Gracz {i+1} —</option>{friendsList.filter(f=>!o.includes(f.uid)).map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>);})}
+                                    <label className="edit-label">Gracze (do 4) <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
+                                    {[0,1,2,3].map(i=>{const oU=pSlots.filter((_,j)=>j!==i).map(s=>s.uid).filter(Boolean);return(<div key={i} style={{marginBottom:i<3?8:0}}>
+                                        <div className="opp-wrap"><select value={pSlots[i].uid} onChange={e=>setPS(i,'uid',e.target.value)}><option value="">— Gracz {i+1}: ze znajomych —</option>{friendsList.filter(f=>!oU.includes(f.uid)).map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>
+                                        {!pSlots[i].uid&&<input type="text" placeholder={`lub wpisz imię gracza ${i+1}…`} value={pSlots[i].manual} onChange={e=>setPS(i,'manual',e.target.value)} style={{marginTop:5}}/>}
+                                    </div>);})}
                                 </>}
                             </>):(
                                 <>
@@ -697,6 +714,9 @@
                                 <option value="L">❌ Przegrana</option>
                                 <option value="D">🤝 Remis</option>
                             </select>
+                            <label className="edit-label">Zdjęcie wyników <span style={{textTransform:'none',fontWeight:400}}>(URL, opcjonalnie)</span></label>
+                            <input type="text" placeholder="https://..." value={photoUrl} onChange={e=>setPhotoUrl(e.target.value)}/>
+                            {photoUrl.trim()&&<div style={{marginTop:7,borderRadius:8,overflow:'hidden',border:'1px solid var(--border)'}}><img src={photoUrl.trim()} alt="Podgląd" style={{width:'100%',maxHeight:200,objectFit:'contain',background:'var(--s2)',display:'block'}} onError={e=>e.target.style.display='none'}/></div>}
                             <button className="btn-primary" style={{marginTop:16}} onClick={handleSave} disabled={saving}>{saving?'Zapisywanie...':'✔ Zapisz zmiany'}</button>
                             {isOwner&&<button className="btn-danger" onClick={()=>setShowC(true)}><i className="fas fa-trash-alt"></i> Usuń aktywność</button>}
                         </div>
@@ -763,13 +783,20 @@
         const [showStats,setShowStats]=useState(false);
         const [editE,setEditE]=useState(null);
         const [chartMode,setChartMode]=useState('month');
+        // court: dropdown + optional custom
         const [court,setCourt]=useState(DATA[0].name);
+        const [courtIsCustom,setCourtIsCustom]=useState(false);
+        const [courtCustom,setCourtCustom]=useState('');
         const [date,setDate]=useState(new Date().toISOString().split('T')[0]);
         const [sport,setSport]=useState('tenis');
+        // tenis opponent: from friends OR manual name
         const [oppUid,setOppUid]=useState('');
-        const [pOpps,setPOpps]=useState(['','','']);
+        const [oppManual,setOppManual]=useState('');
+        // padel: each slot can be from friends OR manual; store {uid, manual} per slot
+        const [pSlots,setPSlots]=useState([{uid:'',manual:''},{uid:'',manual:''},{uid:'',manual:''}]);
         const [score,setScore]=useState('');
         const [result,setResult]=useState('');
+        const [photoUrl,setPhotoUrl]=useState('');
         const [saving,setSaving]=useState(false);
         const [fList,setFList]=useState([]);
         const [eName,setEName]=useState(user.displayName||'');
@@ -779,7 +806,10 @@
         const [showHist,setShowHist]=useState(true);
         const uRef=fb.doc(fb.db,'users',user.uid);
         useEffect(()=>{fb.getDoc(uRef).then(snap=>{if(!snap.exists())return;const d=snap.data();setPlayedList(d.playedHistory||[]);setSharedGames(d.sharedGames||[]);if(d.privacy){setShowFav(d.privacy.showFavourites!==false);setShowHist(d.privacy.showHistory!==false);}const uids=d.friends||[];if(uids.length)Promise.all(uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)))).then(ss=>setFList(ss.filter(s=>s.exists()).map(s=>({uid:s.id,name:s.data().name||s.data().email||s.id}))));});},[user.uid]);
-        const setPO=(i,v)=>{const c=[...pOpps];c[i]=v;setPOpps(c);};
+
+        const setPS=(i,field,val)=>{const c=[...pSlots];c[i]={...c[i],[field]:val};if(field==='uid')c[i].manual='';if(field==='manual')c[i].uid='';setPSlots(c);};
+        const resolvedCourt = courtIsCustom ? courtCustom.trim() : court;
+
         const allEntries=useMemo(()=>[...playedList.map((e,i)=>({e,i,own:true})),...sharedGames.map((e,i)=>({e,i,own:false}))].sort((a,b)=>new Date(b.e.date)-new Date(a.e.date)),[playedList,sharedGames]);
         const chartData=useMemo(()=>{
             const now=new Date();
@@ -790,7 +820,35 @@
         const nowKey=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
         const thisMonth=allEntries.filter(x=>x.e.date&&x.e.date.startsWith(nowKey)).length;
         const wins=allEntries.filter(x=>x.e.result==='W').length;
-        const addEntry=async()=>{setSaving(true);const gid=`game_${Date.now()}_${user.uid}`;let oN='',pN=[],pU=[];if(sport==='tenis'){oN=oppUid?(fList.find(f=>f.uid===oppUid)?.name||''):'';}else{pU=pOpps.filter(Boolean);pN=pU.map(uid=>fList.find(f=>f.uid===uid)?.name||uid);}const entry={gameId:gid,ownerUid:user.uid,court,date,sport,addedAt:new Date().toISOString(),...(sport==='tenis'?(oN?{opponent:oN,opponentUid:oppUid}:{}):{padelOpponents:pN,padelOpponentUids:pU}),...(score.trim()&&{score:score.trim()}),...(result&&{result})};const nl=[entry,...playedList].slice(0,50);await fb.setDoc(uRef,{playedHistory:nl},{merge:true});setPlayedList(nl);const pUids=sport==='tenis'?(oppUid?[oppUid]:[]):pU;const oName=user.displayName||user.email||'Ktoś';for(const uid of pUids){const pRef=fb.doc(fb.db,'users',uid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:[{...entry,sharedWith:uid,ownerName:oName},...ex].slice(0,50)},{merge:true});}}setShowAdd(false);setOppUid('');setPOpps(['','','']);setScore('');setResult('');setSport('tenis');setSaving(false);};
+
+        const addEntry=async()=>{
+            setSaving(true);
+            const gid=`game_${Date.now()}_${user.uid}`;
+            const finalCourt = resolvedCourt || DATA[0].name;
+            let oN='', oUid='', pNames=[], pUids=[];
+            if(sport==='tenis'){
+                if(oppUid){ oUid=oppUid; oN=fList.find(f=>f.uid===oppUid)?.name||''; }
+                else if(oppManual.trim()){ oN=oppManual.trim(); }
+            } else {
+                pSlots.forEach(s=>{
+                    if(s.uid){ pUids.push(s.uid); pNames.push(fList.find(f=>f.uid===s.uid)?.name||s.uid); }
+                    else if(s.manual.trim()){ pNames.push(s.manual.trim()); }
+                });
+            }
+            const entry={gameId:gid,ownerUid:user.uid,court:finalCourt,date,sport,addedAt:new Date().toISOString(),
+                ...(sport==='tenis'?(oN?{opponent:oN,...(oUid&&{opponentUid:oUid})}:{}):{padelOpponents:pNames,padelOpponentUids:pUids}),
+                ...(score.trim()&&{score:score.trim()}),
+                ...(result&&{result}),
+                ...(photoUrl.trim()&&{photoUrl:photoUrl.trim()}),
+            };
+            const nl=[entry,...playedList].slice(0,50);
+            await fb.setDoc(uRef,{playedHistory:nl},{merge:true});
+            setPlayedList(nl);
+            const oName=user.displayName||user.email||'Ktoś';
+            for(const uid of pUids){const pRef=fb.doc(fb.db,'users',uid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:[{...entry,sharedWith:uid,ownerName:oName},...ex].slice(0,50)},{merge:true});}}
+            if(sport==='tenis'&&oUid){const pRef=fb.doc(fb.db,'users',oUid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:[{...entry,sharedWith:oUid,ownerName:oName},...ex].slice(0,50)},{merge:true});}}
+            setShowAdd(false);setOppUid('');setOppManual('');setPSlots([{uid:'',manual:''},{uid:'',manual:''},{uid:'',manual:''}]);setScore('');setResult('');setSport('tenis');setCourt(DATA[0].name);setCourtIsCustom(false);setCourtCustom('');setPhotoUrl('');setSaving(false);
+        };
         const saveOwn=async(upd)=>{const nl=playedList.map((e,i)=>i===editE.idx?upd:e);await fb.setDoc(uRef,{playedHistory:nl},{merge:true});setPlayedList(nl);const pU=upd.padelOpponentUids?upd.padelOpponentUids:upd.opponentUid?[upd.opponentUid]:[];for(const uid of pU){const pRef=fb.doc(fb.db,'users',uid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:ex.map(e=>e.gameId===upd.gameId?{...upd,sharedWith:uid,ownerName:user.displayName||user.email}:e)},{merge:true});}}setEditE(null);};
         const saveShared=async(upd)=>{const nl=sharedGames.map((e,i)=>i===editE.idx?upd:e);await fb.setDoc(uRef,{sharedGames:nl},{merge:true});setSharedGames(nl);setEditE(null);};
         const delOwn=async()=>{const nl=playedList.filter((_,i)=>i!==editE.idx);await fb.setDoc(uRef,{playedHistory:nl},{merge:true});setPlayedList(nl);setEditE(null);};
@@ -816,6 +874,9 @@
                             {players.length>0&&<span><i className="fas fa-users"></i>{players.join(', ')}</span>}
                             {entry.score&&<span><i className="fas fa-table-tennis"></i>{entry.score}</span>}
                         </div>}
+                        {entry.photoUrl&&<a href={entry.photoUrl} target="_blank" rel="noopener noreferrer" style={{display:'block',marginTop:7,borderRadius:8,overflow:'hidden',border:'1px solid var(--border)',maxWidth:220}}>
+                            <img src={entry.photoUrl} alt="Wyniki" style={{width:'100%',maxHeight:130,objectFit:'contain',background:'var(--s2)',display:'block'}} onError={e=>e.target.parentElement.style.display='none'}/>
+                        </a>}
                     </div>
                     <button className="btn-icon" onClick={()=>setEditE({entry,idx,isOwner:isOwn})}><i className="fas fa-pen"></i></button>
                 </div>
@@ -875,22 +936,47 @@
                                     <button type="button" className={`sport-opt ${sport==='tenis'?'sel-t':''}`} onClick={()=>setSport('tenis')}>🎾 Tenis</button>
                                     <button type="button" className={`sport-opt ${sport==='padel'?'sel-p':''}`} onClick={()=>setSport('padel')}>🏓 Padel</button>
                                 </div>
+
                                 <label className="field-label">Obiekt *</label>
-                                <select value={court} onChange={e=>setCourt(e.target.value)}>{DATA.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}</select>
+                                <select value={courtIsCustom?'__custom__':court} onChange={e=>{if(e.target.value==='__custom__'){setCourtIsCustom(true);}else{setCourtIsCustom(false);setCourt(e.target.value);}}}>
+                                    {DATA.map(d=><option key={d.id} value={d.name}>{d.name}</option>)}
+                                    <option value="__custom__">Inny obiekt…</option>
+                                </select>
+                                {courtIsCustom&&<input type="text" placeholder="Wpisz nazwę obiektu" value={courtCustom} onChange={e=>setCourtCustom(e.target.value)} style={{marginTop:6}}/>}
+
                                 <label className="field-label">Data *</label>
                                 <input type="date" value={date} onChange={e=>setDate(e.target.value)}/>
+
                                 {sport==='tenis'&&<>
                                     <label className="field-label">Z kim grałem? <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
-                                    <div className="opp-wrap"><select value={oppUid} onChange={e=>setOppUid(e.target.value)}><option value="">— nie wybrano —</option>{fList.map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>
-                                    {fList.length===0&&<p className="hint-text">Dodaj znajomych, aby ich wybrać.</p>}
+                                    <div className="opp-wrap">
+                                        <select value={oppUid} onChange={e=>{setOppUid(e.target.value);if(e.target.value)setOppManual('');}}>
+                                            <option value="">— wybierz ze znajomych —</option>
+                                            {fList.map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}
+                                        </select>
+                                    </div>
+                                    {!oppUid&&<input type="text" placeholder="lub wpisz imię ręcznie…" value={oppManual} onChange={e=>setOppManual(e.target.value)} style={{marginTop:6}}/>}
                                 </>}
+
                                 {sport==='padel'&&<>
                                     <label className="field-label">Gracze (do 3) <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
-                                    {[0,1,2].map(i=>{const o=pOpps.filter((_,j)=>j!==i).filter(Boolean);return(<div key={i} className="opp-wrap" style={{marginBottom:i<2?7:0}}><select value={pOpps[i]} onChange={e=>setPO(i,e.target.value)}><option value="">— Gracz {i+1} —</option>{fList.filter(f=>!o.includes(f.uid)).map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}</select></div>);})}
-                                    {fList.length===0&&<p className="hint-text">Dodaj znajomych, aby ich wybrać.</p>}
+                                    {[0,1,2].map(i=>{
+                                        const otherUids=pSlots.filter((_,j)=>j!==i).map(s=>s.uid).filter(Boolean);
+                                        return(<div key={i} style={{marginBottom:i<2?8:0}}>
+                                            <div className="opp-wrap">
+                                                <select value={pSlots[i].uid} onChange={e=>setPS(i,'uid',e.target.value)}>
+                                                    <option value="">— Gracz {i+1}: ze znajomych —</option>
+                                                    {fList.filter(f=>!otherUids.includes(f.uid)).map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}
+                                                </select>
+                                            </div>
+                                            {!pSlots[i].uid&&<input type="text" placeholder={`lub wpisz imię gracza ${i+1}…`} value={pSlots[i].manual} onChange={e=>setPS(i,'manual',e.target.value)} style={{marginTop:5}}/>}
+                                        </div>);
+                                    })}
                                 </>}
+
                                 <label className="field-label">Wynik <span style={{textTransform:'none',fontWeight:400}}>(np. 6:3)</span></label>
                                 <input type="text" placeholder="np. 6:3" value={score} onChange={e=>setScore(e.target.value)}/>
+
                                 <label className="field-label">Rezultat</label>
                                 <select value={result} onChange={e=>setResult(e.target.value)}>
                                     <option value="">— nie podawaj —</option>
@@ -898,6 +984,11 @@
                                     <option value="L">❌ Przegrana</option>
                                     <option value="D">🤝 Remis</option>
                                 </select>
+
+                                <label className="field-label">Zdjęcie wyników <span style={{textTransform:'none',fontWeight:400}}>(URL, opcjonalnie)</span></label>
+                                <input type="text" placeholder="https://... (link do zdjęcia np. ze zdjęć Google)" value={photoUrl} onChange={e=>setPhotoUrl(e.target.value)}/>
+                                {photoUrl.trim()&&<div style={{marginTop:7,borderRadius:8,overflow:'hidden',border:'1px solid var(--border)'}}><img src={photoUrl.trim()} alt="Podgląd" style={{width:'100%',maxHeight:200,objectFit:'contain',background:'var(--s2)',display:'block'}} onError={e=>e.target.style.display='none'}/></div>}
+
                                 <button className="btn-primary" style={{marginTop:14}} onClick={addEntry} disabled={saving}>{saving?'Zapisywanie...':'✔ Zapisz aktywność'}</button>
                             </div>}
                             {allEntries.length===0&&!showAdd&&<div className="empty">Brak aktywności — dodaj swoją pierwszą grę!</div>}
