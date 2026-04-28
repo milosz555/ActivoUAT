@@ -226,6 +226,7 @@
     .badge-W { background: rgba(74,222,128,0.1); color: var(--win); border: 1px solid rgba(74,222,128,0.2); }
     .badge-L { background: rgba(244,63,94,0.1); color: var(--danger); border: 1px solid rgba(244,63,94,0.2); }
     .badge-D { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+    .badge-silownia { background: rgba(167,139,250,0.1); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
     .badge-shared { background: rgba(167,139,250,0.1); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); font-size: 0.68em; }
 
     /* ── ADD FORM ── */
@@ -234,6 +235,7 @@
     .sport-opt { flex: 1; padding: 10px 5px; border: 1.5px solid var(--border); border-radius: 9px; background: var(--s1); font-family: var(--font); font-size: 0.85em; font-weight: 600; cursor: pointer; text-align: center; color: var(--t2); transition: all 0.18s; }
     .sport-opt.sel-t { border-color: var(--accent); background: rgba(181,255,77,0.08); color: var(--accent); }
     .sport-opt.sel-p { border-color: var(--accent2); background: rgba(249,115,22,0.08); color: var(--accent2); }
+    .sport-opt.sel-s { border-color: #a78bfa; background: rgba(167,139,250,0.08); color: #a78bfa; }
     .opp-wrap { position: relative; }
     .opp-wrap select { appearance: none; -webkit-appearance: none; padding-right: 34px; }
     .opp-wrap::after { content: '\f107'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--t2); pointer-events: none; font-size: 0.88em; }
@@ -443,8 +445,8 @@
             desc:"Największy ośrodek do gry w padla pod halą w Wielkopolsce — 9 profesjonalnych kortów (8 deblowych + 1 singlowy) w hali o wysokości 11 metrów. Strefa Lounge, ProShop z rakietami HEAD, Babolat i OXDOG. Otwarty 5:00–1:00, rezerwacja przez Playtomic."
         },
     ];
-    const SE = { tenis:'🎾', padel:'🏓' };
-    const SL = { tenis:'Tenis', padel:'Padel' };
+    const SE = { tenis:'🎾', padel:'🏓', silownia:'🏋️' };
+    const SL = { tenis:'Tenis', padel:'Padel', silownia:'Siłownia' };
     const RL = { W:'Wygrana', L:'Przegrana', D:'Remis' };
     const PM = ['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz','Paź','Lis','Gru'];
 
@@ -515,35 +517,52 @@
     /* ── BAR CHART ── */
     function BarChart({ data }) {
         if (!data.length) return <div className="chart-empty">Brak danych</div>;
-        const BW=26, G=8, H=120, PL=28, PB=24, PT=12;
-        const maxV = Math.max(1,...data.map(d=>d.tenis+d.padel));
-        const cW = BW*2+G;
-        const tW = PL + data.length*(cW+8)+8;
+        const hasSilownia = data.some(d=>d.silownia>0);
+        const BARS = hasSilownia ? 3 : 2;
+        const BW=20, G=4, H=130, PL=26, PB=22, PT=14;
+        const cW = BW*BARS + G*(BARS-1);
+        const maxV = Math.max(1,...data.map(d=>(d.tenis||0)+(d.padel||0)+(d.silownia||0)));
+        const tW = PL + data.length*(cW+10)+6;
         const toY = v => PT+(H-PB-PT)*(1-v/maxV);
         const bH = v => Math.max(2,(H-PB-PT)*(v/maxV));
-        const yticks = [0,Math.round(maxV/2),maxV].filter((v,i,a)=>a.indexOf(v)===i);
+        const yticks = maxV<=4?Array.from({length:maxV+1},(_,i)=>i):[0,Math.round(maxV/2),maxV];
+        const uniqueY = [...new Set(yticks)];
+        const COLORS = {tenis:'#b5ff4d', padel:'#f97316', silownia:'#a78bfa'};
+        const sports = hasSilownia ? ['tenis','padel','silownia'] : ['tenis','padel'];
         return (
-            <div className="chart-wrap">
-                <svg width={tW} height={H} style={{display:'block',minWidth:tW}}>
-                    {yticks.map(t=>(
-                        <g key={t}>
-                            <line x1={PL-4} x2={tW} y1={toY(t)} y2={toY(t)} stroke="#27272f" strokeWidth="1"/>
-                            <text x={PL-6} y={toY(t)+4} textAnchor="end" fontSize="9" fill="#8c8c99">{t}</text>
-                        </g>
+            <div>
+                <div className="chart-wrap">
+                    <svg width={tW} height={H} style={{display:'block',minWidth:tW}}>
+                        {uniqueY.map(t=>(
+                            <g key={t}>
+                                <line x1={PL-3} x2={tW} y1={toY(t)} y2={toY(t)} stroke="#27272f" strokeWidth="1"/>
+                                <text x={PL-5} y={toY(t)+4} textAnchor="end" fontSize="9" fill="#8c8c99">{t}</text>
+                            </g>
+                        ))}
+                        {data.map((d,i)=>{
+                            const x0=PL+i*(cW+10);
+                            const cx=x0+cW/2;
+                            return (<g key={i}>
+                                {sports.map((sp,si)=>{
+                                    const v=d[sp]||0;
+                                    const bx=x0+si*(BW+G);
+                                    return v>0
+                                        ?<rect key={sp} x={bx} y={toY(v)} width={BW} height={bH(v)} rx="3" fill={COLORS[sp]} fillOpacity="0.9"/>
+                                        :<rect key={sp} x={bx} y={H-PB-2} width={BW} height={2} rx="1" fill="#27272f"/>;
+                                })}
+                                <text x={cx} y={H-4} textAnchor="middle" fontSize="9" fill="#8c8c99">{d.label}</text>
+                            </g>);
+                        })}
+                    </svg>
+                </div>
+                <div style={{display:'flex',gap:14,marginTop:8,flexWrap:'wrap'}}>
+                    {sports.map(sp=>(
+                        <div key={sp} style={{display:'flex',alignItems:'center',gap:5,fontSize:'0.76em',color:'var(--t2)'}}>
+                            <div style={{width:10,height:10,borderRadius:2,background:COLORS[sp],flexShrink:0}}></div>
+                            {SL[sp]}
+                        </div>
                     ))}
-                    {data.map((d,i)=>{
-                        const x0=PL+i*(cW+8), cx=x0+cW/2;
-                        return (<g key={i}>
-                            {d.tenis>0?<rect x={x0} y={toY(d.tenis)} width={BW} height={bH(d.tenis)} rx="4" fill="#b5ff4d" fillOpacity="0.85"/>:<rect x={x0} y={H-PB-2} width={BW} height={2} rx="1" fill="#27272f"/>}
-                            {d.padel>0?<rect x={x0+BW+G/2} y={toY(d.padel)} width={BW} height={bH(d.padel)} rx="4" fill="#f97316" fillOpacity="0.85"/>:<rect x={x0+BW+G/2} y={H-PB-2} width={BW} height={2} rx="1" fill="#27272f"/>}
-                            <text x={cx} y={H-5} textAnchor="middle" fontSize="9.5" fill="#8c8c99">{d.label}</text>
-                        </g>);
-                    })}
-                    <rect x={PL} y={3} width={8} height={8} rx="2" fill="#b5ff4d" fillOpacity="0.85"/>
-                    <text x={PL+11} y={10} fontSize="8.5" fill="#8c8c99">Tenis</text>
-                    <rect x={PL+48} y={3} width={8} height={8} rx="2" fill="#f97316" fillOpacity="0.85"/>
-                    <text x={PL+59} y={10} fontSize="8.5" fill="#8c8c99">Padel</text>
-                </svg>
+                </div>
             </div>
         );
     }
@@ -782,7 +801,7 @@
         const [showAdd,setShowAdd]=useState(false);
         const [showStats,setShowStats]=useState(false);
         const [editE,setEditE]=useState(null);
-        const [chartMode,setChartMode]=useState('month');
+        const [chartMode,setChartMode]=useState('6m');
         // court: dropdown + optional custom
         const [court,setCourt]=useState(DATA[0].name);
         const [courtIsCustom,setCourtIsCustom]=useState(false);
@@ -797,6 +816,7 @@
         const [score,setScore]=useState('');
         const [result,setResult]=useState('');
         const [photoUrl,setPhotoUrl]=useState('');
+        const [note,setNote]=useState('');
         const [saving,setSaving]=useState(false);
         const [fList,setFList]=useState([]);
         const [eName,setEName]=useState(user.displayName||'');
@@ -813,8 +833,23 @@
         const allEntries=useMemo(()=>[...playedList.map((e,i)=>({e,i,own:true})),...sharedGames.map((e,i)=>({e,i,own:false}))].sort((a,b)=>new Date(b.e.date)-new Date(a.e.date)),[playedList,sharedGames]);
         const chartData=useMemo(()=>{
             const now=new Date();
-            if(chartMode==='month'){return Array.from({length:6},(_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-(5-i),1);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;const g=allEntries.filter(x=>x.e.date&&x.e.date.startsWith(key));return{label:PM[d.getMonth()],tenis:g.filter(x=>x.e.sport==='tenis').length,padel:g.filter(x=>x.e.sport==='padel').length};});}
-            return Array.from({length:8},(_,i)=>{const d=new Date(now);d.setDate(d.getDate()-7*(7-i));const wk=getWeekKey(d.toISOString().split('T')[0]);const we=new Date(wk);we.setDate(we.getDate()+6);const g=allEntries.filter(x=>{if(!x.e.date)return false;const xd=new Date(x.e.date);return xd>=new Date(wk)&&xd<=we;});return{label:weekLabel(wk),tenis:g.filter(x=>x.e.sport==='tenis').length,padel:g.filter(x=>x.e.sport==='padel').length};});
+            let months=6;
+            if(chartMode==='3m')months=3;
+            else if(chartMode==='6m')months=6;
+            else if(chartMode==='12m')months=12;
+            else if(chartMode==='all'){
+                if(!allEntries.length)return[];
+                const oldest=allEntries.reduce((a,b)=>new Date(a.e.date)<new Date(b.e.date)?a:b);
+                const d=new Date(oldest.e.date);
+                const diff=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());
+                months=Math.max(1,diff+1);
+            }
+            return Array.from({length:months},(_,i)=>{
+                const d=new Date(now.getFullYear(),now.getMonth()-(months-1-i),1);
+                const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                const g=allEntries.filter(x=>x.e.date&&x.e.date.startsWith(key));
+                return{label:PM[d.getMonth()],tenis:g.filter(x=>x.e.sport==='tenis').length,padel:g.filter(x=>x.e.sport==='padel').length,silownia:g.filter(x=>x.e.sport==='silownia').length};
+            });
         },[allEntries,chartMode]);
         const total=allEntries.length;
         const nowKey=`${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
@@ -840,6 +875,7 @@
                 ...(score.trim()&&{score:score.trim()}),
                 ...(result&&{result}),
                 ...(photoUrl.trim()&&{photoUrl:photoUrl.trim()}),
+                ...(note.trim()&&{note:note.trim()}),
             };
             const nl=[entry,...playedList].slice(0,50);
             await fb.setDoc(uRef,{playedHistory:nl},{merge:true});
@@ -856,7 +892,7 @@
                     await fb.setDoc(pRef,{sharedGames:[oppEntry,...ex].slice(0,50)},{merge:true});
                 }
             }
-            setShowAdd(false);setOppUid('');setOppManual('');setPSlots([{uid:'',manual:''},{uid:'',manual:''},{uid:'',manual:''}]);setScore('');setResult('');setSport('tenis');setCourt(DATA[0].name);setCourtIsCustom(false);setCourtCustom('');setPhotoUrl('');setSaving(false);
+            setShowAdd(false);setOppUid('');setOppManual('');setPSlots([{uid:'',manual:''},{uid:'',manual:''},{uid:'',manual:''}]);setScore('');setResult('');setSport('tenis');setCourt(DATA[0].name);setCourtIsCustom(false);setCourtCustom('');setPhotoUrl('');setNote('');setSaving(false);
         };
         const saveOwn=async(upd)=>{const nl=playedList.map((e,i)=>i===editE.idx?upd:e);await fb.setDoc(uRef,{playedHistory:nl},{merge:true});setPlayedList(nl);const pU=upd.padelOpponentUids?upd.padelOpponentUids:upd.opponentUid?[upd.opponentUid]:[];for(const uid of pU){const pRef=fb.doc(fb.db,'users',uid);const ps=await fb.getDoc(pRef);if(ps.exists()){const ex=ps.data().sharedGames||[];await fb.setDoc(pRef,{sharedGames:ex.map(e=>e.gameId===upd.gameId?{...upd,sharedWith:uid,ownerName:user.displayName||user.email}:e)},{merge:true});}}setEditE(null);};
         const saveShared=async(upd)=>{const nl=sharedGames.map((e,i)=>i===editE.idx?upd:e);await fb.setDoc(uRef,{sharedGames:nl},{merge:true});setSharedGames(nl);setEditE(null);};
@@ -883,6 +919,7 @@
                             {players.length>0&&<span><i className="fas fa-users"></i>{players.join(', ')}</span>}
                             {entry.score&&<span><i className="fas fa-table-tennis"></i>{entry.score}</span>}
                         </div>}
+                        {entry.note&&<div style={{fontSize:'0.76em',color:'var(--t2)',marginTop:4,fontStyle:'italic'}}>📝 {entry.note}</div>}
                         {entry.photoUrl&&<a href={entry.photoUrl} target="_blank" rel="noopener noreferrer" style={{display:'block',marginTop:7,borderRadius:8,overflow:'hidden',border:'1px solid var(--border)',maxWidth:220}}>
                             <img src={entry.photoUrl} alt="Wyniki" style={{width:'100%',maxHeight:130,objectFit:'contain',background:'var(--s2)',display:'block'}} onError={e=>e.target.parentElement.style.display='none'}/>
                         </a>}
@@ -912,20 +949,21 @@
                 </div>
                 <div className="page" style={{paddingTop:20}}>
                     {pTab==='activity'&&<>
+                        <button className="btn-primary" style={{marginBottom:14,display:'flex',alignItems:'center',justifyContent:'center',gap:8,fontSize:'0.95em'}} onClick={()=>{setShowAdd(!showAdd);setPTab('activity');}}>
+                            <i className="fas fa-plus-circle"></i> Dodaj aktywność
+                        </button>
                         <div className="stats-row">
                             <div className="stat-box"><div className="stat-num">{total}</div><div className="stat-lbl">Wszystkich</div></div>
                             <div className="stat-box"><div className="stat-num">{thisMonth}</div><div className="stat-lbl">Ten miesiąc</div></div>
                             <div className="stat-box"><div className="stat-num" style={{color:'var(--win)'}}>{wins}</div><div className="stat-lbl">Wygranych</div></div>
                         </div>
                         <div className="surf-card">
-                            <h4><i className="fas fa-chart-bar" style={{color:'var(--accent)'}}></i> Aktywność
-                                <span className="card-action">
-                                    <div className="chart-toggle" style={{margin:0,marginLeft:'auto'}}>
-                                        <button className={`chart-toggle-btn ${chartMode==='month'?'active':''}`} onClick={()=>setChartMode('month')}>Miesiące</button>
-                                        <button className={`chart-toggle-btn ${chartMode==='week'?'active':''}`} onClick={()=>setChartMode('week')}>Tygodnie</button>
-                                    </div>
-                                </span>
-                            </h4>
+                            <h4><i className="fas fa-chart-bar" style={{color:'var(--accent)'}}></i> Aktywność</h4>
+                            <div className="chart-toggle" style={{marginBottom:14}}>
+                                {[['3m','3 mies.'],['6m','6 mies.'],['12m','12 mies.'],['all','Wszystko']].map(([k,l])=>(
+                                    <button key={k} className={`chart-toggle-btn ${chartMode===k?'active':''}`} onClick={()=>setChartMode(k)}>{l}</button>
+                                ))}
+                            </div>
                             <BarChart data={chartData}/>
                         </div>
                         <button className="btn-stats-detail" onClick={()=>setShowStats(true)}>
@@ -944,6 +982,7 @@
                                 <div className="sport-selector">
                                     <button type="button" className={`sport-opt ${sport==='tenis'?'sel-t':''}`} onClick={()=>setSport('tenis')}>🎾 Tenis</button>
                                     <button type="button" className={`sport-opt ${sport==='padel'?'sel-p':''}`} onClick={()=>setSport('padel')}>🏓 Padel</button>
+                                    <button type="button" className={`sport-opt ${sport==='silownia'?'sel-s':''}`} onClick={()=>setSport('silownia')}>🏋️ Siłownia</button>
                                 </div>
 
                                 <label className="field-label">Obiekt *</label>
@@ -983,19 +1022,34 @@
                                     })}
                                 </>}
 
-                                <label className="field-label">Wynik <span style={{textTransform:'none',fontWeight:400}}>(np. 6:3)</span></label>
-                                <input type="text" placeholder="np. 6:3" value={score} onChange={e=>setScore(e.target.value)}/>
+                                {sport==='silownia'&&<>
+                                    <label className="field-label">Z kim byłem? <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
+                                    <div className="opp-wrap">
+                                        <select value={oppUid} onChange={e=>{setOppUid(e.target.value);if(e.target.value)setOppManual('');}}>
+                                            <option value="">— wybierz ze znajomych —</option>
+                                            {fList.map(f=><option key={f.uid} value={f.uid}>{f.name}</option>)}
+                                        </select>
+                                    </div>
+                                    {!oppUid&&<input type="text" placeholder="lub wpisz imię ręcznie…" value={oppManual} onChange={e=>setOppManual(e.target.value)} style={{marginTop:6}}/>}
+                                </>}
 
-                                <label className="field-label">Rezultat</label>
-                                <select value={result} onChange={e=>setResult(e.target.value)}>
-                                    <option value="">— nie podawaj —</option>
-                                    <option value="W">🏆 Wygrana</option>
-                                    <option value="L">❌ Przegrana</option>
-                                    <option value="D">🤝 Remis</option>
-                                </select>
+                                {sport!=='silownia'&&<>
+                                    <label className="field-label">Wynik <span style={{textTransform:'none',fontWeight:400}}>(np. 6:3)</span></label>
+                                    <input type="text" placeholder="np. 6:3" value={score} onChange={e=>setScore(e.target.value)}/>
+                                    <label className="field-label">Rezultat</label>
+                                    <select value={result} onChange={e=>setResult(e.target.value)}>
+                                        <option value="">— nie podawaj —</option>
+                                        <option value="W">🏆 Wygrana</option>
+                                        <option value="L">❌ Przegrana</option>
+                                        <option value="D">🤝 Remis</option>
+                                    </select>
+                                </>}
 
-                                <label className="field-label">Zdjęcie wyników <span style={{textTransform:'none',fontWeight:400}}>(URL, opcjonalnie)</span></label>
-                                <input type="text" placeholder="https://... (link do zdjęcia np. ze zdjęć Google)" value={photoUrl} onChange={e=>setPhotoUrl(e.target.value)}/>
+                                <label className="field-label">Notatka <span style={{textTransform:'none',fontWeight:400}}>(opcjonalnie)</span></label>
+                                <input type="text" placeholder={sport==='silownia'?'np. nogi + cardio, PR na przysiadzie…':'np. uwagi do gry…'} value={note} onChange={e=>setNote(e.target.value)}/>
+
+                                <label className="field-label">Zdjęcie / screen wyników <span style={{textTransform:'none',fontWeight:400}}>(URL, opcjonalnie)</span></label>
+                                <input type="text" placeholder="https://..." value={photoUrl} onChange={e=>setPhotoUrl(e.target.value)}/>
                                 {photoUrl.trim()&&<div style={{marginTop:7,borderRadius:8,overflow:'hidden',border:'1px solid var(--border)'}}><img src={photoUrl.trim()} alt="Podgląd" style={{width:'100%',maxHeight:200,objectFit:'contain',background:'var(--s2)',display:'block'}} onError={e=>e.target.style.display='none'}/></div>}
 
                                 <button className="btn-primary" style={{marginTop:14}} onClick={addEntry} disabled={saving}>{saving?'Zapisywanie...':'✔ Zapisz aktywność'}</button>
@@ -1153,13 +1207,31 @@
         const [searchView,setSearchView]=useState('list');
         const [user,setUser]=useState(undefined);
         const [favs,setFavs]=useState([]);
+        const [homeStats,setHomeStats]=useState(null);
         const [surf,setSurf]=useState('all');
         const [fParking,setFParking]=useState(false);
         const [fTrainers,setFTrainers]=useState(false);
         const [fRental,setFRental]=useState(false);
         const [fShop,setFShop]=useState(false);
         window.__setView=setView;
-        useEffect(()=>{const iv=setInterval(()=>{if(window.__firebase){clearInterval(iv);window.__firebase.onAuthStateChanged(window.__firebase.auth,u=>{setUser(u||null);if(u){window.__firebase.getDoc(window.__firebase.doc(window.__firebase.db,'users',u.uid)).then(s=>{if(s.exists())setFavs(s.data().favourites||[]);});}else setFavs([]);});}},100);},[]);
+        useEffect(()=>{const iv=setInterval(()=>{if(window.__firebase){clearInterval(iv);window.__firebase.onAuthStateChanged(window.__firebase.auth,u=>{setUser(u||null);if(u){window.__firebase.getDoc(window.__firebase.doc(window.__firebase.db,'users',u.uid)).then(s=>{
+                        if(s.exists()){
+                            const d=s.data();
+                            setFavs(d.favourites||[]);
+                            const played=d.playedHistory||[];
+                            const shared=d.sharedGames||[];
+                            const all=[...played,...shared];
+                            // partner freq
+                            const pc={};
+                            all.forEach(g=>{
+                                const players=g.sport==='padel'?(g.padelOpponents||[]):(g.opponent?[g.opponent]:[]);
+                                players.forEach(p=>{if(p)pc[p]=(pc[p]||0)+1;});
+                            });
+                            const topPartner=Object.entries(pc).sort((a,b)=>b[1]-a[1])[0]||null;
+                            const recent=all.sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,3);
+                            setHomeStats({total:all.length,wins:all.filter(g=>g.result==='W').length,topPartner,recent,name:d.name||u.displayName||''});
+                        }
+                    });}else setFavs([]);});}},100);},[]);
         const toggleFav=async(id)=>{if(!user){setView('auth');return;}const fb=window.__firebase;const nf=favs.includes(id)?favs.filter(x=>x!==id):[...favs,id];setFavs(nf);await fb.setDoc(fb.doc(fb.db,'users',user.uid),{favourites:nf},{merge:true});};
         const applyFilters=()=>{
             setFiltered(DATA.filter(it=>{
@@ -1261,12 +1333,57 @@
 
                     {/* Views */}
                     {view==='home'&&(
-                        <div className="page" style={{paddingTop:28}}>
-                            <div className="hero-section">
-                                <h2>Znajdź swój kort 🎾</h2>
-                                <p>Najlepsza wyszukiwarka kortów tenisowych i padelowych w Twoim mieście.</p>
-                                <button className="btn-primary" onClick={()=>setView('search')}>Szukaj kortów</button>
-                            </div>
+                        <div className="page" style={{paddingTop:20}}>
+                            {user&&homeStats?(
+                                <>
+                                    <div className="hero-section" style={{marginBottom:14}}>
+                                        <h2>Cześć, {homeStats.name||'zawodniku'} 👋</h2>
+                                        <p style={{marginBottom:10}}>Masz {homeStats.total} aktywności · {homeStats.wins} wygranych{homeStats.topPartner?` · najczęściej z ${homeStats.topPartner[0]}`:''}</p>
+                                        <button className="btn-primary" style={{display:'inline-flex',alignItems:'center',gap:7}} onClick={()=>{setView('profile');window.__triggerAdd=true;}}>
+                                            <i className="fas fa-plus-circle"></i> Dodaj aktywność
+                                        </button>
+                                    </div>
+                                    {homeStats.topPartner&&<div className="surf-card" style={{marginBottom:14}}>
+                                        <h4><i className="fas fa-users" style={{color:'var(--accent)'}}></i> Najczęstszy partner</h4>
+                                        <div style={{display:'flex',alignItems:'center',gap:12,padding:'6px 0'}}>
+                                            <div style={{width:40,height:40,borderRadius:'50%',background:'var(--s2)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,color:'var(--accent)',fontSize:'1.05em'}}>{homeStats.topPartner[0].charAt(0).toUpperCase()}</div>
+                                            <div>
+                                                <div style={{fontWeight:700,color:'var(--t1)',fontSize:'0.9em'}}>{homeStats.topPartner[0]}</div>
+                                                <div style={{fontSize:'0.75em',color:'var(--t2)',marginTop:1}}>{homeStats.topPartner[1]} wspólnych gier</div>
+                                            </div>
+                                        </div>
+                                    </div>}
+                                    {homeStats.recent.length>0&&<div className="surf-card" style={{marginBottom:14}}>
+                                        <h4><i className="fas fa-bolt" style={{color:'var(--accent)'}}></i> Ostatnie aktywności</h4>
+                                        {homeStats.recent.map((e,i)=>(
+                                            <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:i<homeStats.recent.length-1?'1px solid var(--border)':'none'}}>
+                                                <div>
+                                                    <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+                                                        <span className={`badge badge-${e.sport||'tenis'}`}>{SE[e.sport||'tenis']} {SL[e.sport||'tenis']}</span>
+                                                        <span style={{fontSize:'0.84em',color:'var(--t1)',fontWeight:600}}>{e.court}</span>
+                                                        {e.result&&<span className={`badge badge-${e.result}`}>{RL[e.result]}</span>}
+                                                    </div>
+                                                    <div style={{fontSize:'0.73em',color:'var(--t2)',marginTop:3}}>{new Date(e.date).toLocaleDateString('pl-PL',{day:'numeric',month:'short',year:'numeric'})}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <button className="btn-ghost" style={{width:'100%',marginTop:10,fontSize:'0.82em'}} onClick={()=>setView('profile')}>Zobacz wszystkie →</button>
+                                    </div>}
+                                    <div className="surf-card">
+                                        <h4><i className="fas fa-search" style={{color:'var(--accent)'}}></i> Szukaj kortów</h4>
+                                        <p style={{fontSize:'0.82em',color:'var(--t2)',marginBottom:10}}>Znajdź kort w Poznaniu i zarezerwuj miejsce.</p>
+                                        <button className="btn-primary" onClick={()=>setView('search')}>Przeglądaj korty</button>
+                                    </div>
+                                </>
+                            ):(
+                                <>
+                                    <div className="hero-section">
+                                        <h2>Znajdź swój kort 🎾</h2>
+                                        <p>Najlepsza wyszukiwarka kortów tenisowych i padelowych w Twoim mieście.</p>
+                                        <button className="btn-primary" onClick={()=>setView('search')}>Szukaj kortów</button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
                     {view==='search'&&(
